@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Build DBSCAN C++",
+        "type": "shell",
+        "command": "g++",
+        "args": ["-g", "-o", "dbscan", "dbscan.cpp"],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      }
+    ]
+  }
