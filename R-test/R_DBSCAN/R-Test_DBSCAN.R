@@ -17,13 +17,14 @@ library(dbscan)
 # plot(Live$num_comments, Live$num_likes)
 
 
-Cambridge_Crime_Data_2009_2016 <- read_csv("Cambridge Crime Data 2009-2016.csv")
-#View(Cambridge_Crime_Data_2009_2016)
-
-Cambridge_Crime_Data_2009_2016$Crime <- as.numeric(factor(Cambridge_Crime_Data_2009_2016$Crime))
-Cambridge_Crime_Data_2009_2016$`Crime Date Time` <- as.numeric(factor(Cambridge_Crime_Data_2009_2016$`Crime Date Time`))
-plot(Cambridge_Crime_Data_2009_2016$Crime, Cambridge_Crime_Data_2009_2016$`Crime Date Time`)
-
+# ### Cambridge data
+# Cambridge_Crime_Data_2009_2016 <- read_csv("Cambridge Crime Data 2009-2016.csv")
+# #View(Cambridge_Crime_Data_2009_2016)
+# 
+# Cambridge_Crime_Data_2009_2016$Crime <- as.numeric(factor(Cambridge_Crime_Data_2009_2016$Crime))
+# Cambridge_Crime_Data_2009_2016$`Crime Date Time` <- as.numeric(factor(Cambridge_Crime_Data_2009_2016$`Crime Date Time`))
+# plot(Cambridge_Crime_Data_2009_2016$Crime, Cambridge_Crime_Data_2009_2016$`Crime Date Time`)
+# 
 
 # ## Example 1: use dbscan on the iris data set
 # data(iris)
@@ -36,3 +37,31 @@ plot(Cambridge_Crime_Data_2009_2016$Crime, Cambridge_Crime_Data_2009_2016$`Crime
 # show(res)
 # 
 # plot(iris[,1], iris[,3])
+
+
+###################################################################################
+# Plot some data for C++ project
+
+library(MASS)
+
+S <- matrix(c(1,0,0,1),2,2)
+mt1 <- c(2,2)
+mt2 <- c(6,0)
+n1 <- 60
+n2 <- 60
+n <- n1 + n2
+
+X1 <- mvrnorm(n1, mt1, S)
+X2 <- mvrnorm(n2, mt2, S)
+
+DATA_Cpp <- rbind(X1, X2)
+kNN1 <- kNNdistplot(DATA_Cpp, k = 5)
+abline(h=.5, col = "red", lty=2)
+
+# Write to CSV
+write.csv(DATA_Cpp, "DataCpp.csv")
+
+
+plot(X1, ylim = c(-5,5), xlim = c(-2,10), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
+abline(v = 0, h = 0, col = "gray")
+points(X2, pch = 19, col = "orange")
