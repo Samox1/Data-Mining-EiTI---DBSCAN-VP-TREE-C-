@@ -4,29 +4,55 @@
 
 using namespace std;
 
+struct punkt{
+    double x;
+    double y;
+    int cluster;
+};
+
 int main()
 {
     cout << "Hello" << endl << "DBSCAN Test program" << endl;
-    string file1 = "D:\\Programming\\Data-Mining-EiTI---DBSCAN-VP-TREE-C-\\DataCpp.csv";
+    string file1 = "DataCpp.csv";
 
     string line, word, temp;
+    int index = 0;
 
     fstream plik;
     plik.open(file1);
 
-    if(plik.good){
+    if(plik.good())
+    {
+        cout << "--- Opening file" << endl;
         while(!plik.eof())
         {
-            getline(plik, line);
-                
-            while (getline(plik, word, ','))
+            while(getline(plik, line, '\n'))
             {
-                cout << word;
+                // cout << index;
+                // index++;
+                // cout << line << endl;
+
+                stringstream sstream(line);
+                index = 0;
+                while (getline(sstream, word, ','))
+                {
+                    cout << word << " ";
+                    if(index==1){
+
+                    }else if(index==2){
+                        
+                    }
+
+                }
+                cout << endl;
             }
 
-        cout << '\n'; 
+        //cout << '\n'; 
         }
+    }else{
+        cout << "Can't open file" << endl;
     }
     
     plik.close();
+    
 }
