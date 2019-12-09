@@ -5,9 +5,9 @@
 using namespace std;
 
 struct punkt{
-    double x;
-    double y;
-    int cluster;
+    double x = 0.0;
+    double y = 0.0;
+    int cluster = -2;
 };
 
 int main()
@@ -36,14 +36,15 @@ int main()
                 index = 0;
                 while (getline(sstream, word, ','))
                 {
-                    cout << word << " ";
+                    //cout << word << " ";
                     if(index==1){
-
+                        cout << "X: " << word << " ";
                     }else if(index==2){
-                        
+                        cout << "Y: " << word << " ";
                     }
-
+                    index++;
                 }
+
                 cout << endl;
             }
 
