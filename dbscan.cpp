@@ -4,7 +4,8 @@
 #include <fstream>
 #include <sstream>
 
-#define UNDEFINED -2
+#define UNDEFINED   -2
+#define NOISE       -1
 
 
 using namespace std;
@@ -13,11 +14,12 @@ using namespace std;
 struct Punkt{
     double x = 0.0;
     double y = 0.0;
-    int cluster = -2;
+    int cluster = UNDEFINED;
 };
 
 
-double DistFunc(Punkt pkt1, Punkt pkt2);
+double DistFunc(Punkt *pkt1, Punkt *pkt2);
+int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps);
 
 
 int main()
@@ -25,7 +27,9 @@ int main()
     cout << "Hello" << endl << "DBSCAN Test program" << endl;
     
     Punkt *pkt;         // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
-    
+    int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
+    int *S_tab;         // Tablica "Seed" --> 
+
     string file1 = "DataCpp.csv";
     string line, word, temp;
     int index = 0;
@@ -92,24 +96,46 @@ int main()
 
     int wsp1 = 15;
     int wsp2 = 20;
-    cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(pkt[wsp1], pkt[wsp2]) << endl;
+    cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(&pkt[wsp1], &pkt[wsp2]) << endl;
     
     int C = 0;                      // Cluster Counter
     double Eps = 0.5;
     int minN = 4;
 
+    int Qindex = 10;
 
-    for(int i=0; i<ile_linii; i++)
-    {
-        if(pkt[i].cluster != UNDEFINED){
-            continue;
-        }
+    N_tab = new int[ile_linii];
 
-    }
+
+    // for(int i=0; i<ile_linii; i++)
+    // {
+    //     if(pkt[i].cluster != UNDEFINED){
+    //         continue;
+    //     }
+
+    // }
+
+
+    int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, Qindex, Eps);
+    cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
     
+    cout << Qindex << "x: " << pkt[Qindex].x << " | y: " << pkt[Qindex].y << endl;
+
+    for(int i=0; i<ile_sasiadow; i++)
+    {
+        cout << N_tab[i] << " ~ x: " << pkt[N_tab[i]].x << " | y: " << pkt[N_tab[i]].y << endl;
+    }
+
+
+    // cout << "Cala N_tab: " << endl;
+    // for(int i=0; i<ile_linii; i++)
+    // {
+    //     cout << N_tab[i] << endl;              // Wyswietlenie N_tab (calej)
+    // }
 
 // Koniec programu
 
+    delete [] N_tab;
     delete [] pkt;
 }
 
@@ -118,13 +144,32 @@ int main()
 // --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
 
 // Function to calculate distance 
-double DistFunc(Punkt pkt1, Punkt pkt2) 
+double DistFunc(Punkt *pkt1, Punkt *pkt2) 
 { 
     // Calculating distance 
-    return sqrt(pow(pkt2.x - pkt1.x, 2) +  pow(pkt2.y - pkt1.y, 2) * 1.0); 
+    return sqrt(pow(pkt2->x - pkt1->x, 2) +  pow(pkt2->y - pkt1->y, 2) * 1.0); 
 } 
 
-void RangeQuery(DB, Punkt *pkt, Eps)
+int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps)
 {
+    for(int i=0; i<ile_linii; i++)
+    {
+        N_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
+    }
 
+    int j = 0;
+
+    for(int i=0; i<ile_linii; i++)
+    {
+        if(i != Qindex)
+        {
+            if(DistFunc(&pkt[Qindex], &pkt[i]) <= Eps)
+            {
+                N_tab[j] = i;
+                j++;
+            }
+        }
+    }
+
+    return j;
 }
