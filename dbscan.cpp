@@ -4,6 +4,9 @@
 #include <fstream>
 #include <sstream>
 
+#define UNDEFINED -2
+
+
 using namespace std;
 
 
@@ -69,13 +72,14 @@ int main()
                     index++;
                 }
                 ktora_linia++;
-                cout << endl;
+                //cout << endl;
             }
         }
     }else{
         cout << "Can't open file" << endl;
     }
     plik.close();
+    cout << "--- Close file" << endl;
 
 // Wyswietlanie wczytanych danych
 /*
@@ -86,9 +90,23 @@ int main()
 
 // Test - Funkcji DistFunc
 
-    cout << DistFunc(pkt[15], pkt[20]) << endl;
+    int wsp1 = 15;
+    int wsp2 = 20;
+    cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(pkt[wsp1], pkt[wsp2]) << endl;
+    
+    int C = 0;                      // Cluster Counter
+    double Eps = 0.5;
+    int minN = 4;
     
 
+    for(int i=0; i<ile_linii; i++)
+    {
+        if(pkt[i].cluster != UNDEFINED){
+            continue;
+        }
+
+    }
+    
 
 // Koniec programu
 
