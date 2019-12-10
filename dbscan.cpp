@@ -1,14 +1,21 @@
 #include <iostream>
+#include <math.h>
+#include <omp.h>
 #include <fstream>
 #include <sstream>
 
 using namespace std;
+
 
 struct Punkt{
     double x = 0.0;
     double y = 0.0;
     int cluster = -2;
 };
+
+
+double DistFunc(Punkt pkt1, Punkt pkt2);
+
 
 int main()
 {
@@ -54,10 +61,10 @@ int main()
                 {
                     if(index==1){
                         pkt[ktora_linia].x = atof(word.c_str());
-                        cout << "X: " << word << " ";
+                        //cout << "X: " << word << " ";
                     }else if(index==2){
                         pkt[ktora_linia].y = atof(word.c_str());
-                        cout << "Y: " << word << " ";
+                        //cout << "Y: " << word << " ";
                     }
                     index++;
                 }
@@ -71,11 +78,30 @@ int main()
     plik.close();
 
 // Wyswietlanie wczytanych danych
+/*
     for(int i=0; i<ile_linii; i++){
         cout << "x: " << pkt[i].x << " | y:" << pkt[i].y << endl;
     }
+*/
+
+// Test - Funkcji DistFunc
+
+    cout << DistFunc(pkt[15], pkt[20]) << endl;
     
 
 
+// Koniec programu
+
     delete [] pkt;
 }
+
+
+
+// --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
+
+// Function to calculate distance 
+double DistFunc(Punkt pkt1, Punkt pkt2) 
+{ 
+    // Calculating distance 
+    return sqrt(pow(pkt2.x - pkt1.x, 2) +  pow(pkt2.y - pkt1.y, 2) * 1.0); 
+} 
