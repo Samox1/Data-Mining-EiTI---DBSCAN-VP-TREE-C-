@@ -97,7 +97,7 @@ int main()
     int C = 0;                      // Cluster Counter
     double Eps = 0.5;
     int minN = 4;
-    
+
 
     for(int i=0; i<ile_linii; i++)
     {
@@ -123,3 +123,8 @@ double DistFunc(Punkt pkt1, Punkt pkt2)
     // Calculating distance 
     return sqrt(pow(pkt2.x - pkt1.x, 2) +  pow(pkt2.y - pkt1.y, 2) * 1.0); 
 } 
+
+void RangeQuery(DB, Punkt *pkt, Eps)
+{
+
+}
