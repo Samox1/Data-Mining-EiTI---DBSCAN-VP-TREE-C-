@@ -99,12 +99,13 @@ int main()
     cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(&pkt[wsp1], &pkt[wsp2]) << endl;
     
     int C = 0;                      // Cluster Counter
-    double Eps = 0.5;
-    int minN = 4;
+    double Eps = 0.5;               // Max distance between points
+    int minN = 4;                   // Minimal number of Neighbors
 
     int Qindex = 10;
 
     N_tab = new int[ile_linii];
+    S_tab = new int[ile_linii];
 
 
     // for(int i=0; i<ile_linii; i++)
@@ -119,14 +120,63 @@ int main()
     int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, Qindex, Eps);
     cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
     
-    cout << Qindex << "x: " << pkt[Qindex].x << " | y: " << pkt[Qindex].y << endl;
+    cout << "Punkt: " << Qindex << "x: " << pkt[Qindex].x << " | y: " << pkt[Qindex].y << endl;
 
     for(int i=0; i<ile_sasiadow; i++)
     {
         cout << N_tab[i] << " ~ x: " << pkt[N_tab[i]].x << " | y: " << pkt[N_tab[i]].y << endl;
     }
 
-// COKOLWIEK
+    if(ile_sasiadow < minN)
+    {
+        pkt[Qindex].cluster = NOISE;                // IF: N < minN => NOISE
+        //continue;
+    }else
+    {       
+        pkt[Qindex].cluster = C;                    // ELSE: N > minN => Cluster
+    }
+    
+    cout << "Punkt: " << Qindex << " | Cluster: " << pkt[Qindex].cluster << endl;
+
+    for(int i=0; i<ile_linii; i++)
+    {
+        S_tab[i] = N_tab[i];   
+        //cout << S_tab[i] << endl;           
+    }
+
+    for(int i=0; i<ile_sasiadow; i++)
+    {
+        if(pkt[S_tab[i]].cluster == NOISE)
+        {
+            pkt[S_tab[i]].cluster = C;
+        }
+
+        if(pkt[S_tab[i]].cluster != UNDEFINED){
+            continue;
+        }
+
+        pkt[S_tab[i]].cluster = C;
+        ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, Qindex, Eps);
+
+        if( ile_sasiadow >= minN)
+        {
+            for(int i = 0; i < ile_linii; i++)
+            {
+                if(S_tab[i] == -1)
+                {
+                    
+                }
+            }
+        }
+
+    }
+
+
+
+
+
+
+
     // cout << "Cala N_tab: " << endl;
     // for(int i=0; i<ile_linii; i++)
     // {
