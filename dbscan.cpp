@@ -20,6 +20,7 @@ struct Punkt{
 
 double DistFunc(Punkt *pkt1, Punkt *pkt2);
 int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps);
+void alternateMerge(int *S_tab, int *N_tab, int ile_linii, int *Temp_tab) ;
 
 
 int main()
@@ -29,6 +30,7 @@ int main()
     Punkt *pkt;         // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
     int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
     int *S_tab;         // Tablica "Seed" --> 
+    int *Temp_tab;
 
     string file1 = "DataCpp.csv";
     string line, word, temp;
@@ -106,6 +108,7 @@ int main()
 
     N_tab = new int[ile_linii];
     S_tab = new int[ile_linii];
+    Temp_tab = new int[ile_linii];
 
 
     // for(int i=0; i<ile_linii; i++)
@@ -144,31 +147,65 @@ int main()
         //cout << S_tab[i] << endl;           
     }
 
-    for(int i=0; i<ile_sasiadow; i++)
+    for(int i=0; i<60; i++)
     {
-        if(pkt[S_tab[i]].cluster == NOISE)
-        {
-            pkt[S_tab[i]].cluster = C;
-        }
+        N_tab[i] = i;   
+        //cout << S_tab[i] << endl;           
+    }
 
-        if(pkt[S_tab[i]].cluster != UNDEFINED){
-            continue;
-        }
 
-        pkt[S_tab[i]].cluster = C;
-        ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, Qindex, Eps);
+    // Test - MERGE 2 ARRAYS with w/o duplicates
+    alternateMerge(S_tab, N_tab, ile_linii, Temp_tab);
 
-        if( ile_sasiadow >= minN)
-        {
-            for(int i = 0; i < ile_linii; i++)
-            {
-                if(S_tab[i] == -1)
-                {
-                    
-                }
-            }
-        }
+    for(int i = 0; i <ile_linii; i++) 
+    { 
+        cout << Temp_tab[i] << " ";
+    } 
 
+
+    // for(int i=0; i<ile_linii; i++)               // For Each Point Q in S
+    // {
+    //     if(S_tab[i] != -1)
+    //     {
+    //         if(pkt[S_tab[i]].cluster == NOISE)          // IF: Q == NOISE then Q = Cluster
+    //         {
+    //             pkt[S_tab[i]].cluster = C;
+    //         }
+
+    //         if(pkt[S_tab[i]].cluster != UNDEFINED){     // IF: Q == NOISE or CLUSTER then leave Q
+    //             continue;
+    //         }
+
+    //         //i = 0;
+
+    //         pkt[S_tab[i]].cluster = C;
+    //         ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, Qindex, Eps);
+
+    //         if( ile_sasiadow >= minN)
+    //         {
+    //             // for(int i = 0; i < ile_linii; i++)
+    //             // {
+    //                 //if(S_tab[i] == -1)
+    //                 //{
+    //                     alternateMerge(S_tab, N_tab, ile_linii, Temp_tab);
+
+    //                     cout << "Array after merging" <<endl; 
+    //                     for (int i=0; i < ile_linii; i++) 
+    //                     {
+    //                         cout << S_tab[i] << " ";
+    //                     }
+    //                     cout << "-------------------" << endl;
+    //                 //}
+    //             // }
+    //         }
+    //     }
+        
+    // }
+
+cout << endl;
+    for(int i=0; i<ile_linii; i++)
+    {
+        cout << i << "C: " << pkt[i].cluster << endl;              // Wyswietlenie N_tab (calej)
     }
 
 
@@ -185,6 +222,8 @@ int main()
 
 // Koniec programu
 
+    delete [] Temp_tab;
+    delete [] S_tab;
     delete [] N_tab;
     delete [] pkt;
 }
@@ -223,3 +262,101 @@ int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps)
 
     return j;
 }
+
+
+void alternateMerge(int *S_tab, int *N_tab, int ile_linii, int *Temp_tab) 
+{ 
+    for(int i=0; i<ile_linii; i++)
+    {
+        Temp_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
+    }
+
+    int i = 0, j = 0, k = 0; 
+    
+    while (k < ile_linii)
+    {
+        // if(S_tab[i] < 0 && N_tab[j] < 0)
+        // {
+        //     Temp_tab[k++] = -1;
+        // }
+        // else
+        // {
+        //     if(S_tab[i] < N_tab[j])
+        //     {
+        //         if(S_tab[i] >= 0)
+        //         {
+        //             Temp_tab[k++] = S_tab[i++];
+        //         }
+                
+        //     }else{
+        //         if(N_tab[j] >= 0)
+        //         {
+        //             Temp_tab[k++] = N_tab[j++];
+        //         }
+        //     }
+        // }
+
+///JJJJ
+k = k-1;
+cout << S_tab[i] << "x" << N_tab[j] << "x"<< Temp_tab[k] <<endl;
+k = k+1;
+
+        if(S_tab[i] < 0)
+        {
+            if(N_tab[j] < 0)
+            {
+                Temp_tab[k++] = -1;
+            }
+            else
+            {
+                Temp_tab[k++] = N_tab[j++];
+            }
+        }
+        else
+        {
+            if(N_tab[j] < 0)
+            {
+                Temp_tab[k++] = S_tab[i++];
+            }
+            else
+            {
+                if(Temp_tab[k] == S_tab[i])
+                {
+                    i++;
+                }else if(Temp_tab[k] == N_tab[j]){
+                    j++;
+                }
+                else
+                {
+                    if(S_tab[i] < N_tab[j])
+                    {
+                        Temp_tab[k++] = S_tab[i++];
+                    }else if(S_tab[i] == N_tab[j])
+                    {
+                        i++;
+                    }
+                    else
+                    {
+                        Temp_tab[k++] = N_tab[j++];
+                    }
+                }
+                
+            }
+        }
+        cout << i << "|" << j << "|"<< k <<endl;
+        //cout << S_tab[i--] << "|" << N_tab[j--] << "|"<< Temp_tab[k] <<endl;
+    }
+    
+
+    
+
+    for(int i=0; i<ile_linii; i++)
+    {
+        S_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
+    }
+
+    for(int i = 0; i <ile_linii; i++) 
+    { 
+        S_tab[i] = Temp_tab[i];
+    } 
+} 
