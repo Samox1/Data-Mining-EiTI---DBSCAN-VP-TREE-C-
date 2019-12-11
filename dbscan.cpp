@@ -27,7 +27,7 @@ int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_lini
 
 int main()
 {
-    cout << "Hello" << endl << "DBSCAN Test program" << endl;
+    cout << endl << "Hello, Welcome in DBSCAN Test program" << endl;
     
     Punkt *pkt;         // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
     int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
@@ -37,6 +37,8 @@ int main()
     string line, word, temp;
     int index = 0;
     int ile_linii = 0;
+
+    cout << "--- Open file: " << file1 << " --> ";
 
     fstream plik;
     plik.open(file1);
@@ -60,7 +62,7 @@ int main()
 
         int ktora_linia = 0;
 
-        cout << "--- Opening file" << endl;
+        
         while(!plik.eof())
         {
             while(getline(plik, line, '\n'))
@@ -86,7 +88,7 @@ int main()
         cout << "Can't open file" << endl;
     }
     plik.close();
-    cout << "--- Close file" << endl;
+    cout << "Close file: Imported 2D data" << endl;
 
 // Show imported data
 
@@ -187,6 +189,9 @@ cout << "DBSCAN Time: " << duration.count() << " us" << endl;   // Time - show F
 
     string file_out = "Data_Cluster.csv";
     ofstream plik_out;
+
+    cout << "--- Open CSV: " << file_out << " --> ";
+
     plik_out.open(file_out);
 
     if(plik_out.good())
@@ -195,9 +200,11 @@ cout << "DBSCAN Time: " << duration.count() << " us" << endl;   // Time - show F
         {
             plik_out << pkt[i].x << "," << pkt[i].y << "," << pkt[i].cluster << endl;
         }
+    }else{
+        cout << "Can't open file" << endl;
     }
     plik_out.close();
-    cout << "--- Close --- Out File ---" << endl;
+    cout << "Out File: Closed" << endl << endl;
 
 
 // delete - Destroy array/pointers
