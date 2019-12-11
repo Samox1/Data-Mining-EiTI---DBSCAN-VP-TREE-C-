@@ -126,7 +126,7 @@ int main()
         cout << N_tab[i] << " ~ x: " << pkt[N_tab[i]].x << " | y: " << pkt[N_tab[i]].y << endl;
     }
 
-
+// COKOLWIEK
     // cout << "Cala N_tab: " << endl;
     // for(int i=0; i<ile_linii; i++)
     // {
