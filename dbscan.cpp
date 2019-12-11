@@ -20,7 +20,7 @@ struct Punkt{
 
 double DistFunc(Punkt *pkt1, Punkt *pkt2);
 int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps);
-void alternateMerge(int *S_tab, int *N_tab, int ile_linii, int *Temp_tab) ;
+int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_linii) ;
 
 
 int main()
@@ -147,19 +147,23 @@ int main()
         //cout << S_tab[i] << endl;           
     }
 
-    for(int i=0; i<60; i++)
+    int S_licznik = ile_sasiadow;
+    int N_licznik = 66;
+
+
+    for(int i=0; i<N_licznik; i++)
     {
         N_tab[i] = i;   
         //cout << S_tab[i] << endl;           
     }
 
 
-    // Test - MERGE 2 ARRAYS with w/o duplicates
-    alternateMerge(S_tab, N_tab, ile_linii, Temp_tab);
+    // Test - MERGE 2 ARRAYS w/o duplicates
+    int ile_Seed = S_N_Merge(S_tab, N_tab, N_licznik, N_licznik, ile_linii);
 
     for(int i = 0; i <ile_linii; i++) 
     { 
-        cout << Temp_tab[i] << " ";
+        cout << S_tab[i] << " ";
     } 
 
 
@@ -264,17 +268,39 @@ int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps)
 }
 
 
-void alternateMerge(int *S_tab, int *N_tab, int ile_linii, int *Temp_tab) 
+int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_linii) 
 { 
-    for(int i=0; i<ile_linii; i++)
+    int flaga = 0; 
+    
+    for(int i=0; i<N_licznik; i++)
     {
-        Temp_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
+        flaga = 0;
+
+        for(int j=0; j<S_licznik; j++)
+        {
+            if(S_tab[j] == N_tab[i])
+            {
+                flaga = 1;
+            }
+        }
+
+        if(flaga == 0)
+        {
+            S_tab[S_licznik] = N_tab[i];
+            S_licznik++;
+        }
+
+        if (S_licznik == ile_linii)
+        {
+            break;
+        }
     }
 
-    int i = 0, j = 0, k = 0; 
-    
-    while (k < ile_linii)
-    {
+    return S_licznik;
+}
+
+    // while (k < ile_linii)
+    // {
         // if(S_tab[i] < 0 && N_tab[j] < 0)
         // {
         //     Temp_tab[k++] = -1;
@@ -297,66 +323,55 @@ void alternateMerge(int *S_tab, int *N_tab, int ile_linii, int *Temp_tab)
         // }
 
 ///JJJJ
-k = k-1;
-cout << S_tab[i] << "x" << N_tab[j] << "x"<< Temp_tab[k] <<endl;
-k = k+1;
+// k = k-1;
+// cout << S_tab[i] << "x" << N_tab[j] << "x"<< Temp_tab[k] <<endl;
+// k = k+1;
 
-        if(S_tab[i] < 0)
-        {
-            if(N_tab[j] < 0)
-            {
-                Temp_tab[k++] = -1;
-            }
-            else
-            {
-                Temp_tab[k++] = N_tab[j++];
-            }
-        }
-        else
-        {
-            if(N_tab[j] < 0)
-            {
-                Temp_tab[k++] = S_tab[i++];
-            }
-            else
-            {
-                if(Temp_tab[k] == S_tab[i])
-                {
-                    i++;
-                }else if(Temp_tab[k] == N_tab[j]){
-                    j++;
-                }
-                else
-                {
-                    if(S_tab[i] < N_tab[j])
-                    {
-                        Temp_tab[k++] = S_tab[i++];
-                    }else if(S_tab[i] == N_tab[j])
-                    {
-                        i++;
-                    }
-                    else
-                    {
-                        Temp_tab[k++] = N_tab[j++];
-                    }
-                }
+//         if(S_tab[i] < 0)
+//         {
+//             if(N_tab[j] < 0)
+//             {
+//                 Temp_tab[k++] = -1;
+//             }
+//             else
+//             {
+//                 Temp_tab[k++] = N_tab[j++];
+//             }
+//         }
+//         else
+//         {
+//             if(N_tab[j] < 0)
+//             {
+//                 Temp_tab[k++] = S_tab[i++];
+//             }
+//             else
+//             {
+//                 if(Temp_tab[k] == S_tab[i])
+//                 {
+//                     i++;
+//                 }else if(Temp_tab[k] == N_tab[j]){
+//                     j++;
+//                 }
+//                 else
+//                 {
+//                     if(S_tab[i] < N_tab[j])
+//                     {
+//                         Temp_tab[k++] = S_tab[i++];
+//                     }else if(S_tab[i] == N_tab[j])
+//                     {
+//                         i++;
+//                     }
+//                     else
+//                     {
+//                         Temp_tab[k++] = N_tab[j++];
+//                     }
+//                 }
                 
-            }
-        }
-        cout << i << "|" << j << "|"<< k <<endl;
-        //cout << S_tab[i--] << "|" << N_tab[j--] << "|"<< Temp_tab[k] <<endl;
-    }
+//             }
+//         }
+//         cout << i << "|" << j << "|"<< k <<endl;
+//         //cout << S_tab[i--] << "|" << N_tab[j--] << "|"<< Temp_tab[k] <<endl;
+    // }
     
 
-    
-
-    for(int i=0; i<ile_linii; i++)
-    {
-        S_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
-    }
-
-    for(int i = 0; i <ile_linii; i++) 
-    { 
-        S_tab[i] = Temp_tab[i];
-    } 
-} 
+//} 
