@@ -148,63 +148,58 @@ int main()
     }
 
     int S_licznik = ile_sasiadow;
-    int N_licznik = 66;
+    // int N_licznik = 66;
 
 
-    for(int i=0; i<N_licznik; i++)
-    {
-        N_tab[i] = i;   
-        //cout << S_tab[i] << endl;           
-    }
-
-
-    // Test - MERGE 2 ARRAYS w/o duplicates
-    int ile_Seed = S_N_Merge(S_tab, N_tab, N_licznik, N_licznik, ile_linii);
-
-    for(int i = 0; i <ile_linii; i++) 
-    { 
-        cout << S_tab[i] << " ";
-    } 
-
-
-    // for(int i=0; i<ile_linii; i++)               // For Each Point Q in S
+    // for(int i=0; i<N_licznik; i++)
     // {
-    //     if(S_tab[i] != -1)
-    //     {
-    //         if(pkt[S_tab[i]].cluster == NOISE)          // IF: Q == NOISE then Q = Cluster
-    //         {
-    //             pkt[S_tab[i]].cluster = C;
-    //         }
-
-    //         if(pkt[S_tab[i]].cluster != UNDEFINED){     // IF: Q == NOISE or CLUSTER then leave Q
-    //             continue;
-    //         }
-
-    //         //i = 0;
-
-    //         pkt[S_tab[i]].cluster = C;
-    //         ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, Qindex, Eps);
-
-    //         if( ile_sasiadow >= minN)
-    //         {
-    //             // for(int i = 0; i < ile_linii; i++)
-    //             // {
-    //                 //if(S_tab[i] == -1)
-    //                 //{
-    //                     alternateMerge(S_tab, N_tab, ile_linii, Temp_tab);
-
-    //                     cout << "Array after merging" <<endl; 
-    //                     for (int i=0; i < ile_linii; i++) 
-    //                     {
-    //                         cout << S_tab[i] << " ";
-    //                     }
-    //                     cout << "-------------------" << endl;
-    //                 //}
-    //             // }
-    //         }
-    //     }
-        
+    //     N_tab[i] = i;   
+    //     //cout << S_tab[i] << endl;           
     // }
+
+
+    // // Test - MERGE 2 ARRAYS w/o duplicates
+    // int ile_Seed = S_N_Merge(S_tab, N_tab, N_licznik, N_licznik, ile_linii);
+
+    // for(int i = 0; i <ile_linii; i++) 
+    // { 
+    //     cout << S_tab[i] << " ";
+    // } 
+
+
+    for(int i=0; i<S_licznik; i++)               // For Each Point Q in S
+    {
+        if(S_tab[i] != -1)
+        {
+            if(pkt[S_tab[i]].cluster == NOISE)          // IF: Q == NOISE then Q = Cluster
+            {
+                pkt[S_tab[i]].cluster = C;
+            }
+
+            if(pkt[S_tab[i]].cluster != UNDEFINED){     // IF: Q == NOISE or CLUSTER then leave Q
+                continue;
+            }
+
+            //i = 0;
+
+            pkt[S_tab[i]].cluster = C;
+            ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, Qindex, Eps);
+
+            if( ile_sasiadow >= minN)
+            {
+                S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
+
+                cout << "Array after merging" <<endl; 
+                for (int i=0; i < ile_linii; i++) 
+                {
+                    cout << S_tab[i] << " ";
+                }
+                cout << "-------------------" << endl;
+                    //}
+                // }
+            }
+        }
+    }
 
 cout << endl;
     for(int i=0; i<ile_linii; i++)
