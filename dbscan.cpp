@@ -1,14 +1,16 @@
 #include <iostream>
 #include <math.h>
-#include <omp.h>
 #include <fstream>
 #include <sstream>
+#include <chrono> 
+
 
 #define UNDEFINED   -2
 #define NOISE       -1
 
 
 using namespace std;
+using namespace std::chrono; 
 
 
 struct Punkt{
@@ -29,7 +31,7 @@ int main()
     
     Punkt *pkt;         // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
     int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
-    int *S_tab;         // Tablica "Seed" --> 
+    int *S_tab;         // Tablica "Seed" --> rozszerzajacy sie obszar sasiadow wokol punktu P
 
     string file1 = "DataCpp.csv";
     string line, word, temp;
@@ -86,36 +88,31 @@ int main()
     plik.close();
     cout << "--- Close file" << endl;
 
-// Wyswietlanie wczytanych danych
-/*
-    for(int i=0; i<ile_linii; i++){
-        cout << "x: " << pkt[i].x << " | y:" << pkt[i].y << endl;
-    }
-*/
+// Show imported data
 
-// Test - Funkcji DistFunc
+    // for(int i=0; i<ile_linii; i++){
+    //     cout << "x: " << pkt[i].x << " | y:" << pkt[i].y << endl;
+    // }
 
-    int wsp1 = 15;
-    int wsp2 = 20;
-    cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(&pkt[wsp1], &pkt[wsp2]) << endl;
+
+// Test - Function DistFunc
+
+    // int wsp1 = 15;
+    // int wsp2 = 20;
+    // cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(&pkt[wsp1], &pkt[wsp2]) << endl;
     
+
+// Test - Function - DBSCAN()
+
     int C = 0;                      // Cluster Counter
     double Eps = 0.5;               // Max distance between points
     int minN = 4;                   // Minimal number of Neighbors
 
-    int Qindex = 10;
-
-    N_tab = new int[ile_linii];
-    S_tab = new int[ile_linii];
+    N_tab = new int[ile_linii];     // Neighbors tab - index for N in pkt tab
+    S_tab = new int[ile_linii];     // Seed tab - index for S in pkt tab
 
 
-    // for(int i=0; i<ile_linii; i++)
-    // {
-    //     if(pkt[i].cluster != UNDEFINED){
-    //         continue;
-    //     }
-
-    // }
+auto start = high_resolution_clock::now();      // Time - START
 
 for(int P = 0; P < ile_linii; P++)
 {
@@ -126,56 +123,28 @@ for(int P = 0; P < ile_linii; P++)
 
     int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, P, Eps);
     
-    
-    cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
-    cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
-    
-    // for(int i=0; i<ile_sasiadow; i++)
-    // {
-    //     cout << N_tab[i] << " ~ x: " << pkt[N_tab[i]].x << " | y: " << pkt[N_tab[i]].y << endl;
-    // }
+    // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
+    // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
 
     if(ile_sasiadow < minN)
     {
-        pkt[P].cluster = NOISE;                // IF: N < minN => NOISE
+        pkt[P].cluster = NOISE;             // IF: N < minN => NOISE
         continue;
     }
 
-    C = C + 1;    
-    pkt[P].cluster = C;                    // ELSE: N > minN => Cluster
+    C = C + 1;                              // Cluster number increment
+    pkt[P].cluster = C;                     // ELSE: N > minN => Cluster
     
-    cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster << endl;
-    
+    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster << endl;     // Show changing Cluster number
     
     
     for(int i=0; i<ile_linii; i++)
     {
-        S_tab[i] = N_tab[i];   
-        //cout << S_tab[i] << endl;           
+        S_tab[i] = N_tab[i];           
     }
 
     int S_licznik = ile_sasiadow;
-    // int N_licznik = 66;
-
-
-    // for(int i=0; i<N_licznik; i++)
-    // {
-    //     N_tab[i] = i;   
-    //     //cout << S_tab[i] << endl;           
-    // }
-
-
-    // Test - MERGE 2 ARRAYS w/o duplicates
-    // cout << "Test MERGE" << endl;
-    // int ile_Seed = S_N_Merge(S_tab, N_tab, S_licznik, N_licznik, ile_linii);
-
-    // for(int i = 0; i <ile_linii; i++) 
-    // { 
-    //     cout << S_tab[i] << " ";
-    // } 
-
-    
-
+  
     for(int i=0; i<S_licznik; i++)               // For Each Point Q in S
     {
         if(S_tab[i] != -1)
@@ -190,37 +159,28 @@ for(int P = 0; P < ile_linii; P++)
                 continue;
             }
 
-
             pkt[S_tab[i]].cluster = C;
             ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, S_tab[i], Eps);
-
-            // cout << "N_tab (ALL): " << endl;
-            // for(int i = 0; i <ile_linii; i++) 
-            // { 
-            //     cout << N_tab[i] << " ";
-            // }
-            // cout << "------" <<endl;
 
             if( ile_sasiadow >= minN)
             {
                 S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
-                // cout << "S_licznik po MERGE: " << S_licznik << endl;
-
-                // cout << "Array after merging" <<endl; 
-                // for (int i=0; i < ile_linii; i++) 
-                // {
-                //     cout << S_tab[i] << " ";
-                // }
-                // cout << "-------------------" << endl;
             }
         }
     }
 }
-    cout << endl;
-    for(int i=0; i<ile_linii; i++)
-    {
-        cout << i << " ~ C: " << pkt[i].cluster << endl;              // Wyswietlenie N_tab (calej)
-    }
+
+auto stop = high_resolution_clock::now();                       // Time - STOP
+auto duration = duration_cast<microseconds>(stop - start);      // Time - Caltulation
+cout << "DBSCAN Time: " << duration.count() << " us" << endl;   // Time - show Function duration
+
+
+// Show every point and his Cluster number
+    // cout << endl;
+    // for(int i=0; i<ile_linii; i++)
+    // {
+    //     cout << i << " ~ C: " << pkt[i].cluster << endl;              // Wyswietlenie N_tab (calej)
+    // }
 
 
 // Saving CSV - with Cluster data
@@ -240,14 +200,7 @@ for(int P = 0; P < ile_linii; P++)
     cout << "--- Close --- Out File ---" << endl;
 
 
-
-    // cout << "Cala N_tab: " << endl;
-    // for(int i=0; i<ile_linii; i++)
-    // {
-    //     cout << N_tab[i] << endl;              // Wyswietlenie N_tab (calej)
-    // }
-
-// Koniec programu
+// delete - Destroy array/pointers
 
     delete [] S_tab;
     delete [] N_tab;
