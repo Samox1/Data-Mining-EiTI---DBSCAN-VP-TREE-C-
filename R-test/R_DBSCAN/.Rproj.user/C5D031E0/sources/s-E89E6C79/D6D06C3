@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1576085714218.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "D6D06C3",
+    "lastKnownWriteTime" : 1576092714,
+    "last_content_update" : 1576092714343,
+    "path" : "D:/Programming/Data-Mining-EiTI---DBSCAN-VP-TREE-C-/R-test/R_DBSCAN/R-Test_DBSCAN.R",
+    "project_path" : "R-Test_DBSCAN.R",
+    "properties" : {
+        "cursorPosition" : "95,180",
+        "scrollLine" : "54"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

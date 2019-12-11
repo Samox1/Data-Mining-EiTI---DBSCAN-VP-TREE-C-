@@ -30,7 +30,6 @@ int main()
     Punkt *pkt;         // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
     int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
     int *S_tab;         // Tablica "Seed" --> 
-    int *Temp_tab;
 
     string file1 = "DataCpp.csv";
     string line, word, temp;
@@ -108,7 +107,6 @@ int main()
 
     N_tab = new int[ile_linii];
     S_tab = new int[ile_linii];
-    Temp_tab = new int[ile_linii];
 
 
     // for(int i=0; i<ile_linii; i++)
@@ -119,28 +117,37 @@ int main()
 
     // }
 
+for(int P = 0; P < ile_linii; P++)
+{
+    if(pkt[P].cluster != UNDEFINED)
+    {
+        continue;
+    }
 
-    int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, Qindex, Eps);
+    int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, P, Eps);
+    
+    
+    cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
     cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
     
-    cout << "Punkt: " << Qindex << "x: " << pkt[Qindex].x << " | y: " << pkt[Qindex].y << endl;
-
-    for(int i=0; i<ile_sasiadow; i++)
-    {
-        cout << N_tab[i] << " ~ x: " << pkt[N_tab[i]].x << " | y: " << pkt[N_tab[i]].y << endl;
-    }
+    // for(int i=0; i<ile_sasiadow; i++)
+    // {
+    //     cout << N_tab[i] << " ~ x: " << pkt[N_tab[i]].x << " | y: " << pkt[N_tab[i]].y << endl;
+    // }
 
     if(ile_sasiadow < minN)
     {
-        pkt[Qindex].cluster = NOISE;                // IF: N < minN => NOISE
-        //continue;
-    }else
-    {       
-        pkt[Qindex].cluster = C;                    // ELSE: N > minN => Cluster
+        pkt[P].cluster = NOISE;                // IF: N < minN => NOISE
+        continue;
     }
-    
-    cout << "Punkt: " << Qindex << " | Cluster: " << pkt[Qindex].cluster << endl;
 
+    C = C + 1;    
+    pkt[P].cluster = C;                    // ELSE: N > minN => Cluster
+    
+    cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster << endl;
+    
+    
+    
     for(int i=0; i<ile_linii; i++)
     {
         S_tab[i] = N_tab[i];   
@@ -158,14 +165,16 @@ int main()
     // }
 
 
-    // // Test - MERGE 2 ARRAYS w/o duplicates
-    // int ile_Seed = S_N_Merge(S_tab, N_tab, N_licznik, N_licznik, ile_linii);
+    // Test - MERGE 2 ARRAYS w/o duplicates
+    // cout << "Test MERGE" << endl;
+    // int ile_Seed = S_N_Merge(S_tab, N_tab, S_licznik, N_licznik, ile_linii);
 
     // for(int i = 0; i <ile_linii; i++) 
     // { 
     //     cout << S_tab[i] << " ";
     // } 
 
+    
 
     for(int i=0; i<S_licznik; i++)               // For Each Point Q in S
     {
@@ -176,40 +185,59 @@ int main()
                 pkt[S_tab[i]].cluster = C;
             }
 
-            if(pkt[S_tab[i]].cluster != UNDEFINED){     // IF: Q == NOISE or CLUSTER then leave Q
+            if(pkt[S_tab[i]].cluster != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
+            {     
                 continue;
             }
 
-            //i = 0;
 
             pkt[S_tab[i]].cluster = C;
-            ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, Qindex, Eps);
+            ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, S_tab[i], Eps);
+
+            // cout << "N_tab (ALL): " << endl;
+            // for(int i = 0; i <ile_linii; i++) 
+            // { 
+            //     cout << N_tab[i] << " ";
+            // }
+            // cout << "------" <<endl;
 
             if( ile_sasiadow >= minN)
             {
                 S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
+                // cout << "S_licznik po MERGE: " << S_licznik << endl;
 
-                cout << "Array after merging" <<endl; 
-                for (int i=0; i < ile_linii; i++) 
-                {
-                    cout << S_tab[i] << " ";
-                }
-                cout << "-------------------" << endl;
-                    //}
+                // cout << "Array after merging" <<endl; 
+                // for (int i=0; i < ile_linii; i++) 
+                // {
+                //     cout << S_tab[i] << " ";
                 // }
+                // cout << "-------------------" << endl;
             }
         }
     }
-
-cout << endl;
+}
+    cout << endl;
     for(int i=0; i<ile_linii; i++)
     {
-        cout << i << "C: " << pkt[i].cluster << endl;              // Wyswietlenie N_tab (calej)
+        cout << i << " ~ C: " << pkt[i].cluster << endl;              // Wyswietlenie N_tab (calej)
     }
 
 
+// Saving CSV - with Cluster data
 
+    string file_out = "Data_Cluster.csv";
+    ofstream plik_out;
+    plik_out.open(file_out);
 
+    if(plik_out.good())
+    {   
+        for (int i = 0; i < ile_linii; i++)
+        {
+            plik_out << pkt[i].x << "," << pkt[i].y << "," << pkt[i].cluster << endl;
+        }
+    }
+    plik_out.close();
+    cout << "--- Close --- Out File ---" << endl;
 
 
 
@@ -221,7 +249,6 @@ cout << endl;
 
 // Koniec programu
 
-    delete [] Temp_tab;
     delete [] S_tab;
     delete [] N_tab;
     delete [] pkt;
@@ -293,80 +320,3 @@ int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_lini
 
     return S_licznik;
 }
-
-    // while (k < ile_linii)
-    // {
-        // if(S_tab[i] < 0 && N_tab[j] < 0)
-        // {
-        //     Temp_tab[k++] = -1;
-        // }
-        // else
-        // {
-        //     if(S_tab[i] < N_tab[j])
-        //     {
-        //         if(S_tab[i] >= 0)
-        //         {
-        //             Temp_tab[k++] = S_tab[i++];
-        //         }
-                
-        //     }else{
-        //         if(N_tab[j] >= 0)
-        //         {
-        //             Temp_tab[k++] = N_tab[j++];
-        //         }
-        //     }
-        // }
-
-///JJJJ
-// k = k-1;
-// cout << S_tab[i] << "x" << N_tab[j] << "x"<< Temp_tab[k] <<endl;
-// k = k+1;
-
-//         if(S_tab[i] < 0)
-//         {
-//             if(N_tab[j] < 0)
-//             {
-//                 Temp_tab[k++] = -1;
-//             }
-//             else
-//             {
-//                 Temp_tab[k++] = N_tab[j++];
-//             }
-//         }
-//         else
-//         {
-//             if(N_tab[j] < 0)
-//             {
-//                 Temp_tab[k++] = S_tab[i++];
-//             }
-//             else
-//             {
-//                 if(Temp_tab[k] == S_tab[i])
-//                 {
-//                     i++;
-//                 }else if(Temp_tab[k] == N_tab[j]){
-//                     j++;
-//                 }
-//                 else
-//                 {
-//                     if(S_tab[i] < N_tab[j])
-//                     {
-//                         Temp_tab[k++] = S_tab[i++];
-//                     }else if(S_tab[i] == N_tab[j])
-//                     {
-//                         i++;
-//                     }
-//                     else
-//                     {
-//                         Temp_tab[k++] = N_tab[j++];
-//                     }
-//                 }
-                
-//             }
-//         }
-//         cout << i << "|" << j << "|"<< k <<endl;
-//         //cout << S_tab[i--] << "|" << N_tab[j--] << "|"<< Temp_tab[k] <<endl;
-    // }
-    
-
-//} 
