@@ -67,9 +67,35 @@ library(dbscan)
 # points(X2, pch = 19, col = "orange")
 
 library(readr)
-DataCpp <- read_csv("~/GitHub/DBSCAN_VP-TREE_Cpp/DataCpp.csv")
-View(DataCpp)
+# DataCpp <- read_csv("D:/Programming/Data-Mining-EiTI---DBSCAN-VP-TREE-C-/DataCpp.csv")
+# #View(DataCpp)
+# 
+# plot(DataCpp[2:3], xlim=c(0,8), ylim=c(0,8))
+# #symbols(x=DataCpp[10,2], y=DataCpp[10,3], circles=rep(0.5), add=T, inches=F)
+# XX <- DataCpp[,2]
+# YY <- DataCpp[,3]
+# ZZ <- c(10,20,25,48,57,7,10,35,42,19,23,24,50,49,43,39,45,4,47,52,18,15,36,6,3)
+# 
+# for (val in ZZ){
+#   plot(DataCpp[2:3], xlim=c(0,8), ylim=c(0,8))
+#   symbols(x=DataCpp[val,2], y=DataCpp[val,3], circles=rep(0.5), add=T, inches=F)
+# }
+# 
+# plot(DataCpp[2:3], xlim=c(0,8), ylim=c(0,8))
+# for (val in ZZ){
+#   symbols(x=DataCpp[val,2], y=DataCpp[val,3], circles=rep(0.5), add=T, inches=F)
+# }
 
-plot(DataCpp[2:3])
-symbols(x=DataCpp[10,2], y=DataCpp[10,3], circles=rep(0.5), add=T, inches=F)
 
+Data_Cluster <- as.data.frame(read.table("~/GitHub/DBSCAN_VP-TREE_Cpp/Data_Cluster.csv", header=FALSE,sep=","))
+#Data_Cluster <- as.data.frame(read.table("D:/Programming/Data-Mining-EiTI---DBSCAN-VP-TREE-C-/Data_Cluster.csv", header=FALSE,sep=","))
+
+cluster <- as.factor(Data_Cluster[,3])
+
+library(ggplot2)
+#sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster, size = cluster)) + geom_point() + geom_point(size = 50, pch = 1) + coord_cartesian(xlim =c(-1, 8), ylim = c(-1, 8))
+sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster, size = cluster)) + geom_point() + geom_point(size = 50, pch = 1)
+show(sp)
+
+# cols <- c((-1)='red',1='blue',2='green',3='yellow');
+# plot(Data_Cluster[,1:2], xlim=c(0,8), ylim=c(0,8),col=cols[Data_Cluster[3]])
