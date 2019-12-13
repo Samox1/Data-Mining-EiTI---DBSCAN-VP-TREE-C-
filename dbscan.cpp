@@ -43,7 +43,9 @@ int main()
 
     string file1 = "DataCpp.csv";
     string line, word, temp, struktura;
+    char FirstColYN;
     int index = 0;
+    int start_index = 0;
     int ile_linii = 0;
     int ile_x = 0;
 
@@ -63,12 +65,13 @@ int main()
             }
         }
 
-        //cout << plik.tellg() << endl;
         plik.clear();
         plik.seekg(0, ios::beg);
 
-        while(getline(plik, line, '\n'))
-        {
+        for(int i = 0; i < 3; i++)
+        {   
+            ile_x = 0;
+            getline(plik, line, '\n');
             stringstream sstream(line);
             while(getline(sstream, word, ','))
             {
@@ -76,40 +79,66 @@ int main()
                 struktura = struktura + word + " | ";
                 ile_x++;
             }
-            break;
+            struktura = struktura + '\n';
         }
-        // cout << "Ile kolumn: " << ile_x << endl;
+        
         plik.clear();
         plik.seekg(0, ios::beg);
-        // cout << plik.tellg() << endl;
-        
-        // cout << "Wierszy w pliku: " <<  ile_linii << endl;
 
-        pkt = new Punkt[ile_linii];                             // Inicjalizacja pamieci
+        // cout << "Ile kolumn: " << ile_x << endl;
+        // cout << "Wierszy w pliku: " <<  ile_linii << endl;
+        cout << endl << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << endl << struktura << "***" << endl;
+        
+        int flaga_wybor = 1;
+        while(flaga_wybor)
+        {   
+            cout << "Import 1st column? [y/n] : ";
+            cin >> FirstColYN;
+
+            switch (FirstColYN)
+            {
+            case 'y':
+                start_index = 0;
+                flaga_wybor = 0;
+                break;
+            case 'n':
+                start_index = 1;
+                ile_x--;
+                flaga_wybor = 0;
+                break;
+            default:
+                cout << "Wrong character" << endl;
+                break;
+            } 
+        }
+        
+        pkt = new Punkt[ile_linii];                             // Memory Initialization
 
         for(int i=0; i<ile_linii; i++){
-            pkt[i].Przydziel(2);
+            pkt[i].Przydziel(ile_x);                                // Memory Initialization
         }
 
         int ktora_linia = 0;
 
-        
+        int counter_tab = 0;
         while(!plik.eof())
         {
             while(getline(plik, line, '\n'))
             {                
                 stringstream sstream(line);
                 index = 0;
+                counter_tab = 0;
                 while (getline(sstream, word, ','))
                 {
-                    if(index==1){
-                        pkt[ktora_linia].x[0] = atof(word.c_str());
+                    if(index>=start_index){
+                        pkt[ktora_linia].x[counter_tab] = atof(word.c_str());
                         //cout << "X: " << word << " ";
-                    }else if(index==2){
-                        pkt[ktora_linia].x[1] = atof(word.c_str());
-                        //cout << "Y: " << word << " ";
+                    // }else if(index==2){
+                    //     pkt[ktora_linia].x[1] = atof(word.c_str());
+                    //     //cout << "Y: " << word << " ";
                     }
                     index++;
+                    counter_tab++;
                 }
                 ktora_linia++;
                 //cout << endl;
@@ -121,11 +150,16 @@ int main()
     plik.close();
     cout << "Close file: Imported 2D data" << endl;
 
-    cout << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << struktura << endl << "***" << endl ;
+    //cout << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << endl << struktura << "***" << endl ;
+
 // Show imported data
-    // for(int i=0; i<ile_linii; i++){
-    //     cout << "x: " << pkt[i].x[0] << " | y:" << pkt[i].x[1] << endl;
-    // }
+    for(int i=0; i<ile_linii; i++){
+        for (int j = 0; j < ile_x; j++)
+        {
+            cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
+        }
+        cout << endl;
+    }
 
 
 // Test - Function DistFunc
