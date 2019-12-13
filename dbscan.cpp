@@ -43,9 +43,10 @@ int main()
 
     string file1 = "DataCpp-2D-1000.csv";
     string line, word, temp, struktura;
-    char FirstColYN;
+    char FirstColYN, FirstRowYN;
     int index = 0;
     int start_index = 0;
+    int ktora_linia = 0;
     int ile_linii = 0;
     int ile_x = 0;
 
@@ -82,7 +83,6 @@ int main()
             struktura = struktura + '\n';
         }
         
-        
 
         // cout << "Ile kolumn: " << ile_x << endl;
         // cout << "Wierszy w pliku: " <<  ile_linii << endl;
@@ -92,17 +92,17 @@ int main()
         while(flaga_wybor)
         {   
             cout << "Import 1st row = Header? [y/n] : ";
-            cin >> FirstColYN;
+            cin >> FirstRowYN;
 
-            switch (FirstColYN)
+            switch (FirstRowYN)
             {
             case 'y':
-                //start_index = 0;
+                ktora_linia = 0;
                 flaga_wybor = 0;
                 break;
             case 'n':
-                //start_index = 1;
-                //ile_linii--;
+                ktora_linia = 1;
+                ile_linii--;
                 flaga_wybor = 0;
                 break;
             default:
@@ -140,7 +140,6 @@ int main()
             pkt[i].Przydziel(ile_x);                                // Memory Initialization
         }
 
-        int ktora_linia = 0;
 
         plik.clear();
         plik.seekg(0, ios::beg);
@@ -148,22 +147,24 @@ int main()
         int counter_tab = 0;
         while(!plik.eof())
         {
-            while(getline(plik, line, '\n'))
+            for(int kl=ktora_linia; kl < ile_linii; kl++)// while(getline(plik, line, '\n'))
             {                
+                getline(plik, line, '\n');
                 stringstream sstream(line);
                 index = 0;
                 counter_tab = 0;
+                cout<<kl<<": "<<endl;
                 while (getline(sstream, word, ','))
                 {
                     if(index>=start_index)
                     {
-                        pkt[ktora_linia].x[counter_tab] = atof(word.c_str());
-                        //cout<<index<<" "<<counter_tab<<" "<<word <<" = " <<pkt[ktora_linia].x[counter_tab] <<endl;
+                        pkt[kl].x[counter_tab] = atof(word.c_str());
+                        cout<<index<<" "<<counter_tab<<" "<<word <<" = " <<pkt[kl].x[counter_tab] <<endl;
                         counter_tab++;
                     }
                     index++; 
                 }
-                ktora_linia++;
+                //ktora_linia++;
             }
         }
     }else{
@@ -175,22 +176,23 @@ int main()
     //cout << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << endl << struktura << "***" << endl ;
 
 // Show ALL Imported Data
-    // for(int i=0; i<ile_linii; i++){
-    //     for (int j = 0; j < ile_x; j++)
-    //     {
-    //         cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
-    //     }
-    //     cout << endl;
-    // }
-
-// Show first 3 rows from memory
-    for(int i=0; i<3; i++){
+    for(int i=0; i<ile_linii; i++){
+        cout<<i<<": ";
         for (int j = 0; j < ile_x; j++)
         {
             cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
         }
         cout << endl;
     }
+
+// Show first 3 rows from memory
+    // for(int i=0; i<3; i++){
+    //     for (int j = 0; j < ile_x; j++)
+    //     {
+    //         cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
+    //     }
+    //     cout << endl;
+    // }
 
 // Test - Function DistFunc
 
