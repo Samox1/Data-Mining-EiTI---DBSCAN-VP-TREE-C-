@@ -28,9 +28,9 @@ Punkt::~Punkt(){
 }
 
 double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x);
-int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps);
+int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int ile_x);
 int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_linii);
-void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C);
+void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x);
 
 
 int main()
@@ -72,8 +72,8 @@ int main()
         {   
             ile_x = 0;
             getline(plik, line, '\n');
-            stringstream sstream(line);
-            while(getline(sstream, word, ','))
+            stringstream sstream_temp(line);
+            while(getline(sstream_temp, word, ','))
             {
                 // cout << word << " ";
                 struktura = struktura + word + " | ";
@@ -82,8 +82,7 @@ int main()
             struktura = struktura + '\n';
         }
         
-        plik.clear();
-        plik.seekg(0, ios::beg);
+        
 
         // cout << "Ile kolumn: " << ile_x << endl;
         // cout << "Wierszy w pliku: " <<  ile_linii << endl;
@@ -120,6 +119,9 @@ int main()
 
         int ktora_linia = 0;
 
+        plik.clear();
+        plik.seekg(0, ios::beg);
+
         int counter_tab = 0;
         while(!plik.eof())
         {
@@ -130,7 +132,7 @@ int main()
                 counter_tab = 0;
                 while (getline(sstream, word, ','))
                 {
-                    if(index>=start_index){
+                    if(index>=start_index){                                     // Przy start_index=1 cos sie psuje
                         pkt[ktora_linia].x[counter_tab] = atof(word.c_str());
                         //cout << "X: " << word << " ";
                     // }else if(index==2){
@@ -148,7 +150,7 @@ int main()
         cout << "Can't open file" << endl;
     }
     plik.close();
-    cout << "Close file: Imported 2D data" << endl;
+    cout << "Close file: Imported "<<ile_x<<"D data" << endl;
 
     //cout << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << endl << struktura << "***" << endl ;
 
@@ -182,7 +184,7 @@ int main()
 auto start = high_resolution_clock::now();      // Time - START
 
 // DBSCAN --- START //
-DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C);
+DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);
 // DBSCAN --- END //
 
 auto stop = high_resolution_clock::now();                       // Time - STOP
@@ -191,11 +193,16 @@ cout << "DBSCAN Time: " << duration.count() << " us" << endl;   // Time - show F
 
 
 // Show every point and his Cluster number
-    // cout << endl;
-    // for(int i=0; i<ile_linii; i++)
-    // {
-    //     cout << i << " ~ C: " << pkt[i].cluster << endl;              // Wyswietlenie N_tab (calej)
-    // }
+    cout << endl;
+    for(int i=0; i<ile_linii; i++)
+    {
+        for (int j = 0; j < ile_x; j++)
+        {
+            cout << pkt[i].x[j] << ",";
+        }
+        
+        cout << pkt[i].cluster << endl;
+    }
 
 
 // Saving CSV - with Cluster data
@@ -211,8 +218,14 @@ cout << "DBSCAN Time: " << duration.count() << " us" << endl;   // Time - show F
     {   
         for (int i = 0; i < ile_linii; i++)
         {
-            plik_out << pkt[i].x[0] << "," << pkt[i].x[1] << "," << pkt[i].cluster << endl;
+            //plik_out << pkt[i].x[0] << "," << pkt[i].x[1] << "," << pkt[i].cluster << endl;
+            for (int j = 0; j < ile_x; j++)
+            {
+                plik_out << pkt[i].x[j] << ",";
+            }
+            plik_out << pkt[i].cluster << endl;
         }
+        
     }else{
         cout << "Can't open file" << endl;
     }
@@ -244,7 +257,7 @@ double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x)
     return distance;
 } 
 
-int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps)
+int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int ile_x)
 {
     for(int i=0; i<ile_linii; i++)
     {
@@ -257,7 +270,7 @@ int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps)
     {
         if(i != Qindex)
         {
-            if(DistFunc(&pkt[Qindex], &pkt[i], 2) <= Eps)
+            if(DistFunc(&pkt[Qindex], &pkt[i], ile_x) <= Eps)
             {
                 N_tab[j] = i;
                 j++;
@@ -302,7 +315,7 @@ int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_lini
 
 
 // NIE DZIALA
-void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C)
+void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
 {
 
 for(int P = 0; P < ile_linii; P++)
@@ -312,7 +325,7 @@ for(int P = 0; P < ile_linii; P++)
         continue;
     }
 
-    int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, P, Eps);
+    int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, P, Eps, ile_x);
     
     // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
     // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
@@ -351,7 +364,7 @@ for(int P = 0; P < ile_linii; P++)
             }
 
             pkt[S_tab[i]].cluster = C;
-            ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, S_tab[i], Eps);
+            ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, S_tab[i], Eps, ile_x);
 
             if( ile_sasiadow >= minN)
             {
