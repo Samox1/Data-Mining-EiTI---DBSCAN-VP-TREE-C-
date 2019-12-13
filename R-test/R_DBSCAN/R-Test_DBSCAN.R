@@ -94,7 +94,12 @@ cluster <- as.factor(Data_Cluster[,3])
 
 library(ggplot2)
 #sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster, size = cluster)) + geom_point() + geom_point(size = 50, pch = 1) + coord_cartesian(xlim =c(-1, 8), ylim = c(-1, 8))
-sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster, size = cluster)) + geom_point() + geom_point(size = 50, pch = 1)
+
+sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster)) + geom_point() + geom_point(aes(size = 0.5), pch = 1) + theme(
+  axis.ticks.length.y = unit(.25, "cm"),
+  axis.ticks.length.x = unit(-.25, "cm"),
+  axis.text.x = element_text(margin = margin(t = .3, unit = "cm"))
+)
 show(sp)
 
 # cols <- c((-1)='red',1='blue',2='green',3='yellow');
