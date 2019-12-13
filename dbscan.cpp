@@ -41,7 +41,7 @@ int main()
     int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
     int *S_tab;         // Tablica "Seed" --> rozszerzajacy sie obszar sasiadow wokol punktu P
 
-    string file1 = "DataCpp.csv";
+    string file1 = "DataCpp-2D-1000.csv";
     string line, word, temp, struktura;
     char FirstColYN;
     int index = 0;
@@ -91,6 +91,29 @@ int main()
         int flaga_wybor = 1;
         while(flaga_wybor)
         {   
+            cout << "Import 1st row = Header? [y/n] : ";
+            cin >> FirstColYN;
+
+            switch (FirstColYN)
+            {
+            case 'y':
+                //start_index = 0;
+                flaga_wybor = 0;
+                break;
+            case 'n':
+                //start_index = 1;
+                //ile_linii--;
+                flaga_wybor = 0;
+                break;
+            default:
+                cout << "Wrong character" << endl;
+                break;
+            } 
+        }
+
+        flaga_wybor = 1;        // Flag reset
+        while(flaga_wybor)
+        {   
             cout << "Import 1st column? [y/n] : ";
             cin >> FirstColYN;
 
@@ -132,18 +155,15 @@ int main()
                 counter_tab = 0;
                 while (getline(sstream, word, ','))
                 {
-                    if(index>=start_index){                                     // Przy start_index=1 cos sie psuje
+                    if(index>=start_index)
+                    {
                         pkt[ktora_linia].x[counter_tab] = atof(word.c_str());
-                        //cout << "X: " << word << " ";
-                    // }else if(index==2){
-                    //     pkt[ktora_linia].x[1] = atof(word.c_str());
-                    //     //cout << "Y: " << word << " ";
+                        //cout<<index<<" "<<counter_tab<<" "<<word <<" = " <<pkt[ktora_linia].x[counter_tab] <<endl;
+                        counter_tab++;
                     }
-                    index++;
-                    counter_tab++;
+                    index++; 
                 }
                 ktora_linia++;
-                //cout << endl;
             }
         }
     }else{
@@ -154,15 +174,23 @@ int main()
 
     //cout << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << endl << struktura << "***" << endl ;
 
-// Show imported data
-    for(int i=0; i<ile_linii; i++){
+// Show ALL Imported Data
+    // for(int i=0; i<ile_linii; i++){
+    //     for (int j = 0; j < ile_x; j++)
+    //     {
+    //         cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
+    //     }
+    //     cout << endl;
+    // }
+
+// Show first 3 rows from memory
+    for(int i=0; i<3; i++){
         for (int j = 0; j < ile_x; j++)
         {
             cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
         }
         cout << endl;
     }
-
 
 // Test - Function DistFunc
 
@@ -189,20 +217,20 @@ DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);
 
 auto stop = high_resolution_clock::now();                       // Time - STOP
 auto duration = duration_cast<microseconds>(stop - start);      // Time - Caltulation
-cout << "DBSCAN Time: " << duration.count() << " us" << endl;   // Time - show Function duration
+cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;   // Time - show Function duration
 
 
 // Show every point and his Cluster number
-    cout << endl;
-    for(int i=0; i<ile_linii; i++)
-    {
-        for (int j = 0; j < ile_x; j++)
-        {
-            cout << pkt[i].x[j] << ",";
-        }
+    // cout << endl;
+    // for(int i=0; i<ile_linii; i++)
+    // {
+    //     for (int j = 0; j < ile_x; j++)
+    //     {
+    //         cout << pkt[i].x[j] << ",";
+    //     }
         
-        cout << pkt[i].cluster << endl;
-    }
+    //     cout << pkt[i].cluster << endl;
+    // }
 
 
 // Saving CSV - with Cluster data

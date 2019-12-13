@@ -42,24 +42,24 @@ library(dbscan)
 ###################################################################################
 # Plot some data for C++ project
 
-# library(MASS)
-# 
-# S <- matrix(c(1,0,0,1),2,2)
-# mt1 <- c(2,2)
-# mt2 <- c(6,0)
-# n1 <- 60
-# n2 <- 60
-# n <- n1 + n2
-# 
-# X1 <- mvrnorm(n1, mt1, S)
-# X2 <- mvrnorm(n2, mt2, S)
-# 
-# DATA_Cpp <- rbind(X1, X2)
-# kNN1 <- kNNdistplot(DATA_Cpp, k = 5)
-# abline(h=.5, col = "red", lty=2)
-# 
-# # Write to CSV
-# write.csv(DATA_Cpp, "DataCpp.csv")
+library(MASS)
+
+S <- matrix(c(1,0,0,1),2,2)
+mt1 <- c(2,2)
+mt2 <- c(6,0)
+n1 <- 1000
+n2 <- 1000
+n <- n1 + n2
+
+X1 <- mvrnorm(n1, mt1, S)
+X2 <- mvrnorm(n2, mt2, S)
+
+DATA_Cpp <- rbind(X1, X2)
+kNN1 <- kNNdistplot(DATA_Cpp, k = 5)
+abline(h=.5, col = "red", lty=2)
+
+# Write to CSV
+write.csv(DATA_Cpp, "DataCpp-2D-1000.csv")
 # 
 # 
 # plot(X1, ylim = c(-5,5), xlim = c(-2,10), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
@@ -104,3 +104,4 @@ show(sp)
 
 # cols <- c((-1)='red',1='blue',2='green',3='yellow');
 # plot(Data_Cluster[,1:2], xlim=c(0,8), ylim=c(0,8),col=cols[Data_Cluster[3]])
+#show(3^10)
