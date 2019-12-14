@@ -41,35 +41,36 @@ int main()
     int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
     int *S_tab;         // Tablica "Seed" --> rozszerzajacy sie obszar sasiadow wokol punktu P
 
-    string file1 = "DataCpp-2D-1000.csv";
-    string line, word, temp, struktura;
-    char FirstColYN, FirstRowYN;
-    int index = 0;
-    int start_index = 0;
-    int ktora_linia = 0;
-    int ile_linii = 0;
-    int ile_x = 0;
+    string file1 = "DataCpp-2D-1000.csv";                                   // Name of File to Import
+    string line, word, temp, struktura;                                     // Temporary strings for import
+    char FirstColYN, FirstRowYN;                                            // FirstColYN - char for: Import First Column?   // FirstRowYN - char for: Import First Row?
+    int index = 0;                                                          // Counter for every "word" in imported line
+    int counter_tab = 0;                                                    // Counter for "x" in every point
+    int start_index = 0;                                                    // Start index - if User don't want First Column
+    int ktora_linia = 0;                                                    // Row Counter for importing 
+    int ile_linii = 0;                                                      // Number of Rows    - Number of points 
+    int ile_x = 0;                                                          // Number of Columns - Number of co-ordinates for every point
 
     cout << "--- Open file: " << file1 << " --> ";
 
-    fstream plik;
-    plik.open(file1);
+    fstream plik;                                                           // FStream for import file
+    plik.open(file1);                                                       // Open import file
 
     if(plik.good())
     {
         //cout << plik.tellg() << endl;
         while(!plik.eof())
         {
-            while(getline(plik, line, '\n'))
+            while(getline(plik, line, '\n'))                                // Calculate how many lines are in the file
             {
                 ile_linii++;
             }
         }
 
         plik.clear();
-        plik.seekg(0, ios::beg);
+        plik.seekg(0, ios::beg);                                            // Clear buffer and go to the beginning of the file
 
-        for(int i = 0; i < 3; i++)
+        for(int i = 0; i < 3; i++)                                          // Import first 3 lines from file - to show them later
         {   
             ile_x = 0;
             getline(plik, line, '\n');
@@ -83,13 +84,12 @@ int main()
             struktura = struktura + '\n';
         }
         
-
         // cout << "Ile kolumn: " << ile_x << endl;
         // cout << "Wierszy w pliku: " <<  ile_linii << endl;
-        cout << endl << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << endl << struktura << "***" << endl;
+        cout << endl << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << endl << struktura << "***" << endl;       // Show - File Structure
         
-        int flaga_wybor = 1;
-        while(flaga_wybor)
+        int flaga_wybor = 1;                                                // Flag reset
+        while(flaga_wybor)                                                  // While - for: First Row Import - y / n 
         {   
             cout << "Import 1st row = Header? [y/n] : ";
             cin >> FirstRowYN;
@@ -111,8 +111,8 @@ int main()
             } 
         }
 
-        flaga_wybor = 1;        // Flag reset
-        while(flaga_wybor)
+        flaga_wybor = 1;                                                    // Flag reset
+        while(flaga_wybor)                                                  // While - for: First Column Import - y / n 
         {   
             cout << "Import 1st column? [y/n] : ";
             cin >> FirstColYN;
@@ -134,37 +134,41 @@ int main()
             } 
         }
         
-        pkt = new Punkt[ile_linii];                             // Memory Initialization
+        pkt = new Punkt[ile_linii];                                         // Memory Initialization
 
         for(int i=0; i<ile_linii; i++){
-            pkt[i].Przydziel(ile_x);                                // Memory Initialization
+            pkt[i].Przydziel(ile_x);                                        // Memory Initialization
         }
 
 
         plik.clear();
-        plik.seekg(0, ios::beg);
+        plik.seekg(0, ios::beg);                                            // Clear buffer and go to the beginning of the file
 
-        int counter_tab = 0;
+        if(ktora_linia == 1){                                               // Get Line if FirstRowYN is NO - dont import first line
+            getline(plik, line, '\n');
+            ktora_linia = 0;                                                // Counter reset
+        }
+
+
         while(!plik.eof())
         {
-            for(int kl=ktora_linia; kl < ile_linii; kl++)// while(getline(plik, line, '\n'))
+            while(getline(plik, line, '\n'))                                // Get every line from file
             {                
-                getline(plik, line, '\n');
                 stringstream sstream(line);
                 index = 0;
                 counter_tab = 0;
-                cout<<kl<<": "<<endl;
-                while (getline(sstream, word, ','))
+                // cout<<ktora_linia<<": "<<endl;                           // Show - which point is being imported
+                while (getline(sstream, word, ','))                         // Get every "word" (number) from line
                 {
                     if(index>=start_index)
                     {
-                        pkt[kl].x[counter_tab] = atof(word.c_str());
-                        cout<<index<<" "<<counter_tab<<" "<<word <<" = " <<pkt[kl].x[counter_tab] <<endl;
+                        pkt[ktora_linia].x[counter_tab] = atof(word.c_str());                                           // Conversion string to double
+                        // cout<<index<<" "<<counter_tab<<" "<<word <<" = " <<pkt[ktora_linia].x[counter_tab] <<endl;   // Show - data from memory while importing
                         counter_tab++;
                     }
                     index++; 
                 }
-                //ktora_linia++;
+                ktora_linia++;
             }
         }
     }else{
@@ -176,17 +180,8 @@ int main()
     //cout << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << endl << struktura << "***" << endl ;
 
 // Show ALL Imported Data
-    for(int i=0; i<ile_linii; i++){
-        cout<<i<<": ";
-        for (int j = 0; j < ile_x; j++)
-        {
-            cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
-        }
-        cout << endl;
-    }
-
-// Show first 3 rows from memory
-    // for(int i=0; i<3; i++){
+    // for(int i=0; i<ile_linii; i++){
+    //     cout<<i<<": ";
     //     for (int j = 0; j < ile_x; j++)
     //     {
     //         cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
@@ -194,32 +189,43 @@ int main()
     //     cout << endl;
     // }
 
-// Test - Function DistFunc
+// Show first 3 rows from memory - Imported Structure
+    cout << endl << "***" << endl << "Imported Structure in Memory: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure in Memory: " << endl;       // Show - Imported Structure in Memory
+    for(int i=0; i<3; i++){
+        cout << i << ": ";
+        for (int j = 0; j < ile_x; j++)
+        {
+            cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
+        }
+        cout << endl;
+    }
+    cout << "***" << endl;
 
+// Test - Function DistFunc
     // int wsp1 = 15;
     // int wsp2 = 20;
-    // cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(&pkt[wsp1], &pkt[wsp2]) << endl;
+    // cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(&pkt[wsp1], &pkt[wsp2], ile_x) << endl;
     
 
 // Test - Function - DBSCAN()
 
-    int C = 0;                      // Cluster Counter
-    double Eps = 0.5;               // Max distance between points
-    int minN = 4;                   // Minimal number of Neighbors
+    int C = 0;                                                                  // Cluster Counter
+    double Eps = 0.5;                                                           // Max distance between points
+    int minN = 4;                                                               // Minimal number of Neighbors
 
-    N_tab = new int[ile_linii];     // Neighbors tab - index for N in pkt tab
-    S_tab = new int[ile_linii];     // Seed tab - index for S in pkt tab
+    N_tab = new int[ile_linii];                                                 // Neighbors tab - index for N in pkt tab
+    S_tab = new int[ile_linii];                                                 // Seed tab - index for S in pkt tab
 
 
-auto start = high_resolution_clock::now();      // Time - START
+auto start = high_resolution_clock::now();                                      // Time - START
 
 // DBSCAN --- START //
-DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);
+DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);               // DBSCAN - Function
 // DBSCAN --- END //
 
-auto stop = high_resolution_clock::now();                       // Time - STOP
-auto duration = duration_cast<microseconds>(stop - start);      // Time - Caltulation
-cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;   // Time - show Function duration
+auto stop = high_resolution_clock::now();                                       // Time - STOP
+auto duration = duration_cast<microseconds>(stop - start);                      // Time - Caltulation
+cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           // Time - show Function duration
 
 
 // Show every point and his Cluster number
@@ -230,13 +236,11 @@ cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;   // Time 
     //     {
     //         cout << pkt[i].x[j] << ",";
     //     }
-        
     //     cout << pkt[i].cluster << endl;
     // }
 
 
 // Saving CSV - with Cluster data
-
     string file_out = "Data_Cluster1.csv";
     ofstream plik_out;
 
@@ -264,7 +268,6 @@ cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;   // Time 
 
 
 // delete - Destroy array/pointers
-
     delete [] S_tab;
     delete [] N_tab;
     delete [] pkt;
