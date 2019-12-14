@@ -275,7 +275,7 @@ cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           
 
 
 
-// --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
+// --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
 
 // Function to calculate distance 
 double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x) 
@@ -347,7 +347,7 @@ int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_lini
 }
 
 
-// NIE DZIALA
+
 void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
 {
 
@@ -382,7 +382,7 @@ for(int P = 0; P < ile_linii; P++)
 
     int S_licznik = ile_sasiadow;
   
-    for(int i=0; i<S_licznik; i++)               // For Each Point Q in S
+    for(int i=0; i<S_licznik; i++)                      // For Each Point Q in S
     {
         if(S_tab[i] != -1)
         {
