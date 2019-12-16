@@ -60,11 +60,11 @@ abline(h=.5, col = "red", lty=2)
 
 # Write to CSV
 write.csv(DATA_Cpp, "DataCpp-2D-1000.csv")
-# 
-# 
-# plot(X1, ylim = c(-5,5), xlim = c(-2,10), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
-# abline(v = 0, h = 0, col = "gray")
-# points(X2, pch = 19, col = "orange")
+
+
+plot(X1, ylim = c(-5,5), xlim = c(-2,10), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
+abline(v = 0, h = 0, col = "gray")
+points(X2, pch = 19, col = "orange")
 
 library(readr)
 # DataCpp <- read_csv("D:/Programming/Data-Mining-EiTI---DBSCAN-VP-TREE-C-/DataCpp.csv")
