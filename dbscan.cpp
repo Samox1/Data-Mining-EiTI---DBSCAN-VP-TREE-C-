@@ -258,15 +258,20 @@ cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           
 
 // Saving CSV - with Cluster data
     string file_out = "Data_Cluster1.csv";
+    cout << "File output: ";
+    cin >> file_out;
     int num_file_out = 0;
+    exist = 1;
 
     do
     {
         if (FILE *file = fopen(file_out.c_str(), "r")) {
             fclose(file);
             cout << "There is file: " << file_out << " --> Changing name to: ";
+            file_out.erase(file_out.length()-4, file_out.length());
             num_file_out++;
-            file_out = "Data_Cluster" + to_string(num_file_out) + ".csv";
+            file_out = file_out + "_" + to_string(num_file_out) + ".csv";
+            cout << file_out << endl;
             exist = 1;
         }else{
             exist = 0;
