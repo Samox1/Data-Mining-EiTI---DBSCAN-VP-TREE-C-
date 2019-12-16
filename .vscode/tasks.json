@@ -7,6 +7,7 @@
             "command": "g++",
             "args": [
                 "-g",
+                "-fopenmp",
                 "-o",
                 "dbscan",
                 "dbscan.cpp"

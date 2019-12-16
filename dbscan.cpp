@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <chrono> 
+#include <omp.h>
 
 
 #define UNDEFINED   -2
@@ -31,12 +32,23 @@ double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x);
 int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int ile_x);
 int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_linii);
 void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x);
+void DBSCAN_Origin_OMP(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x);
 
 
 int main()
 {
     cout << endl << "Hello, This is (VP-TREE) DBSCAN program" << endl;
+    cout << "Threads in PC: " << omp_get_num_threads() << endl;
     
+    int th_id, nthreads;
+    #pragma omp parallel private(th_id)
+    {
+        th_id = omp_get_thread_num();
+        cout << "Hello World from thread: " << th_id << endl;
+    }
+
+    cout << "Threads in PC: " << omp_get_num_threads() << endl << endl;
+
     Punkt *pkt;         // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
     int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
     int *S_tab;         // Tablica "Seed" --> rozszerzajacy sie obszar sasiadow wokol punktu P
@@ -244,6 +256,12 @@ auto duration = duration_cast<microseconds>(stop - start);                      
 cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           // Time - show Function duration
 
 
+auto start1 = high_resolution_clock::now();                                      // Time - START
+DBSCAN_Origin_OMP(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);
+auto stop1 = high_resolution_clock::now();                                       // Time - STOP
+auto duration1 = duration_cast<microseconds>(stop1 - start1);                      // Time - Caltulation
+cout << endl << "DBSCAN OMP Time: " << duration1.count() << " us" << endl;           // Time - show Function duration
+
 // Show every point and his Cluster number
     // cout << endl;
     // for(int i=0; i<ile_linii; i++)
@@ -274,7 +292,14 @@ cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           
             cout << "There is file: " << file_out << " --> Changing name to: ";
             file_out.erase(file_out.length()-4, file_out.length());
             num_file_out++;
-            file_out = file_out + "_" + to_string(num_file_out) + ".csv";
+            if(num_file_out > 1)
+            {
+                //for(int i = 0; i <= (num_file_out / 10); i++)
+                //{
+                    file_out.pop_back();
+                //}
+            }
+            file_out = file_out + to_string(num_file_out) + ".csv";
             cout << file_out << endl;
             exist = 1;
         }else{
@@ -387,6 +412,70 @@ int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_lini
     return S_licznik;
 }
 
+
+
+void DBSCAN_Origin_OMP(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
+{
+
+#pragma omp parallel for
+for(int P = 0; P < ile_linii; P++)
+{
+    if(pkt[P].cluster != UNDEFINED)
+    {
+        continue;
+    }
+
+    int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, P, Eps, ile_x);
+    
+    // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
+    // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
+
+    if(ile_sasiadow < minN)
+    {
+        pkt[P].cluster = NOISE;             // IF: N < minN => NOISE
+        continue;
+    }
+
+    C = C + 1;                              // Cluster number increment
+    pkt[P].cluster = C;                     // ELSE: N > minN => Cluster
+    
+    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster << endl;     // Show changing Cluster number
+    
+    
+    for(int i=0; i<ile_linii; i++)
+    {
+        S_tab[i] = N_tab[i];           
+    }
+
+    int S_licznik = ile_sasiadow;
+  
+    for(int i=0; i<S_licznik; i++)                      // For Each Point Q in S
+    {
+        if(S_tab[i] != -1)
+        {
+            if(pkt[S_tab[i]].cluster == NOISE)          // IF: Q == NOISE then Q = Cluster
+            {
+                pkt[S_tab[i]].cluster = C;
+            }
+
+            if(pkt[S_tab[i]].cluster != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
+            {     
+                continue;
+            }
+
+            pkt[S_tab[i]].cluster = C;
+            ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, S_tab[i], Eps, ile_x);
+
+            if( ile_sasiadow >= minN)
+            {
+                S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
+            }
+        }
+    }
+}
+   // END OMP parallel
+
+}
 
 
 void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
