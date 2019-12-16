@@ -61,7 +61,7 @@ int main()
             fclose(file);
             exist = 1;
         }else{
-            cout << "Can't find this file" << endl;
+            cout << "Warning: Can't find this file" << endl;
         }
     }while(exist != 1);
     
@@ -258,6 +258,22 @@ cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           
 
 // Saving CSV - with Cluster data
     string file_out = "Data_Cluster1.csv";
+    int num_file_out = 0;
+
+    do
+    {
+        if (FILE *file = fopen(file_out.c_str(), "r")) {
+            fclose(file);
+            cout << "There is file: " << file_out << " --> Changing name to: ";
+            num_file_out++;
+            file_out = "Data_Cluster" + to_string(num_file_out) + ".csv";
+            exist = 1;
+        }else{
+            exist = 0;
+        }
+    } while(exist == 1);
+    
+
     ofstream plik_out;
 
     cout << "--- Open CSV: " << file_out << " --> ";
