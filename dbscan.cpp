@@ -35,7 +35,7 @@ void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii
 
 int main()
 {
-    cout << endl << "Hello, Welcome in DBSCAN Test program" << endl;
+    cout << endl << "Hello, This is (VP-TREE) DBSCAN program" << endl;
     
     Punkt *pkt;         // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
     int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
@@ -50,6 +50,22 @@ int main()
     int ktora_linia = 0;                                                    // Row Counter for importing 
     int ile_linii = 0;                                                      // Number of Rows    - Number of points 
     int ile_x = 0;                                                          // Number of Columns - Number of co-ordinates for every point
+
+
+    int exist = 0;
+
+    do{
+        cout << "What file you want? : ";
+        cin >> file1;
+        if (FILE *file = fopen(file1.c_str(), "r")) {
+            fclose(file);
+            exist = 1;
+        }else{
+            cout << "Can't find this file" << endl;
+        }
+    }while(exist != 1);
+    
+
 
     cout << "--- Open file: " << file1 << " --> ";
 
