@@ -38,16 +38,15 @@ void DBSCAN_Origin_OMP(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_l
 int main()
 {
     cout << endl << "Hello, This is (VP-TREE) DBSCAN program" << endl;
-    cout << "Threads in PC: " << omp_get_num_threads() << endl;
     
-    int th_id, nthreads;
-    #pragma omp parallel private(th_id)
-    {
-        th_id = omp_get_thread_num();
-        cout << "Hello World from thread: " << th_id << endl;
-    }
-
-    cout << "Threads in PC: " << omp_get_num_threads() << endl << endl;
+    // cout << "Threads in PC: " << omp_get_num_threads() << endl;
+    // int th_id, nthreads;
+    // #pragma omp parallel private(th_id)
+    // {
+    //     th_id = omp_get_thread_num();
+    //     cout << "Hello World from thread: " << th_id << endl;
+    // }
+    // cout << "Threads in PC: " << omp_get_num_threads() << endl << endl;
 
     Punkt *pkt;         // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
     int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
@@ -255,21 +254,32 @@ auto stop = high_resolution_clock::now();                                       
 auto duration = duration_cast<microseconds>(stop - start);                      // Time - Caltulation
 cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           // Time - show Function duration
 
-for(int i=0; i<ile_linii; i++)
-{
-    pkt[i].cluster = -2;
-}
+// int *Temp_tab;
+// Temp_tab = new int[ile_linii];
+// // Przepisanie tablicy "pkt.cluster" do tymczasowej w celach porownania
+// for(int i=0; i<ile_linii; i++)
+// {
+//     Temp_tab[i] = pkt[i].cluster;
+// }
 
-auto start1 = high_resolution_clock::now();                                     // Time OMP - START
-DBSCAN_Origin_OMP(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - OMP - Function
-auto stop1 = high_resolution_clock::now();                                      // Time OMP - STOP
-auto duration1 = duration_cast<microseconds>(stop1 - start1);                   // Time OMP - Caltulation
-cout << "DBSCAN OMP Time: " << duration1.count() << " us" << endl;              // Time OMP - show Function duration
+// // Czyszczenie "pkt" - przed OMP
+// for(int i=0; i<ile_linii; i++)
+// {
+//     pkt[i].cluster = -2;
+// }
+
+// auto start1 = high_resolution_clock::now();                                     // Time OMP - START
+// DBSCAN_Origin_OMP(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - OMP - Function
+// auto stop1 = high_resolution_clock::now();                                      // Time OMP - STOP
+// auto duration1 = duration_cast<microseconds>(stop1 - start1);                   // Time OMP - Caltulation
+// cout << "DBSCAN OMP Time: " << duration1.count() << " us" << endl;              // Time OMP - show Function duration
+
 
 // Show every point and his Cluster number
     // cout << endl;
     // for(int i=0; i<ile_linii; i++)
     // {
+    //     cout << i << ": ";
     //     for (int j = 0; j < ile_x; j++)
     //     {
     //         cout << pkt[i].x[j] << ",";
