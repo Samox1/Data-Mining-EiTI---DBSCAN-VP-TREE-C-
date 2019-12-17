@@ -59,9 +59,9 @@ int main()
     int ile_linii = 0;          // Number of Rows    - Number of points 
     int ile_x = 0;              // Number of Columns - Number of co-ordinates for every point
 
-    string file_in;
-    int start_ind = 0;
-    int start_linia = 0;
+    string file_in;             // String for File to Import - Variable to carry information between functions
+    int start_ind = 0;          // Flag for import - take first COLUMN - Variable to carry information between functions
+    int start_linia = 0;        // Flag for import - take first ROW - Variable to carry information between functions
 
 
 // Import Metadata from CSV File    
@@ -123,7 +123,6 @@ int main()
 
 }
 // --- End of Main --- //
-
 
 
 
