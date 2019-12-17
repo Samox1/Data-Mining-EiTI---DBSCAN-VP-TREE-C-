@@ -29,7 +29,9 @@ Punkt::~Punkt(){
 }
 
 
-void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x);
+
+void Import_CSV_Metadata(Punkt *pkt, int &ile_linii, int &ile_x, string &file_in, int &start_ind, int &start_linia);
+void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x, string file_in, int start_ind, int start_linia);
 void Show_Imported_First3(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Imported_All(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Clustered(Punkt *pkt, int ile_linii, int ile_x);
@@ -57,59 +59,53 @@ int main()
     int ile_linii = 0;          // Number of Rows    - Number of points 
     int ile_x = 0;              // Number of Columns - Number of co-ordinates for every point
 
+    string file_in;
+    int start_ind = 0;
+    int start_linia = 0;
 
-// Import Data from CSV File    
-    Import_CSV_File(pkt, ile_linii, ile_x);
 
-// Show ALL Imported Data
-    // Show_Imported_All(pkt, ile_linii, ile_x);
+// Import Metadata from CSV File    
+    Import_CSV_Metadata(pkt, ile_linii, ile_x, file_in, start_ind, start_linia);
+
+// Allocation Memory
+    pkt = new Punkt[ile_linii];                                         // Memory Initialization
+
+    for(int i=0; i<ile_linii; i++)
+    {
+        pkt[i].Przydziel(ile_x);                                        // Memory Initialization
+    }
+
+// Import Data from CSV File
+    Import_CSV_File(pkt, ile_linii, ile_x, file_in, start_ind, start_linia);
+
 
 // Show first 3 rows from memory - Imported Structure
     Show_Imported_First3(pkt, ile_linii, ile_x);
 
-// Test - Function DistFunc
-    // int wsp1 = 15;
-    // int wsp2 = 20;
-    // cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(&pkt[wsp1], &pkt[wsp2], ile_x) << endl;
-    
+// Show ALL Imported Data
+    // Show_Imported_All(pkt, ile_linii, ile_x);
+
 
 // Test - Function - DBSCAN()
-
     int C = 0;                                                                  // Cluster Counter
     double Eps = 0.5;                                                           // Max distance between points
     int minN = 4;                                                               // Minimal number of Neighbors
 
+    cout << endl << "Epsilon (double): ";
+    cin >> Eps;
+    cout << "Minimal number of Neighbors = minN (int)): ";
+    cin >> minN;
+
     N_tab = new int[ile_linii];                                                 // Neighbors tab - index for N in pkt tab
     S_tab = new int[ile_linii];                                                 // Seed tab - index for S in pkt tab
 
-
     auto start = high_resolution_clock::now();                                  // Time - START
-
 // DBSCAN --- START //
     DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - Origin - Function
 // DBSCAN --- END //
-
     auto stop = high_resolution_clock::now();                                   // Time - STOP
     auto duration = duration_cast<microseconds>(stop - start);                  // Time - Caltulation
     cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;       // Time - show Function duration
-
-
-// Przepisanie tablicy "pkt.cluster" do tymczasowej w celach porownania
-    // int *Temp_tab;
-    // Temp_tab = new int[ile_linii];
-    // for(int i=0; i<ile_linii; i++)
-    // {
-    //     Temp_tab[i] = pkt[i].cluster;
-    // }
-
-// Czyszczenie "pkt" - przed OMP
-    // Clear_Cluster(pkt, ile_linii);
-
-// auto start1 = high_resolution_clock::now();                                     // Time OMP - START
-// DBSCAN_Origin_OMP(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - OMP - Function
-// auto stop1 = high_resolution_clock::now();                                      // Time OMP - STOP
-// auto duration1 = duration_cast<microseconds>(stop1 - start1);                   // Time OMP - Caltulation
-// cout << "DBSCAN OMP Time: " << duration1.count() << " us" << endl;              // Time OMP - show Function duration
 
 
 // Show every point and his Cluster number
@@ -135,9 +131,9 @@ int main()
 // --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
 
 
-void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x)
+void Import_CSV_Metadata(Punkt *pkt, int &ile_linii, int &ile_x, string &file_in, int &start_ind, int &start_linia)
 {
-    string file1 = "DataCpp-2D-1000.csv";                                   // Name of File to Import
+    string file1 = "DataCpp.csv";                                           // Name of File to Import
     string line, word, temp, struktura;                                     // Temporary strings for import
     char FirstColYN, FirstRowYN;                                            // FirstColYN - char for: Import First Column?   // FirstRowYN - char for: Import First Row?
     int index = 0;                                                          // Counter for every "word" in imported line
@@ -240,13 +236,34 @@ void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x)
                 break;
             } 
         }
-        
-        pkt = new Punkt[ile_linii];                                         // Memory Initialization
+    }else{
+        cout << "Can't open file" << endl;
+    }
 
-        for(int i=0; i<ile_linii; i++){
-            pkt[i].Przydziel(ile_x);                                        // Memory Initialization
-        }
 
+    file_in = file1;
+    start_linia = ktora_linia;
+    start_ind = start_index;
+
+}        
+
+
+
+// Import File
+void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x, string file_in, int start_ind, int start_linia)
+{
+    // string file1 = file_in;                                                 // Name of File to Import
+    string line, word;                                                      // Temporary strings for import
+    int index = 0;                                                          // Counter for every "word" in imported line
+    int counter_tab = 0;                                                    // Counter for "x" in every point
+    int start_index = start_ind;                                            // Start index - if User don't want First Column
+    int ktora_linia = start_linia;                                          // Row Counter for importing 
+
+    fstream plik;                                                           // FStream for import file
+    plik.open(file_in);                                                       // Open import file
+
+    if(plik.good())
+    {
         plik.clear();
         plik.seekg(0, ios::beg);                                            // Clear buffer and go to the beginning of the file
 
@@ -270,17 +287,22 @@ void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x)
                         pkt[ktora_linia].x[counter_tab] = atof(word.c_str());                                           // Conversion string to double
                         // cout<<index<<" "<<counter_tab<<" "<<word <<" = " <<pkt[ktora_linia].x[counter_tab] <<endl;   // Show - data from memory while importing
                         counter_tab++;
+
                     }
                     index++; 
                 }
                 ktora_linia++;
             }
         }
+
+        cout << "Close file: Imported "<<ile_x<<"D data" << endl;
+
     }else{
         cout << "Can't open file" << endl;
     }
+
     plik.close();
-    cout << "Close file: Imported "<<ile_x<<"D data" << endl;
+    
 }
 
 
@@ -334,7 +356,7 @@ void Show_Clustered(Punkt *pkt, int ile_linii, int ile_x)
 void Save_File(Punkt *pkt, int ile_linii, int ile_x)
 {
     string file_out = "Data_Clustered.csv";
-    cout << "File output: ";
+    cout << endl << "File output: ";
     cin >> file_out;
     int num_file_out = 0;
     int exist = 1;
@@ -544,10 +566,7 @@ for(int P = 0; P < ile_linii; P++)
 
 
 
-
-
-
-
+// NOT WORKING PROPERLY ------------------------------------------------------------------------------------------ //
 void DBSCAN_Origin_OMP(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
 {
 
