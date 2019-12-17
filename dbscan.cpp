@@ -28,6 +28,12 @@ Punkt::~Punkt(){
     delete [] x;
 }
 
+void Show_Imported_First3(Punkt *pkt, int ile_linii, int ile_x);
+void Show_Clustered(Punkt *pkt, int ile_linii, int ile_x);
+void Save_File(Punkt *pkt, int ile_linii, int ile_x);
+
+void Clear_Cluster(Punkt *pkt, int ile_linii);
+
 double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x);
 int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int ile_x);
 int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_linii);
@@ -217,16 +223,7 @@ int main()
     // }
 
 // Show first 3 rows from memory - Imported Structure
-    cout << endl << "***" << endl << "Imported Structure in Memory: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure in Memory: " << endl;       // Show - Imported Structure in Memory
-    for(int i=0; i<3; i++){
-        cout << i << ": ";
-        for (int j = 0; j < ile_x; j++)
-        {
-            cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
-        }
-        cout << endl;
-    }
-    cout << "***" << endl;
+Show_Imported_First3(pkt, ile_linii, ile_x);
 
 // Test - Function DistFunc
     // int wsp1 = 15;
@@ -244,15 +241,15 @@ int main()
     S_tab = new int[ile_linii];                                                 // Seed tab - index for S in pkt tab
 
 
-auto start = high_resolution_clock::now();                                      // Time - START
+    auto start = high_resolution_clock::now();                                  // Time - START
 
 // DBSCAN --- START //
-DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);               // DBSCAN - Origin - Function
+    DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - Origin - Function
 // DBSCAN --- END //
 
-auto stop = high_resolution_clock::now();                                       // Time - STOP
-auto duration = duration_cast<microseconds>(stop - start);                      // Time - Caltulation
-cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           // Time - show Function duration
+    auto stop = high_resolution_clock::now();                                   // Time - STOP
+    auto duration = duration_cast<microseconds>(stop - start);                  // Time - Caltulation
+    cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;       // Time - show Function duration
 
 // int *Temp_tab;
 // Temp_tab = new int[ile_linii];
@@ -263,10 +260,7 @@ cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           
 // }
 
 // // Czyszczenie "pkt" - przed OMP
-// for(int i=0; i<ile_linii; i++)
-// {
-//     pkt[i].cluster = -2;
-// }
+// Clear_Cluster(pkt, ile_linii);
 
 // auto start1 = high_resolution_clock::now();                                     // Time OMP - START
 // DBSCAN_Origin_OMP(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - OMP - Function
@@ -276,24 +270,63 @@ cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           
 
 
 // Show every point and his Cluster number
-    // cout << endl;
-    // for(int i=0; i<ile_linii; i++)
-    // {
-    //     cout << i << ": ";
-    //     for (int j = 0; j < ile_x; j++)
-    //     {
-    //         cout << pkt[i].x[j] << ",";
-    //     }
-    //     cout << pkt[i].cluster << endl;
-    // }
+Show_Clustered(pkt, ile_linii, ile_x);
 
 
 // Saving CSV - with Cluster data
+Save_File(pkt, ile_linii, ile_x);
+
+
+// delete - Destroy array/pointers
+    delete [] S_tab;
+    delete [] N_tab;
+    delete [] pkt;
+
+}
+// --- End of Main --- //
+
+
+// --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
+
+
+void Show_Imported_First3(Punkt *pkt, int ile_linii, int ile_x) 
+{
+    cout << endl << "***" << endl << "Imported Structure in Memory: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure in Memory: " << endl;       // Show - Imported Structure in Memory
+    for(int i=0; i<3; i++){
+        cout << i << ": ";
+        for (int j = 0; j < ile_x; j++)
+        {
+            cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
+        }
+        cout << endl;
+    }
+    cout << "***" << endl;
+}
+
+
+void Show_Clustered(Punkt *pkt, int ile_linii, int ile_x)
+{
+    cout << endl;
+    for(int i=0; i<ile_linii; i++)
+    {
+        cout << i << ": ";
+        for (int j = 0; j < ile_x; j++)
+        {
+            cout << pkt[i].x[j] << ",";
+        }
+        cout << pkt[i].cluster << endl;
+    }
+}
+
+
+
+void Save_File(Punkt *pkt, int ile_linii, int ile_x)
+{
     string file_out = "Data_Clustered.csv";
     cout << "File output: ";
     cin >> file_out;
     int num_file_out = 0;
-    exist = 1;
+    int exist = 1;
 
     do
     {
@@ -301,21 +334,29 @@ cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           
             file_out = file_out + ".csv";
         }
 
-        if (FILE *file = fopen(file_out.c_str(), "r")) {
+        if (FILE *file = fopen(file_out.c_str(), "r")) 
+        {
             fclose(file);
-            cout << "There is file: " << file_out << " --> Changing name to: ";
-            file_out.erase(file_out.length()-4, file_out.length());
-            num_file_out++;
-            if(num_file_out > 1)
+            cout << "Oh there is file: \"" << file_out << "\" - You wanna override this? [y/n]: ";
+            char OverYN;
+            cin >> OverYN;
+            if (OverYN == 'y')
             {
-                //for(int i = 0; i <= (num_file_out / 10); i++)
-                //{
-                    file_out.pop_back();
-                //}
+                exist = 0;
             }
-            file_out = file_out + to_string(num_file_out) + ".csv";
-            cout << file_out << endl;
-            exist = 1;
+            else if(OverYN == 'n'){
+                cout << "There is file: " << file_out << " --> Changing name to: ";
+                file_out.erase(file_out.length()-4, file_out.length());
+                num_file_out++;
+                if(num_file_out > 1)
+                {
+                    file_out.pop_back();
+                }
+                file_out = file_out + to_string(num_file_out) + ".csv";
+                cout << file_out << endl;
+                exist = 1;
+            }
+            
         }else{
             exist = 0;
         }
@@ -345,20 +386,21 @@ cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           
     }
     plik_out.close();
     cout << "Out File: Closed" << endl << endl;
-
-
-// delete - Destroy array/pointers
-    delete [] S_tab;
-    delete [] N_tab;
-    delete [] pkt;
 }
 
 
 
-// --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
+void Clear_Cluster(Punkt *pkt, int ile_linii)
+{
+    for(int i=0; i<ile_linii; i++)
+    {
+        pkt[i].cluster = -2;
+    }
+}
 
-// Function to calculate distance 
-double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x) 
+
+
+double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x)                // Function to calculate distance 
 { 
     double distance = 0.0;
     // Calculating distance 
@@ -428,70 +470,6 @@ int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_lini
 
 
 
-void DBSCAN_Origin_OMP(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
-{
-
-#pragma omp parallel for
-for(int P = 0; P < ile_linii; P++)
-{
-    if(pkt[P].cluster != UNDEFINED)
-    {
-        continue;
-    }
-
-    int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, P, Eps, ile_x);
-    
-    // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
-    // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
-
-    if(ile_sasiadow < minN)
-    {
-        pkt[P].cluster = NOISE;             // IF: N < minN => NOISE
-        continue;
-    }
-
-    C = C + 1;                              // Cluster number increment
-    pkt[P].cluster = C;                     // ELSE: N > minN => Cluster
-    
-    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster << endl;     // Show changing Cluster number
-    
-    
-    for(int i=0; i<ile_linii; i++)
-    {
-        S_tab[i] = N_tab[i];           
-    }
-
-    int S_licznik = ile_sasiadow;
-  
-    for(int i=0; i<S_licznik; i++)                      // For Each Point Q in S
-    {
-        if(S_tab[i] != -1)
-        {
-            if(pkt[S_tab[i]].cluster == NOISE)          // IF: Q == NOISE then Q = Cluster
-            {
-                pkt[S_tab[i]].cluster = C;
-            }
-
-            if(pkt[S_tab[i]].cluster != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
-            {     
-                continue;
-            }
-
-            pkt[S_tab[i]].cluster = C;
-            ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, S_tab[i], Eps, ile_x);
-
-            if( ile_sasiadow >= minN)
-            {
-                S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
-            }
-        }
-    }
-}
-   // END OMP parallel
-
-}
-
-
 void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
 {
 
@@ -551,4 +529,72 @@ for(int P = 0; P < ile_linii; P++)
     }
 }
 
+}
+
+
+
+
+
+
+
+void DBSCAN_Origin_OMP(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
+{
+
+//#pragma omp parallel for
+for(int P = 0; P < ile_linii; P++)
+{
+    if(pkt[P].cluster != UNDEFINED)
+    {
+        continue;
+    }
+
+    int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, P, Eps, ile_x);
+    
+    // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
+    // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
+
+    if(ile_sasiadow < minN)
+    {
+        pkt[P].cluster = NOISE;             // IF: N < minN => NOISE
+        continue;
+    }
+
+    C = C + 1;                              // Cluster number increment
+    pkt[P].cluster = C;                     // ELSE: N > minN => Cluster
+    
+    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster << endl;     // Show changing Cluster number
+    
+    
+    for(int i=0; i<ile_linii; i++)
+    {
+        S_tab[i] = N_tab[i];           
+    }
+
+    int S_licznik = ile_sasiadow;
+  
+    for(int i=0; i<S_licznik; i++)                      // For Each Point Q in S
+    {
+        if(S_tab[i] != -1)
+        {
+            if(pkt[S_tab[i]].cluster == NOISE)          // IF: Q == NOISE then Q = Cluster
+            {
+                pkt[S_tab[i]].cluster = C;
+            }
+
+            if(pkt[S_tab[i]].cluster != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
+            {     
+                continue;
+            }
+
+            pkt[S_tab[i]].cluster = C;
+            ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, S_tab[i], Eps, ile_x);
+
+            if( ile_sasiadow >= minN)
+            {
+                S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
+            }
+        }
+    }
+}
+   // END OMP parallel
 }
