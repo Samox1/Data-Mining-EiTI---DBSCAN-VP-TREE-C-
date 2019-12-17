@@ -28,7 +28,10 @@ Punkt::~Punkt(){
     delete [] x;
 }
 
+
+void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Imported_First3(Punkt *pkt, int ile_linii, int ile_x);
+void Show_Imported_All(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Clustered(Punkt *pkt, int ile_linii, int ile_x);
 void Save_File(Punkt *pkt, int ile_linii, int ile_x);
 
@@ -41,23 +44,99 @@ void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii
 void DBSCAN_Origin_OMP(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x);
 
 
+// --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN ---//
+
 int main()
 {
     cout << endl << "Hello, This is (VP-TREE) DBSCAN program" << endl;
+
+    Punkt *pkt;                 // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
+    int *N_tab;                 // Tablica z indeksami sasiadow przy RangeQuery
+    int *S_tab;                 // Tablica "Seed" --> rozszerzajacy sie obszar sasiadow wokol punktu P
+
+    int ile_linii = 0;          // Number of Rows    - Number of points 
+    int ile_x = 0;              // Number of Columns - Number of co-ordinates for every point
+
+
+// Import Data from CSV File    
+    Import_CSV_File(pkt, ile_linii, ile_x);
+
+// Show ALL Imported Data
+    // Show_Imported_All(pkt, ile_linii, ile_x);
+
+// Show first 3 rows from memory - Imported Structure
+    Show_Imported_First3(pkt, ile_linii, ile_x);
+
+// Test - Function DistFunc
+    // int wsp1 = 15;
+    // int wsp2 = 20;
+    // cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(&pkt[wsp1], &pkt[wsp2], ile_x) << endl;
     
-    // cout << "Threads in PC: " << omp_get_num_threads() << endl;
-    // int th_id, nthreads;
-    // #pragma omp parallel private(th_id)
+
+// Test - Function - DBSCAN()
+
+    int C = 0;                                                                  // Cluster Counter
+    double Eps = 0.5;                                                           // Max distance between points
+    int minN = 4;                                                               // Minimal number of Neighbors
+
+    N_tab = new int[ile_linii];                                                 // Neighbors tab - index for N in pkt tab
+    S_tab = new int[ile_linii];                                                 // Seed tab - index for S in pkt tab
+
+
+    auto start = high_resolution_clock::now();                                  // Time - START
+
+// DBSCAN --- START //
+    DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - Origin - Function
+// DBSCAN --- END //
+
+    auto stop = high_resolution_clock::now();                                   // Time - STOP
+    auto duration = duration_cast<microseconds>(stop - start);                  // Time - Caltulation
+    cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;       // Time - show Function duration
+
+
+// Przepisanie tablicy "pkt.cluster" do tymczasowej w celach porownania
+    // int *Temp_tab;
+    // Temp_tab = new int[ile_linii];
+    // for(int i=0; i<ile_linii; i++)
     // {
-    //     th_id = omp_get_thread_num();
-    //     cout << "Hello World from thread: " << th_id << endl;
+    //     Temp_tab[i] = pkt[i].cluster;
     // }
-    // cout << "Threads in PC: " << omp_get_num_threads() << endl << endl;
 
-    Punkt *pkt;         // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
-    int *N_tab;         // Tablica z indeksami sasiadow przy RangeQuery
-    int *S_tab;         // Tablica "Seed" --> rozszerzajacy sie obszar sasiadow wokol punktu P
+// Czyszczenie "pkt" - przed OMP
+    // Clear_Cluster(pkt, ile_linii);
 
+// auto start1 = high_resolution_clock::now();                                     // Time OMP - START
+// DBSCAN_Origin_OMP(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - OMP - Function
+// auto stop1 = high_resolution_clock::now();                                      // Time OMP - STOP
+// auto duration1 = duration_cast<microseconds>(stop1 - start1);                   // Time OMP - Caltulation
+// cout << "DBSCAN OMP Time: " << duration1.count() << " us" << endl;              // Time OMP - show Function duration
+
+
+// Show every point and his Cluster number
+    // Show_Clustered(pkt, ile_linii, ile_x);
+
+
+// Saving CSV - with Cluster data
+    Save_File(pkt, ile_linii, ile_x);
+
+
+// delete - Destroy array/pointers
+    delete [] S_tab;
+    delete [] N_tab;
+    delete [] pkt;
+
+}
+// --- End of Main --- //
+
+
+
+
+
+// --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
+
+
+void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x)
+{
     string file1 = "DataCpp-2D-1000.csv";                                   // Name of File to Import
     string line, word, temp, struktura;                                     // Temporary strings for import
     char FirstColYN, FirstRowYN;                                            // FirstColYN - char for: Import First Column?   // FirstRowYN - char for: Import First Row?
@@ -65,10 +144,6 @@ int main()
     int counter_tab = 0;                                                    // Counter for "x" in every point
     int start_index = 0;                                                    // Start index - if User don't want First Column
     int ktora_linia = 0;                                                    // Row Counter for importing 
-    int ile_linii = 0;                                                      // Number of Rows    - Number of points 
-    int ile_x = 0;                                                          // Number of Columns - Number of co-ordinates for every point
-
-
     int exist = 0;
 
     do{
@@ -82,8 +157,7 @@ int main()
         }
     }while(exist != 1);
     
-
-
+    
     cout << "--- Open file: " << file1 << " --> ";
 
     fstream plik;                                                           // FStream for import file
@@ -173,7 +247,6 @@ int main()
             pkt[i].Przydziel(ile_x);                                        // Memory Initialization
         }
 
-
         plik.clear();
         plik.seekg(0, ios::beg);                                            // Clear buffer and go to the beginning of the file
 
@@ -181,7 +254,6 @@ int main()
             getline(plik, line, '\n');
             ktora_linia = 0;                                                // Counter reset
         }
-
 
         while(!plik.eof())
         {
@@ -209,90 +281,29 @@ int main()
     }
     plik.close();
     cout << "Close file: Imported "<<ile_x<<"D data" << endl;
-
-    //cout << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << endl << struktura << "***" << endl ;
-
-// Show ALL Imported Data
-    // for(int i=0; i<ile_linii; i++){
-    //     cout<<i<<": ";
-    //     for (int j = 0; j < ile_x; j++)
-    //     {
-    //         cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
-    //     }
-    //     cout << endl;
-    // }
-
-// Show first 3 rows from memory - Imported Structure
-Show_Imported_First3(pkt, ile_linii, ile_x);
-
-// Test - Function DistFunc
-    // int wsp1 = 15;
-    // int wsp2 = 20;
-    // cout << "Distance between pkt: "<< wsp1 << " & "<< wsp2 << " = " << DistFunc(&pkt[wsp1], &pkt[wsp2], ile_x) << endl;
-    
-
-// Test - Function - DBSCAN()
-
-    int C = 0;                                                                  // Cluster Counter
-    double Eps = 0.5;                                                           // Max distance between points
-    int minN = 4;                                                               // Minimal number of Neighbors
-
-    N_tab = new int[ile_linii];                                                 // Neighbors tab - index for N in pkt tab
-    S_tab = new int[ile_linii];                                                 // Seed tab - index for S in pkt tab
-
-
-    auto start = high_resolution_clock::now();                                  // Time - START
-
-// DBSCAN --- START //
-    DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - Origin - Function
-// DBSCAN --- END //
-
-    auto stop = high_resolution_clock::now();                                   // Time - STOP
-    auto duration = duration_cast<microseconds>(stop - start);                  // Time - Caltulation
-    cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;       // Time - show Function duration
-
-// int *Temp_tab;
-// Temp_tab = new int[ile_linii];
-// // Przepisanie tablicy "pkt.cluster" do tymczasowej w celach porownania
-// for(int i=0; i<ile_linii; i++)
-// {
-//     Temp_tab[i] = pkt[i].cluster;
-// }
-
-// // Czyszczenie "pkt" - przed OMP
-// Clear_Cluster(pkt, ile_linii);
-
-// auto start1 = high_resolution_clock::now();                                     // Time OMP - START
-// DBSCAN_Origin_OMP(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - OMP - Function
-// auto stop1 = high_resolution_clock::now();                                      // Time OMP - STOP
-// auto duration1 = duration_cast<microseconds>(stop1 - start1);                   // Time OMP - Caltulation
-// cout << "DBSCAN OMP Time: " << duration1.count() << " us" << endl;              // Time OMP - show Function duration
-
-
-// Show every point and his Cluster number
-Show_Clustered(pkt, ile_linii, ile_x);
-
-
-// Saving CSV - with Cluster data
-Save_File(pkt, ile_linii, ile_x);
-
-
-// delete - Destroy array/pointers
-    delete [] S_tab;
-    delete [] N_tab;
-    delete [] pkt;
-
 }
-// --- End of Main --- //
 
 
-// --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
+void Show_Imported_All(Punkt *pkt, int ile_linii, int ile_x)
+{
+    cout << endl << "***" << endl << "ALL - Imported Structure in Memory: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure in Memory: " << endl;
+    for(int i=0; i<ile_linii; i++)
+    {
+        cout<<i<<": ";
+        for (int j = 0; j < ile_x; j++)
+        {
+            cout << "x[" << j << "] = " << pkt[i].x[j] << " | ";
+        }
+        cout << endl;
+    }
+}
 
 
 void Show_Imported_First3(Punkt *pkt, int ile_linii, int ile_x) 
 {
-    cout << endl << "***" << endl << "Imported Structure in Memory: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure in Memory: " << endl;       // Show - Imported Structure in Memory
-    for(int i=0; i<3; i++){
+    cout << endl << "***" << endl << "First3 - Imported Structure in Memory: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure in Memory: " << endl;       // Show - Imported Structure in Memory
+    for(int i=0; i<3; i++)
+    {
         cout << i << ": ";
         for (int j = 0; j < ile_x; j++)
         {
