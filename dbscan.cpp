@@ -248,19 +248,23 @@ int main()
 auto start = high_resolution_clock::now();                                      // Time - START
 
 // DBSCAN --- START //
-DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);               // DBSCAN - Function
+DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);               // DBSCAN - Origin - Function
 // DBSCAN --- END //
 
 auto stop = high_resolution_clock::now();                                       // Time - STOP
 auto duration = duration_cast<microseconds>(stop - start);                      // Time - Caltulation
 cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;           // Time - show Function duration
 
+for(int i=0; i<ile_linii; i++)
+{
+    pkt[i].cluster = -2;
+}
 
-auto start1 = high_resolution_clock::now();                                      // Time - START
-DBSCAN_Origin_OMP(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);
-auto stop1 = high_resolution_clock::now();                                       // Time - STOP
-auto duration1 = duration_cast<microseconds>(stop1 - start1);                      // Time - Caltulation
-cout << endl << "DBSCAN OMP Time: " << duration1.count() << " us" << endl;           // Time - show Function duration
+auto start1 = high_resolution_clock::now();                                     // Time OMP - START
+DBSCAN_Origin_OMP(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);           // DBSCAN - OMP - Function
+auto stop1 = high_resolution_clock::now();                                      // Time OMP - STOP
+auto duration1 = duration_cast<microseconds>(stop1 - start1);                   // Time OMP - Caltulation
+cout << "DBSCAN OMP Time: " << duration1.count() << " us" << endl;              // Time OMP - show Function duration
 
 // Show every point and his Cluster number
     // cout << endl;
