@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1576057098942.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3297420104",
+    "id" : "CD2318CA",
+    "lastKnownWriteTime" : 1576281153,
+    "last_content_update" : 1576281154040,
+    "path" : "~/GitHub/DBSCAN_VP-TREE_Cpp/R-test/R_DBSCAN/R-Test_DBSCAN.R",
+    "project_path" : "R-Test_DBSCAN.R",
+    "properties" : {
+        "cursorPosition" : "67,0",
+        "scrollLine" : "38"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -12,21 +12,21 @@
     "path" : null,
     "project_path" : null,
     "properties" : {
-        "cacheKey" : "A60A40F3",
+        "cacheKey" : "C89685CB",
         "caption" : "DataCpp",
-        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=DataCpp&cache_key=A60A40F3",
-        "displayedObservations" : 119,
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=DataCpp&cache_key=C89685CB",
+        "displayedObservations" : "119",
         "environment" : "",
         "expression" : "DataCpp",
         "object" : "DataCpp",
-        "preview" : 0,
-        "totalObservations" : 119,
-        "variables" : 3
+        "preview" : "0",
+        "totalObservations" : "119",
+        "variables" : "3"
     },
     "read_only" : false,
     "read_only_alternatives" : [
     ],
-    "relative_order" : 1,
+    "relative_order" : 2,
     "source_on_save" : false,
     "source_window" : "",
     "type" : "r_dataframe"
