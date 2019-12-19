@@ -87,21 +87,27 @@ library(readr)
 # }
 
 
-Data_Cluster <- as.data.frame(read.table("~/GitHub/DBSCAN_VP-TREE_Cpp/Data_Cluster.csv", header=FALSE,sep=","))
+Data_Cluster <- as.data.frame(read.table("Data_Clustered.csv", header=FALSE,sep=","))
 #Data_Cluster <- as.data.frame(read.table("D:/Programming/Data-Mining-EiTI---DBSCAN-VP-TREE-C-/Data_Cluster.csv", header=FALSE,sep=","))
 
 cluster <- as.factor(Data_Cluster[,3])
 
 library(ggplot2)
+library(ggforce)
 #sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster, size = cluster)) + geom_point() + geom_point(size = 50, pch = 1) + coord_cartesian(xlim =c(-1, 8), ylim = c(-1, 8))
 
-sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster)) + geom_point() + geom_point(aes(size = 0.5), pch = 1) + theme(
-  axis.ticks.length.y = unit(.25, "cm"),
-  axis.ticks.length.x = unit(-.25, "cm"),
-  axis.text.x = element_text(margin = margin(t = .3, unit = "cm"))
-)
+sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster)) + geom_point() + scale_x_continuous() + scale_y_continuous() #+ theme(aspect.ratio = 1)
+sp <- sp + coord_fixed(ratio = 1)
+sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c(0,4))
 show(sp)
 
-# cols <- c((-1)='red',1='blue',2='green',3='yellow');
+x <- c(0,1,5)
+y <- c(0,1,3)
+kappa <- as.data.frame(x)
+kappa <- cbind(kappa,y)
+sp1 <- ggplot(kappa, aes(x=x, y=y)) + geom_point() + coord_fixed(ratio = 1) + geom_circle(aes(x0=x, y0=y, r= 10), data= kappa)
+show(sp1)
+
+  # cols <- c((-1)='red',1='blue',2='green',3='yellow');
 # plot(Data_Cluster[,1:2], xlim=c(0,8), ylim=c(0,8),col=cols[Data_Cluster[3]])
 #show(3^10)
