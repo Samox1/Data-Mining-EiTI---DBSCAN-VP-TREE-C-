@@ -62,12 +62,17 @@ Dane <- as.data.frame(read.table("DataCpp-2D-1000.csv", header=TRUE,sep=","))
 Dane <- Dane[1:nrow(Dane),2:ncol(Dane)]
 colnames(Dane) <- c("x", "y")
 
+node.p <- 0
 node.p <- Select_VP(Dane)
 Dane_temp <- Dane[as.integer(rownames(Dane)) != as.integer(rownames(node.p)),]
-node.mu <- median(dist_calc(node.p, Dane))
+node.mu <- median(dist_calc(node.p, Dane_temp))
 
-L <- 
-R <- 
+for(sx in c(1:nrow(Dane_temp))){
+  if(euc.dist(node.p, Dane_temp[sx,])){
+    
+  }
+}
+
 
 
 
