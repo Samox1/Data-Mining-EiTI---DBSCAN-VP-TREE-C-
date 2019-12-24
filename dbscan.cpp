@@ -29,6 +29,13 @@ Punkt::~Punkt(){
 }
 
 
+class VP_Tree{
+    public:
+        int index;
+        double mu;
+        
+};
+
 
 void Import_CSV_Metadata(Punkt *pkt, int &ile_linii, int &ile_x, string &file_in, int &start_ind, int &start_linia);
 void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x, string file_in, int start_ind, int start_linia);
@@ -562,6 +569,8 @@ for(int P = 0; P < ile_linii; P++)
 }
 }
 
+
+int Select_VP()
 
 
 
