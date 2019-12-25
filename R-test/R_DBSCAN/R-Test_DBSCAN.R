@@ -52,6 +52,7 @@ show(sp)
 
 P_tab = c(0,2,10,15,16,18,19,22,23,24,30,34,45,59,61,63,64,79,86,94,97,100,102,107)
 for (zz in 1:length(P_tab)){
+  kappa = P_tab[zz]
   sp <- sp + geom_point(aes(x=Data_Cluster[P_tab[zz],1], y=Data_Cluster[P_tab[zz],2], colour = 'yellow'))
   sp <- sp + geom_point(size=10, pch=1)
 }
