@@ -34,7 +34,8 @@ points(X2, pch = 19, col = "orange")
 
 ### Visualization
 
-Data_Cluster <- as.data.frame(read.table("Data_Clustered.csv", header=FALSE,sep=","))
+Data_Cluster <- as.data.frame(read.table("Data_Clustered_S.csv", header=FALSE,sep=","))
+Data_Cluster <- as.data.frame(read.table("DataCpp.csv", header=FALSE,sep=","))
 #Data_Cluster <- as.data.frame(read.table("D:/Programming/Data-Mining-EiTI---DBSCAN-VP-TREE-C-/Data_Cluster.csv", header=FALSE,sep=","))
 
 cluster <- as.factor(Data_Cluster[,3])
@@ -46,7 +47,15 @@ library(ggforce)
 sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster)) + geom_point() + scale_x_continuous() + scale_y_continuous() #+ theme(aspect.ratio = 1)
 sp <- sp + coord_fixed(ratio = 1)
 sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c(0,4))
+#sp <- sp + geom_point(aes(x=Data_Cluster[63,1], y=Data_Cluster[63,2], colour = 'black'))
 show(sp)
+
+P_tab = c(0,2,10,15,16,18,19,22,23,24,30,34,45,59,61,63,64,79,86,94,97,100,102,107)
+for (zz in 1:length(P_tab)){
+  sp <- sp + geom_point(aes(x=Data_Cluster[P_tab[zz],1], y=Data_Cluster[P_tab[zz],2], colour = 'yellow'))
+  sp <- sp + geom_point(size=10, pch=1)
+}
+
 
 x <- c(0,1,5)
 y <- c(0,1,3)

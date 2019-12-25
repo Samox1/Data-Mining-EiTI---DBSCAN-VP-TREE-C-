@@ -29,11 +29,12 @@ Punkt::~Punkt(){
 }
 
 
-class VP_Tree{
+struct VP{
     public:
-        int index;
-        double mu;
-        
+        int index_parent_node;      // Index wezla nadrzednego
+        int index;                  // Index w tablicy wejsciowej
+        char l_r;                   // Znak czy Lewo / Prawo (Left / Right)
+        double mu;                  // Mediana odleglosci od punktu do pozostalych
 };
 
 
@@ -51,6 +52,13 @@ int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, in
 int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_linii);
 void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x);
 //void DBSCAN_Origin_OMP(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x);
+
+double RandVal(double low,double high);
+long iRandVal(long low,long high);
+double Mediana(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], int D_rozmiar, int ile_x, int p_counter);
+int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x);
+void Make_VP_Tree(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int &Tree_Counter);
+
 
 
 // --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN ---//
@@ -114,9 +122,41 @@ int main()
     auto duration = duration_cast<microseconds>(stop - start);                  // Time - Caltulation
     cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;       // Time - show Function duration
 
-
 // Show every point and his Cluster number
     // Show_Clustered(pkt, ile_linii, ile_x);
+
+
+// --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
+// Tworzenie drzewa Vantage Points
+
+    int *S_VP_tab;
+    S_VP_tab = new int[ile_linii];
+
+    for (int i = 0; i < ile_linii; i++)                                         // Wpisywanie indeksow do startowej tablicy S do tworzenia drzewa VP-Tree
+    {
+        S_VP_tab[i] = i;
+    }
+
+    double P_proc_S = 0;
+    double D_proc_S = 0;
+
+    cout << "P Random Sample of S (0-1): " ;
+    cin >> P_proc_S;
+    cout << "D Random Sample of S (0-1): " ;
+    cin >> D_proc_S;
+
+ // Test - Function - Select_VP()   
+    // int Best_p = Select_VP(pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x);
+    // cout << "Best_p = " << Best_p << endl;
+
+    VP *VP_tree;                                                                // Memory for VP_Tree
+    VP_tree = new VP[ile_linii];
+
+    int Tree_Counter = -1;
+
+    Make_VP_Tree(VP_tree, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, Tree_Counter);
+
+// --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
 
 
 // Saving CSV - with Cluster data
@@ -126,12 +166,201 @@ int main()
 // delete - Destroy array/pointers
     delete [] S_tab;
     delete [] N_tab;
+    delete [] VP_tree;
     delete [] pkt;
 
 }
 // --- End of Main --- //
 
 
+
+void Make_VP_Tree(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int &Tree_Counter)
+{
+    if (S_rozmiar == 0)
+    {
+        return;
+    }
+    
+    Tree_Counter++;
+
+    VP_tree[Tree_Counter].index = Select_VP(pkt, S_VP_tab, S_rozmiar, P_proc_S, D_proc_S, ile_x);
+
+    int p_counter = 0;
+    int P_tabk = VP_tree[Tree_Counter].index;
+    
+    double *Mediana_tab;
+    Mediana_tab = new double[S_rozmiar];
+
+    VP_tree[Tree_Counter].mu = Mediana(pkt, Mediana_tab, &P_tabk, S_VP_tab, S_rozmiar, ile_x, p_counter);
+
+    delete [] Mediana_tab;
+
+    cout << "VP Index: " << VP_tree[Tree_Counter].index << " | Mediana: " << VP_tree[Tree_Counter].mu << endl;
+
+}
+
+
+
+double Mediana(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], int D_rozmiar, int ile_x, int p_counter)
+{
+    double med = 0.0;
+
+    // cout << "P_tab[p_counter]" << P_tab[p_counter] << endl;
+
+    for (int d = 0; d < D_rozmiar; d++)
+    {
+        Mediana_tab[d] = DistFunc( &pkt[P_tab[p_counter]], &pkt[D_tab[d]], ile_x);      // Liczenie odleglosci od punktu P do wszystkich ze zbioru D
+    }
+        
+
+    double temp_dist = 0;                                   // Sortowanie Babelkowe - START
+    for (int b = 0; b < D_rozmiar; b++)                     
+    {
+        for (int c = 0; c < (D_rozmiar-1); c++)
+        {
+            if(Mediana_tab[c] > Mediana_tab[c+1]){
+                temp_dist = Mediana_tab[c+1];
+                Mediana_tab[c+1] = Mediana_tab[c];
+                Mediana_tab[c] = temp_dist;
+            }
+        }
+    }                                                       // Sortowanie Babelkowe - KONIEC
+
+
+    if (D_rozmiar%2 == 1)                                   // D_rozmiar = Nieparzysta  - Mediana to srodkowa wartosc
+    {
+        med = Mediana_tab[D_rozmiar/2];
+    }else                                                   // D_rozmiar = Parzysta     - Mediana to srednia z dwoch srodkowych wartosci
+    {
+        med = (Mediana_tab[(D_rozmiar/2) - 1] + Mediana_tab[(D_rozmiar/2)]) / 2.0;
+    }
+
+    return med;
+}
+
+
+
+int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x){
+    
+    int P_rozmiar = P_proc_S * S_rozmiar;
+    int D_rozmiar = D_proc_S * S_rozmiar;
+
+    if(P_rozmiar < 1){
+       P_rozmiar = 1; 
+    }
+
+    if(D_rozmiar < 1){
+       D_rozmiar = 1; 
+    }
+
+    int *P_tab;
+    int *D_tab;
+    double *Mediana_tab;
+    Mediana_tab = new double[D_rozmiar];
+    P_tab = new int[P_rozmiar];
+    D_tab = new int[D_rozmiar];
+
+    int best_p = 0;
+    double mu_pd = 0;
+    double var = 0;
+    
+    int Si = 0;                                                 // Iterator po S
+    int Pi = 0;                                                 // Iterator po P
+
+    double best_spread = 0;
+
+    while (Pi < P_rozmiar)                                      // Wylosowanie punktow P ze zbioru S
+    {
+        if ( RandVal(0,1) <= P_proc_S)
+        {
+            P_tab[Pi] = S_VP_tab[Si];
+            
+            Pi++;
+        }
+            
+        Si++;
+        
+        if(Si >= S_rozmiar){                                    // Pirackie rozwiazanie problemu jesli wyjdziemy poza tablice S_VP_tab (poczatkowa) - zbieramy znowu punkty (mozliwe powtorzenia)
+            Si = 0;
+        }
+    }
+    
+    // cout << "P_tab:" << endl;                                   // Wyswietlanie tablicy P
+    // for (int i = 0; i < P_rozmiar; i++)
+    // {
+    //     cout << P_tab[i] << endl;
+    // }
+    
+    
+    for (int k = 0; k < P_rozmiar; k++)                         // Dla kazdego punktu p ze zbioru P
+    {
+        int Di = 0;                                             // Iterator po D
+
+        Si = 0;
+        while (Di < D_rozmiar)                                  // Wylosowanie punktow D ze zbioru S
+        {
+            if ( RandVal(0,1) <= D_proc_S)
+            {
+                D_tab[Di] = S_VP_tab[Si];
+                Di++;
+            } 
+            Si++;
+        
+            if(Si >= S_rozmiar){                                // Pirackie rozwiazanie problemu jesli wyjdziemy poza tablice S_VP_tab (poczatkowa) - zbieramy znowu punkty (mozliwe powtorzenia)
+                Si = 0;
+            }
+        }
+
+        // cout << "D_tab:" << endl;                               // Wyswietlanie tablicy D
+        // for (int i = 0; i < D_rozmiar; i++)
+        // {
+        //     cout << D_tab[i] << endl;
+        // }
+
+
+        double mu_pd = Mediana(pkt, Mediana_tab, P_tab, D_tab, D_rozmiar, ile_x, k);
+
+
+        var = 0;                                                // Liczenie Wariancji - START
+        for( int n = 0; n < D_rozmiar; n++)
+        {
+            var += pow(Mediana_tab[n] - mu_pd, 2);
+        }
+        var /= D_rozmiar;                                       // Liczenie Wariancji - KONIEC
+        
+
+        if (var > best_spread)                                  // Sprawdzenie punktu P - czy jest lepszy?        
+        {
+            best_spread = var;
+            best_p = P_tab[k];
+            // cout << "Better: " << best_p << " | War: " << best_spread << endl;
+        }
+    }
+
+
+    delete [] D_tab;
+    delete [] P_tab;
+
+    return best_p;
+}
+
+
+
+// Additional functions
+
+/************************ RandVal *****************************************/
+double RandVal(double low,double high)
+{
+  return(((double) (rand() % RAND_MAX)/((double) RAND_MAX))*(high-low)+low);
+}
+
+
+/************************ iRandVal *****************************************/
+long iRandVal(long low,long high) 
+{
+  high++;
+  return (long) (((double) (rand() % RAND_MAX)/((double) RAND_MAX))*(high-low)+low);
+}
 
 
 // --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
@@ -570,7 +799,7 @@ for(int P = 0; P < ile_linii; P++)
 }
 
 
-int Select_VP()
+
 
 
 
