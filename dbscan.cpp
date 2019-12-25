@@ -4,6 +4,7 @@
 #include <sstream>
 #include <chrono> 
 #include <omp.h>
+#include <atomic>
 
 
 #define UNDEFINED   -2
@@ -32,8 +33,9 @@ Punkt::~Punkt(){
 struct VP{
     public:
         int index_parent_node;      // Index wezla nadrzednego
+        int lvl_parent;
         int index;                  // Index w tablicy wejsciowej
-        char l_r;                   // Znak czy Lewo / Prawo (Left / Right)
+        int l_r;                   // Znak czy Lewo(-1) / Prawo(1) (Left / Right)
         double mu;                  // Mediana odleglosci od punktu do pozostalych
 };
 
@@ -57,7 +59,7 @@ double RandVal(double low,double high);
 long iRandVal(long low,long high);
 double Mediana(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], int D_rozmiar, int ile_x, int p_counter);
 int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x);
-void Make_VP_Tree(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int &Tree_Counter);
+void Make_VP_Tree(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int *Tree_Counter, int lr, int index_parentnode);
 
 
 
@@ -153,9 +155,17 @@ int main()
     VP_tree = new VP[ile_linii];
 
     int Tree_Counter = -1;
+    int L_R = 0;                            // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
+    int index_parentnode = -1;              // Nie ma wczesniejszego "Rodzica"
 
-    Make_VP_Tree(VP_tree, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, Tree_Counter);
+    Make_VP_Tree(VP_tree, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, &Tree_Counter, L_R, index_parentnode);
 
+    for (int i = 0; i < (Tree_Counter + 1); i++)
+    {
+        cout << "VP Index: " << VP_tree[i].index << " | Mediana: " << VP_tree[i].mu << " | L_R: " << VP_tree[i].l_r << " | ID_Parent: " << VP_tree[i].index_parent_node << endl;
+    }
+    
+    
 // --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
 
 
@@ -174,28 +184,88 @@ int main()
 
 
 
-void Make_VP_Tree(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int &Tree_Counter)
+void Make_VP_Tree(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int *Tree_Counter, int lr, int index_parentnode)
 {
+
     if (S_rozmiar == 0)
     {
         return;
     }
-    
-    Tree_Counter++;
+    ((*Tree_Counter))++;
 
-    VP_tree[Tree_Counter].index = Select_VP(pkt, S_VP_tab, S_rozmiar, P_proc_S, D_proc_S, ile_x);
+    if (S_rozmiar == 1)
+    {
+        VP_tree[(*Tree_Counter)].index = S_VP_tab[0];
+        VP_tree[(*Tree_Counter)].l_r = lr;
+        VP_tree[(*Tree_Counter)].index_parent_node = index_parentnode;
+
+        cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " <--- " << endl;
+
+
+        return;
+    }
+
+    VP_tree[(*Tree_Counter)].index = Select_VP(pkt, S_VP_tab, S_rozmiar, P_proc_S, D_proc_S, ile_x);
+    VP_tree[(*Tree_Counter)].l_r = lr;
+    VP_tree[(*Tree_Counter)].index_parent_node = index_parentnode;
 
     int p_counter = 0;
-    int P_tabk = VP_tree[Tree_Counter].index;
+    int P_tabk = VP_tree[(*Tree_Counter)].index;
     
     double *Mediana_tab;
     Mediana_tab = new double[S_rozmiar];
 
-    VP_tree[Tree_Counter].mu = Mediana(pkt, Mediana_tab, &P_tabk, S_VP_tab, S_rozmiar, ile_x, p_counter);
+    VP_tree[(*Tree_Counter)].mu = Mediana(pkt, Mediana_tab, &P_tabk, S_VP_tab, S_rozmiar, ile_x, p_counter);
 
     delete [] Mediana_tab;
 
-    cout << "VP Index: " << VP_tree[Tree_Counter].index << " | Mediana: " << VP_tree[Tree_Counter].mu << endl;
+    cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " ||| ";
+
+    int *L_tab;
+    L_tab = new int[S_rozmiar];
+    
+    int *R_tab;
+    R_tab = new int[S_rozmiar];
+
+    int L_counter = 0;
+    int R_counter = 0;
+
+    for (int dc = 0; dc < S_rozmiar; dc++)
+    {
+        if (VP_tree[(*Tree_Counter)].index == S_VP_tab[dc])
+        {
+            continue;
+        }
+
+        if (DistFunc(&pkt[VP_tree[(*Tree_Counter)].index], &pkt[S_VP_tab[dc]], ile_x) < VP_tree[(*Tree_Counter)].mu)
+        {
+            L_tab[L_counter] = S_VP_tab[dc];
+            // cout << "L_tab[L_counter]: " << L_tab[L_counter] << endl;
+            L_counter++; 
+        }else
+        {
+            R_tab[R_counter] = S_VP_tab[dc];
+            // cout << "R_tab[R_counter]: " << R_tab[R_counter] << endl;
+            R_counter++;
+        } 
+    }
+    
+    cout << "L_count: " << L_counter << " | R_count: " << R_counter << endl;
+
+    int Parent = VP_tree[(*Tree_Counter)].index;
+
+
+    if(L_counter > 0){
+        Make_VP_Tree(VP_tree, pkt, L_tab, L_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, -1, Parent);
+    }
+    
+    if(R_counter > 0){
+        Make_VP_Tree(VP_tree, pkt, R_tab, R_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, 1, Parent);
+    }
+    
+
+    delete [] L_tab;
+    delete [] R_tab;
 
 }
 
@@ -267,7 +337,7 @@ int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double 
     int Si = 0;                                                 // Iterator po S
     int Pi = 0;                                                 // Iterator po P
 
-    double best_spread = 0;
+    double best_spread = -1e300;
 
     while (Pi < P_rozmiar)                                      // Wylosowanie punktow P ze zbioru S
     {
