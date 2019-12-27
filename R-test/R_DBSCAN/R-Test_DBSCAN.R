@@ -10,8 +10,8 @@ library(dbscan)
 library(MASS)
 
 S <- matrix(c(1,0,0,1),2,2)
-mt1 <- c(2,2)
-mt2 <- c(6,0)
+mt1 <- c(5,5)
+mt2 <- c(0,0)
 n1 <- 1000
 n2 <- 1000
 n <- n1 + n2
@@ -21,24 +21,32 @@ X2 <- mvrnorm(n2, mt2, S)
 
 DATA_Cpp <- rbind(X1, X2)
 kNN1 <- kNNdistplot(DATA_Cpp, k = 5)
+abline(h=.1, col = "red", lty=2)
+abline(h=.2, col = "red", lty=2)
+abline(h=.3, col = "red", lty=2)
+abline(h=.4, col = "red", lty=2)
 abline(h=.5, col = "red", lty=2)
 
 # Write to CSV
 write.csv(DATA_Cpp, "DataCpp-2D-1000.csv")
 
 
-plot(X1, ylim = c(-5,5), xlim = c(-2,10), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
+plot(X1, ylim = c(-5,10), xlim = c(-5,10), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
 abline(v = 0, h = 0, col = "gray")
 points(X2, pch = 19, col = "orange")
 
 
 ### Visualization
 
+Data_Cluster <- as.data.frame(read.table("Clustered_Test.csv", header=FALSE,sep=","))
+
+Data_Cluster <- as.data.frame(read.table("Clustered-2D-2000-Eps-0-3_N-5_Rand-0-2.csv", header=FALSE,sep=","))
 Data_Cluster <- as.data.frame(read.table("Data_Clustered_S.csv", header=FALSE,sep=","))
 Data_Cluster <- as.data.frame(read.table("DataCpp.csv", header=FALSE,sep=","))
 #Data_Cluster <- as.data.frame(read.table("D:/Programming/Data-Mining-EiTI---DBSCAN-VP-TREE-C-/Data_Cluster.csv", header=FALSE,sep=","))
 
 cluster <- as.factor(Data_Cluster[,3])
+cluster2 <- as.factor(Data_Cluster[,4])
 
 library(ggplot2)
 library(ggforce)
