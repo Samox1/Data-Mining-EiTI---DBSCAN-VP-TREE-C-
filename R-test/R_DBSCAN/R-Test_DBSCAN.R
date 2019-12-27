@@ -52,7 +52,7 @@ library(ggplot2)
 library(ggforce)
 #sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster, size = cluster)) + geom_point() + geom_point(size = 50, pch = 1) + coord_cartesian(xlim =c(-1, 8), ylim = c(-1, 8))
 
-sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster)) + geom_point() + scale_x_continuous() + scale_y_continuous() #+ theme(aspect.ratio = 1)
+sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster2)) + geom_point() + scale_x_continuous() + scale_y_continuous() #+ theme(aspect.ratio = 1)
 sp <- sp + coord_fixed(ratio = 1)
 sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c(0,4))
 #sp <- sp + geom_point(aes(x=Data_Cluster[63,1], y=Data_Cluster[63,2], colour = 'black'))
