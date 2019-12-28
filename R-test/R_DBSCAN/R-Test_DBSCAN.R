@@ -37,7 +37,7 @@ points(X2, pch = 19, col = "orange")
 
 
 ### Visualization
-
+Data_Cluster <- as.data.frame(read.table("Clustered_1.csv", header=FALSE,sep=","))
 Data_Cluster <- as.data.frame(read.table("Clustered_Test.csv", header=FALSE,sep=","))
 
 Data_Cluster <- as.data.frame(read.table("Clustered-2D-2000-Eps-0-3_N-5_Rand-0-2.csv", header=FALSE,sep=","))
@@ -47,12 +47,20 @@ Data_Cluster <- as.data.frame(read.table("DataCpp.csv", header=FALSE,sep=","))
 
 cluster <- as.factor(Data_Cluster[,3])
 cluster2 <- as.factor(Data_Cluster[,4])
+cluster3 <- as.factor(Data_Cluster[,5])
+
+for (x in c(1:length(Data_Cluster[,3]))) {
+  if(Data_Cluster[x,3] != Data_Cluster[x,4] || Data_Cluster[x,4] != Data_Cluster[x,5] || Data_Cluster[x,3] != Data_Cluster[x,5]){
+    cat(Data_Cluster[x,3], " | ", Data_Cluster[x,4], " | ", Data_Cluster[x,5], "\n")
+  }
+}
+
 
 library(ggplot2)
 library(ggforce)
 #sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster, size = cluster)) + geom_point() + geom_point(size = 50, pch = 1) + coord_cartesian(xlim =c(-1, 8), ylim = c(-1, 8))
 
-sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster2)) + geom_point() + scale_x_continuous() + scale_y_continuous() #+ theme(aspect.ratio = 1)
+sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster3)) + geom_point() + scale_x_continuous() + scale_y_continuous() #+ theme(aspect.ratio = 1)
 sp <- sp + coord_fixed(ratio = 1)
 sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c(0,4))
 #sp <- sp + geom_point(aes(x=Data_Cluster[63,1], y=Data_Cluster[63,2], colour = 'black'))
