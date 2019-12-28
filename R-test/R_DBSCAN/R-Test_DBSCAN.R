@@ -10,10 +10,10 @@ library(dbscan)
 library(MASS)
 
 S <- matrix(c(1,0,0,1),2,2)
-mt1 <- c(5,5)
+mt1 <- c(10,10)
 mt2 <- c(0,0)
-n1 <- 1000
-n2 <- 1000
+n1 <- 10000
+n2 <- 10000
 n <- n1 + n2
 
 X1 <- mvrnorm(n1, mt1, S)
@@ -28,7 +28,7 @@ abline(h=.4, col = "red", lty=2)
 abline(h=.5, col = "red", lty=2)
 
 # Write to CSV
-write.csv(DATA_Cpp, "DataCpp-2D-1000.csv")
+write.csv(DATA_Cpp, "DataCpp-2D-20000.csv")
 
 
 plot(X1, ylim = c(-5,10), xlim = c(-5,10), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
