@@ -57,6 +57,7 @@ void Save_File(Punkt *pkt, int ile_linii, int ile_x);
 
 void Clear_N_S(int *N_tab, int *S_tab, int ile_linii);
 void Clear_Cluster(Punkt *pkt, int ile_linii);
+void Show_VP_Tree(VP *VP_tree, int Tree_Counter);
 
 double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x);
 int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int ile_x);
@@ -124,11 +125,17 @@ int main()
     int C = 0;                                                                  // Cluster Counter
     double Eps = 0.5;                                                           // Max distance between points
     int minN = 4;                                                               // Minimal number of Neighbors
+    double P_proc_S = 0.0;
+    double D_proc_S = 0.0;
 
     cout << endl << "Epsilon (double): ";
     cin >> Eps;
     cout << "Minimal number of Neighbors = minN (int)): ";
     cin >> minN;
+    cout << "P Random Sample of S (0-1): " ;
+    cin >> P_proc_S;
+    cout << "D Random Sample of S (0-1): " ;
+    cin >> D_proc_S;
 
     N_tab = new int[ile_linii];                                                 // Neighbors tab - index for N in pkt tab
     S_tab = new int[ile_linii];                                                 // Seed tab - index for S in pkt tab
@@ -158,14 +165,6 @@ int main()
         S_VP_tab[i] = i;
     }
 
-    double P_proc_S = 0;
-    double D_proc_S = 0;
-
-    cout << "P Random Sample of S (0-1): " ;
-    cin >> P_proc_S;
-    cout << "D Random Sample of S (0-1): " ;
-    cin >> D_proc_S;
-
     VP *VP_tree;                                                                // Memory for VP_Tree
     VP_tree = new VP[ile_linii];
 
@@ -173,24 +172,15 @@ int main()
     int L_R = 0;                            // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
     int index_parentnode = -1;              // Nie ma wczesniejszego "Rodzica"
     C = 0;
-    cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;               // Time - show Function duration
-
 
     auto start2 = high_resolution_clock::now();                                         // Time - START
+// VP_TREE - CREATE - START //
     Make_VP_Tree(VP_tree, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, &Tree_Counter, L_R, index_parentnode);
+// VP_TREE - CREATE - END //
     auto stop2 = high_resolution_clock::now();                                          // Time - STOP
     auto duration2 = duration_cast<microseconds>(stop2 - start2);                       // Time - Caltulation
     cout << endl << "MAKE_VP_TREE Time: " << duration2.count() << " us" << endl;        // Time - show Function duration
 
-    // for (int i = 0; i < (Tree_Counter + 1); i++)
-    // {
-    //     cout << i << "= VP Index: " << VP_tree[i].index << " | Mediana: " << VP_tree[i].mu << " | L_R: " << VP_tree[i].l_r << " | ID_Parent: " << VP_tree[i].index_parent_node 
-    //     << " | L_kid: " << VP_tree[i].L_kid << " | R_kid: " << VP_tree[i].R_kid 
-    //     << " | L_kid_N: " << VP_tree[i].L_kid_N << " | R_kid_N: " << VP_tree[i].R_kid_N 
-    //     << endl;
-    // }
-    
-    
 
     auto start1 = high_resolution_clock::now();                                         // Time - START
 // DBSCAN_VP-TREE --- START //
@@ -198,7 +188,10 @@ int main()
 // DBSCAN_VP-TREE --- END //
     auto stop1 = high_resolution_clock::now();                                          // Time - STOP
     auto duration1 = duration_cast<microseconds>(stop1 - start1);                       // Time - Caltulation
-    cout << endl << "DBSCAN_VP_TREE Time: " << duration1.count() << " us" << endl;      // Time - show Function duration
+    cout << "DBSCAN_VP_TREE Time: " << duration1.count() << " us" << endl;      // Time - show Function duration
+    
+// Show VP_Tree Structure
+    // Show_VP_Tree(VP_tree, Tree_Counter);
 
 // --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
 
@@ -209,12 +202,9 @@ int main()
 
 // --- VP-TREE - ver 2 - Improved Condition ------------------------------------------------------------------------------------------------------------- //
 
-    int *S_VP_tab2;
-    S_VP_tab2 = new int[ile_linii];
-
     for (int i = 0; i < ile_linii; i++)                                                 // Wpisywanie indeksow do startowej tablicy S do tworzenia drzewa VP-Tree
     {
-        S_VP_tab2[i] = i;
+        S_VP_tab[i] = i;
     }
 
     VP *VP_tree2;                                                                       // Memory for VP_Tree
@@ -226,7 +216,9 @@ int main()
     C = 0;
 
     auto start4 = high_resolution_clock::now();                                         // Time - START
-    Make_VP_Tree_2(VP_tree2, pkt, S_VP_tab2, ile_linii, P_proc_S, D_proc_S, ile_x, &Tree_Counter, L_R, index_parentnode);
+// VP_TREE - CREATE - START //
+    Make_VP_Tree_2(VP_tree2, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, &Tree_Counter, L_R, index_parentnode);
+// VP_TREE - CREATE - END //
     auto stop4 = high_resolution_clock::now();                                          // Time - STOP
     auto duration4 = duration_cast<microseconds>(stop4 - start4);                       // Time - Caltulation
     cout << endl << "MAKE_VP_TREE_2 Time: " << duration4.count() << " us" << endl;      // Time - show Function duration
@@ -238,8 +230,10 @@ int main()
 // DBSCAN_VP-TREE --- END //
     auto stop3 = high_resolution_clock::now();                                          // Time - STOP
     auto duration3 = duration_cast<microseconds>(stop3 - start3);                       // Time - Caltulation
-    cout << endl << "DBSCAN_VP_TREE_2 Time: " << duration3.count() << " us" << endl;    // Time - show Function duration
+    cout << "DBSCAN_VP_TREE_2 Time: " << duration3.count() << " us" << endl;    // Time - show Function duration
 
+// Show VP_Tree Structure
+    // Show_VP_Tree(VP_tree2, Tree_Counter);
 
 // --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
     
@@ -252,12 +246,10 @@ int main()
 // delete - Destroy array/pointers
     delete [] S_VP_tab;
     delete [] VP_tree;
-    delete [] S_VP_tab2;
     delete [] VP_tree2;
 
     delete [] S_tab;
     delete [] N_tab;
-    delete [] VP_tree;
     delete [] pkt;
 
 }
@@ -265,725 +257,7 @@ int main()
 
 
 
-void DBSCAN_VP_TREE_2(VP *VP_tree, Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
-{
-
-for(int P = 0; P < ile_linii; P++)
-{
-    if(pkt[P].cluster3 != UNDEFINED)
-    {
-        continue;
-    }
-
-    int ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
-    
-    // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
-    // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
-
-    if(ile_sasiadow < minN)
-    {
-        pkt[P].cluster3 = NOISE;             // IF: N < minN => NOISE
-        continue;
-    }
-
-    C = C + 1;                              // Cluster number increment
-    pkt[P].cluster3 = C;                     // ELSE: N > minN => Cluster
-    
-    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << endl;     // Show changing Cluster number
-    
-    
-    for(int i=0; i<ile_linii; i++)
-    {
-        S_tab[i] = N_tab[i];           
-    }
-
-    int S_licznik = ile_sasiadow;
-  
-    for(int i=0; i<S_licznik; i++)                      // For Each Point Q in S
-    {
-        if(S_tab[i] != -1)
-        {
-            if(pkt[S_tab[i]].cluster3 == NOISE)          // IF: Q == NOISE then Q = Cluster
-            {
-                pkt[S_tab[i]].cluster3 = C;
-            }
-
-            if(pkt[S_tab[i]].cluster3 != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
-            {     
-                continue;
-            }
-
-            pkt[S_tab[i]].cluster3 = C;
-            ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
-
-            if( ile_sasiadow >= minN)
-            {
-                S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
-            }
-        }
-    }
-}
-}
-
-int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int minN, int ile_x)
-{
-    for(int i=0; i<ile_linii; i++)
-    {
-        N_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
-    }
-
-    int TC = 0;                     // Tree Counter
-    int flag_end = 0;
-
-    while(flag_end != 2)
-    {
-        flag_end = 0;
-
-        // cout << "TC: " << TC;
-
-        if ((DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) - VP_tree[TC].left_bound)  >  Eps)
-        {
-            if (VP_tree[TC].R_kid_N > minN)
-            {
-                // cout << " R_kid_N: " << VP_tree[TC].R_kid_N << endl;
-                TC = VP_tree[TC].R_kid;
-                continue;
-            }else
-            {
-                // cout << "EXIT 1" << endl;
-                //flag_end = 1;
-                //exit(0);
-                break;
-            }
-        }else
-        {
-            flag_end++;
-        }
-        
-        
-        if ((VP_tree[TC].right_bound - DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x))  >  Eps)
-        {
-            if (VP_tree[TC].L_kid_N > minN)
-            {
-                // cout << " L_kid_N: " << VP_tree[TC].L_kid_N << endl;
-                TC = VP_tree[TC].L_kid;
-                continue;
-            }else
-            {
-                // cout << "EXIT 2" << endl;
-                //flag_end = 1;
-                //exit(0);
-                break;
-            }
-        }else
-        {
-            flag_end++;
-        }
-        
-
-        if(flag_end == 2){
-            // cout << "EXIT 3" << endl;
-            break;
-        }
-        
-    }
-
-    // cout << "EXIT WHILE ==> Tree_DIST" << endl;
-
-    int kNN = 0;
-
-    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
-    // cout << "kNN: " << kNN << endl;
-    
-    return kNN;
-}
-
-
-void Make_VP_Tree_2(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int *Tree_Counter, int lr, int index_parentnode)
-{
-
-    if (S_rozmiar == 0)
-    {
-        return;
-    }
-    ((*Tree_Counter))++;
-
-    if (S_rozmiar == 1)
-    {
-        VP_tree[(*Tree_Counter)].index = S_VP_tab[0];
-        VP_tree[(*Tree_Counter)].l_r = lr;
-        VP_tree[(*Tree_Counter)].index_parent_node = index_parentnode;
-        
-        if (index_parentnode != -1){
-            if (lr == -1)
-            {
-                VP_tree[index_parentnode].L_kid = *Tree_Counter;
-            }else
-            {
-                VP_tree[index_parentnode].R_kid = *Tree_Counter;
-            }
-        }
-        
-        // cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " <--- " << endl;
-        return;
-    }
-
-    VP_tree[(*Tree_Counter)].index = Select_VP(pkt, S_VP_tab, S_rozmiar, P_proc_S, D_proc_S, ile_x);
-    VP_tree[(*Tree_Counter)].l_r = lr;
-    VP_tree[(*Tree_Counter)].index_parent_node = index_parentnode;
-    
-    if (index_parentnode != -1){
-        if (lr == -1)
-        {
-            VP_tree[index_parentnode].L_kid = *Tree_Counter;
-        }else
-        {
-            VP_tree[index_parentnode].R_kid = *Tree_Counter;
-        }
-    }
-
-    int p_counter = 0;
-    int P_tabk = VP_tree[(*Tree_Counter)].index;
-    
-    double *Mediana_tab;
-    Mediana_tab = new double[S_rozmiar];
-
-    VP_tree[(*Tree_Counter)].mu = Mediana(pkt, Mediana_tab, &P_tabk, S_VP_tab, S_rozmiar, ile_x, p_counter);
-
-    
-    // cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " ||| ";
-
-    int *L_tab;
-    L_tab = new int[S_rozmiar];
-    
-    int *R_tab;
-    R_tab = new int[S_rozmiar];
-
-    int L_counter = 0;
-    int R_counter = 0;
-
-    for (int dc = 0; dc < S_rozmiar; dc++)
-    {
-        if (VP_tree[(*Tree_Counter)].index == S_VP_tab[dc])
-        {
-            continue;
-        }
-
-        if (DistFunc(&pkt[VP_tree[(*Tree_Counter)].index], &pkt[S_VP_tab[dc]], ile_x) < VP_tree[(*Tree_Counter)].mu)
-        {
-            L_tab[L_counter] = S_VP_tab[dc];
-            // cout << "L_tab[L_counter]: " << L_tab[L_counter] << endl;
-            L_counter++; 
-        }else
-        {
-            R_tab[R_counter] = S_VP_tab[dc];
-            // cout << "R_tab[R_counter]: " << R_tab[R_counter] << endl;
-            R_counter++;
-        } 
-    }
-
-    double left_bound = 0.0;
-    double right_bound = 0.0;
-    int kk = 0;
-
-    while(1)
-    {
-        if (Mediana_tab[kk] < VP_tree[(*Tree_Counter)].mu)
-        {
-            left_bound = Mediana_tab[kk];
-        }else if(Mediana_tab[kk] > VP_tree[(*Tree_Counter)].mu)
-        // if (Mediana_tab[kk] > VP_tree[(*Tree_Counter)].mu)
-        {
-            right_bound = Mediana_tab[kk];
-            break;
-        }
-        kk++;
-    }
-    
-    delete [] Mediana_tab;
-
-    VP_tree[(*Tree_Counter)].left_bound = left_bound;
-    VP_tree[(*Tree_Counter)].right_bound = right_bound;
-
-    // for (int i = 0; i < S_rozmiar; i++)
-    // {
-    //     cout << " | " << Mediana_tab[i];
-    // }
-    
-    // cout << endl << "Mediana = " << VP_tree[(*Tree_Counter)].mu << " | L_B = " << left_bound << " | R_B = " << right_bound << endl;
-    
-    // cout << *Tree_Counter << " = L_count: " << L_counter << " | R_count: " << R_counter << endl;
-
-    VP_tree[*Tree_Counter].L_kid_N = L_counter;
-    VP_tree[*Tree_Counter].R_kid_N = R_counter;
-
-    // int Parent = VP_tree[(*Tree_Counter)].index;             // Indeks Parent - w glownej tablicy danych
-    int Parent = *Tree_Counter;                                 // Indeks Parent - w tablicy drzewa
-    
-
-    if(L_counter > 0){
-        // VP_tree[index_parentnode].L_kid = Parent;
-        Make_VP_Tree_2(VP_tree, pkt, L_tab, L_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, -1, Parent);
-    }
-    
-    if(R_counter > 0){
-        // VP_tree[index_parentnode].R_kid = Parent;
-        Make_VP_Tree_2(VP_tree, pkt, R_tab, R_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, 1, Parent);
-    }
-    
-    
-    delete [] L_tab;
-    delete [] R_tab;
-
-}
-
-
 // --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
-
-
-
-void DBSCAN_VP_TREE(VP *VP_tree, Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
-{
-
-for(int P = 0; P < ile_linii; P++)
-{
-    if(pkt[P].cluster2 != UNDEFINED)
-    {
-        continue;
-    }
-
-    int ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
-    
-    // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
-    // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
-
-    if(ile_sasiadow < minN)
-    {
-        pkt[P].cluster2 = NOISE;             // IF: N < minN => NOISE
-        continue;
-    }
-
-    C = C + 1;                              // Cluster number increment
-    pkt[P].cluster2 = C;                     // ELSE: N > minN => Cluster
-    
-    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << endl;     // Show changing Cluster number
-    
-    
-    for(int i=0; i<ile_linii; i++)
-    {
-        S_tab[i] = N_tab[i];           
-    }
-
-    int S_licznik = ile_sasiadow;
-  
-    for(int i=0; i<S_licznik; i++)                      // For Each Point Q in S
-    {
-        if(S_tab[i] != -1)
-        {
-            if(pkt[S_tab[i]].cluster2 == NOISE)          // IF: Q == NOISE then Q = Cluster
-            {
-                pkt[S_tab[i]].cluster2 = C;
-            }
-
-            if(pkt[S_tab[i]].cluster2 != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
-            {     
-                continue;
-            }
-
-            pkt[S_tab[i]].cluster2 = C;
-            ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
-
-            if( ile_sasiadow >= minN)
-            {
-                S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
-            }
-        }
-    }
-}
-}
-
-int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int minN, int ile_x)
-{
-    for(int i=0; i<ile_linii; i++)
-    {
-        N_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
-    }
-
-    int TC = 0;                     // Tree Counter
-    int flag_end = 0;
-
-    while(flag_end != 2)
-    {
-        flag_end = 0;
-
-        // cout << "TC: " << TC;
-
-        if ((DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) - VP_tree[TC].mu)  >=  Eps)
-        {
-            if (VP_tree[TC].R_kid_N > minN)
-            {
-                // cout << " R_kid_N: " << VP_tree[TC].R_kid_N << endl;
-                TC = VP_tree[TC].R_kid;
-                continue;
-            }else
-            {
-                // cout << "EXIT 1" << endl;
-                //flag_end = 1;
-                //exit(0);
-                break;
-            }
-        }else
-        {
-            flag_end++;
-        }
-        
-        
-        if ((VP_tree[TC].mu - DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x))  >  Eps)
-        {
-            if (VP_tree[TC].L_kid_N > minN)
-            {
-                // cout << " L_kid_N: " << VP_tree[TC].L_kid_N << endl;
-                TC = VP_tree[TC].L_kid;
-                continue;
-            }else
-            {
-                // cout << "EXIT 2" << endl;
-                //flag_end = 1;
-                //exit(0);
-                break;
-            }
-        }else
-        {
-            flag_end++;
-        }
-        
-
-        if(flag_end == 2){
-            // cout << "EXIT 3" << endl;
-            break;
-        }
-        
-    }
-
-    // cout << "EXIT WHILE ==> Tree_DIST" << endl;
-
-    int kNN = 0;
-
-    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
-    // cout << "kNN: " << kNN << endl;
-    
-    return kNN;
-}
-
-
-void kNN_TreeDist(VP *VP_tree, Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int minN, int ile_x, int TC, int *kNN)
-{
-    // cout << "knn_TREE_DIST == ";
-
-    if (VP_tree[TC].index != Qindex)
-    {
-        if(DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) <= Eps)
-        {
-            // cout << "Dist: " << DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) << " / ";
-            N_tab[(*kNN)] = VP_tree[TC].index;
-            (*kNN)++;
-        }
-    }
-    
-
-    // cout << TC << " -> ";
-
-    if(VP_tree[TC].L_kid > -1){
-        kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].L_kid, kNN);
-    }
-    
-    if(VP_tree[TC].R_kid > -1){
-        kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].R_kid, kNN);
-    }
-    
-    // cout << "kNN: " << *kNN << " || ";
-}
-
-
-void Make_VP_Tree(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int *Tree_Counter, int lr, int index_parentnode)
-{
-
-    if (S_rozmiar == 0)
-    {
-        return;
-    }
-    ((*Tree_Counter))++;
-
-    if (S_rozmiar == 1)
-    {
-        VP_tree[(*Tree_Counter)].index = S_VP_tab[0];
-        VP_tree[(*Tree_Counter)].l_r = lr;
-        VP_tree[(*Tree_Counter)].index_parent_node = index_parentnode;
-        
-        if (index_parentnode != -1){
-            if (lr == -1)
-            {
-                VP_tree[index_parentnode].L_kid = *Tree_Counter;
-            }else
-            {
-                VP_tree[index_parentnode].R_kid = *Tree_Counter;
-            }
-        }
-        
-        // cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " <--- " << endl;
-        return;
-    }
-
-    VP_tree[(*Tree_Counter)].index = Select_VP(pkt, S_VP_tab, S_rozmiar, P_proc_S, D_proc_S, ile_x);
-    VP_tree[(*Tree_Counter)].l_r = lr;
-    VP_tree[(*Tree_Counter)].index_parent_node = index_parentnode;
-    
-    if (index_parentnode != -1){
-        if (lr == -1)
-        {
-            VP_tree[index_parentnode].L_kid = *Tree_Counter;
-        }else
-        {
-            VP_tree[index_parentnode].R_kid = *Tree_Counter;
-        }
-    }
-
-    int p_counter = 0;
-    int P_tabk = VP_tree[(*Tree_Counter)].index;
-    
-    double *Mediana_tab;
-    Mediana_tab = new double[S_rozmiar];
-
-    VP_tree[(*Tree_Counter)].mu = Mediana(pkt, Mediana_tab, &P_tabk, S_VP_tab, S_rozmiar, ile_x, p_counter);
-
-    delete [] Mediana_tab;
-
-    // cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " ||| ";
-
-    int *L_tab;
-    L_tab = new int[S_rozmiar];
-    
-    int *R_tab;
-    R_tab = new int[S_rozmiar];
-
-    int L_counter = 0;
-    int R_counter = 0;
-
-    for (int dc = 0; dc < S_rozmiar; dc++)
-    {
-        if (VP_tree[(*Tree_Counter)].index == S_VP_tab[dc])
-        {
-            continue;
-        }
-
-        if (DistFunc(&pkt[VP_tree[(*Tree_Counter)].index], &pkt[S_VP_tab[dc]], ile_x) < VP_tree[(*Tree_Counter)].mu)
-        {
-            L_tab[L_counter] = S_VP_tab[dc];
-            // cout << "L_tab[L_counter]: " << L_tab[L_counter] << endl;
-            L_counter++; 
-        }else
-        {
-            R_tab[R_counter] = S_VP_tab[dc];
-            // cout << "R_tab[R_counter]: " << R_tab[R_counter] << endl;
-            R_counter++;
-        } 
-    }
-    
-    // cout << *Tree_Counter << " = L_count: " << L_counter << " | R_count: " << R_counter << endl;
-
-    VP_tree[*Tree_Counter].L_kid_N = L_counter;
-    VP_tree[*Tree_Counter].R_kid_N = R_counter;
-
-    // int Parent = VP_tree[(*Tree_Counter)].index;             // Indeks Parent - w glownej tablicy danych
-    int Parent = *Tree_Counter;                                 // Indeks Parent - w tablicy drzewa
-    
-
-    if(L_counter > 0){
-        // VP_tree[index_parentnode].L_kid = Parent;
-        Make_VP_Tree(VP_tree, pkt, L_tab, L_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, -1, Parent);
-    }
-    
-    if(R_counter > 0){
-        // VP_tree[index_parentnode].R_kid = Parent;
-        Make_VP_Tree(VP_tree, pkt, R_tab, R_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, 1, Parent);
-    }
-    
-
-    delete [] L_tab;
-    delete [] R_tab;
-
-}
-
-
-
-double Mediana(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], int D_rozmiar, int ile_x, int p_counter)
-{
-    double med = 0.0;
-
-    // cout << "P_tab[p_counter]" << P_tab[p_counter] << endl;
-
-    if (D_rozmiar == 1)
-    {
-        med = DistFunc(&pkt[P_tab[p_counter]], &pkt[D_tab[0]], ile_x);
-    }else
-    {
-        for (int d = 0; d < D_rozmiar; d++)
-        {
-
-            Mediana_tab[d] = DistFunc( &pkt[P_tab[p_counter]], &pkt[D_tab[d]], ile_x);      // Liczenie odleglosci od punktu P do wszystkich ze zbioru D
-        }
-        
-
-        double temp_dist = 0;                                   // Sortowanie Babelkowe - START
-        for (int b = 0; b < D_rozmiar; b++)                     
-        {
-            for (int c = 0; c < (D_rozmiar-1); c++)
-            {
-                if(Mediana_tab[c] > Mediana_tab[c+1]){
-                    temp_dist = Mediana_tab[c+1];
-                    Mediana_tab[c+1] = Mediana_tab[c];
-                    Mediana_tab[c] = temp_dist;
-                }
-            }
-        }                                                      // Sortowanie Babelkowe - KONIEC
-
-
-        if (D_rozmiar%2 == 1)                                   // D_rozmiar = Nieparzysta  - Mediana to srodkowa wartosc
-        {
-            med = Mediana_tab[D_rozmiar/2];
-        }else                                                   // D_rozmiar = Parzysta     - Mediana to srednia z dwoch srodkowych wartosci
-        {
-            med = (Mediana_tab[(D_rozmiar/2) - 1] + Mediana_tab[(D_rozmiar/2)]) / 2.0;
-        }
-    }
-
-    return med;
-}
-
-
-
-int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x){
-    
-    int P_rozmiar = P_proc_S * S_rozmiar;
-    int D_rozmiar = D_proc_S * S_rozmiar;
-
-    if(P_rozmiar < 1){
-       P_rozmiar = 1; 
-    }
-
-    if(D_rozmiar < 1){
-       D_rozmiar = 1; 
-    }
-
-    int *P_tab;
-    int *D_tab;
-    double *Mediana_tab;
-    Mediana_tab = new double[D_rozmiar];
-    P_tab = new int[P_rozmiar];
-    D_tab = new int[D_rozmiar];
-
-    int best_p = 0;
-    double mu_pd = 0.0;
-    double var = 0.0;
-    
-    int Si = 0;                                                 // Iterator po S
-    int Pi = 0;                                                 // Iterator po P
-
-    double best_spread = -1;                                    // Problemy z "best_spread = 0.0" --> czasem wartosic wychodzily na tyle male ze pojawialy sie problemy z porownaniem
-
-    while (Pi < P_rozmiar)                                      // Wylosowanie punktow P ze zbioru S
-    {
-        if ( RandVal(0,1) <= P_proc_S)
-        {
-            P_tab[Pi] = S_VP_tab[Si];
-            
-            Pi++;
-        }
-            
-        Si++;
-        
-        if(Si >= S_rozmiar){                                    // Pirackie rozwiazanie problemu jesli wyjdziemy poza tablice S_VP_tab (poczatkowa) - zbieramy znowu punkty (mozliwe powtorzenia)
-            Si = 0;
-        }
-    }
-    
-    // cout << "P_tab:" << endl;                                   // Wyswietlanie tablicy P
-    // for (int i = 0; i < P_rozmiar; i++)
-    // {
-    //     cout << P_tab[i] << endl;
-    // }
-    
-    
-    for (int k = 0; k < P_rozmiar; k++)                         // Dla kazdego punktu p ze zbioru P
-    {
-        int Di = 0;                                             // Iterator po D
-
-        Si = 0;
-        while (Di < D_rozmiar)                                  // Wylosowanie punktow D ze zbioru S
-        {
-            if ( RandVal(0,1) <= D_proc_S)
-            {
-                D_tab[Di] = S_VP_tab[Si];
-                Di++;
-            } 
-            Si++;
-        
-            if(Si >= S_rozmiar){                                // Pirackie rozwiazanie problemu jesli wyjdziemy poza tablice S_VP_tab (poczatkowa) - zbieramy znowu punkty (mozliwe powtorzenia)
-                Si = 0;
-            }
-        }
-
-        // cout << "D_tab:" << endl;                               // Wyswietlanie tablicy D
-        // for (int i = 0; i < D_rozmiar; i++)
-        // {
-        //     cout << D_tab[i] << endl;
-        // }
-
-
-        double mu_pd = Mediana(pkt, Mediana_tab, P_tab, D_tab, D_rozmiar, ile_x, k);
-
-
-        var = 0;                                                // Liczenie Wariancji - START
-        for( int n = 0; n < D_rozmiar; n++)
-        {
-            var += pow(Mediana_tab[n] - mu_pd, 2);
-        }
-        var /= D_rozmiar;                                       // Liczenie Wariancji - KONIEC
-        
-
-        if (var > best_spread)                                  // Sprawdzenie punktu P - czy jest lepszy?        
-        {
-            best_spread = var;
-            best_p = P_tab[k];
-            // cout << "Better: " << best_p << " | War: " << best_spread << endl;
-        }
-    }
-
-
-    delete [] D_tab;
-    delete [] P_tab;
-
-    return best_p;
-}
-
-
-
-// Additional functions
-
-/************************ RandVal *****************************************/
-double RandVal(double low,double high)
-{
-  return(((double) (rand() % RAND_MAX)/((double) RAND_MAX))*(high-low)+low);
-}
-
-
-/************************ iRandVal *****************************************/
-long iRandVal(long low,long high) 
-{
-  high++;
-  return (long) (((double) (rand() % RAND_MAX)/((double) RAND_MAX))*(high-low)+low);
-}
-
 
 
 void Import_CSV_Metadata(Punkt *pkt, int &ile_linii, int &ile_x, string &file_in, int &start_ind, int &start_linia)
@@ -1311,7 +585,16 @@ void Clear_Cluster(Punkt *pkt, int ile_linii)
     }
 }
 
-
+void Show_VP_Tree(VP *VP_tree, int Tree_Counter)
+{
+    for (int i = 0; i < (Tree_Counter + 1); i++)
+    {
+        cout << i << "= VP Index: " << VP_tree[i].index << " | Mediana: " << VP_tree[i].mu << " | L_R: " << VP_tree[i].l_r << " | ID_Parent: " << VP_tree[i].index_parent_node 
+        << " | L_kid: " << VP_tree[i].L_kid << " | R_kid: " << VP_tree[i].R_kid 
+        << " | L_kid_N: " << VP_tree[i].L_kid_N << " | R_kid_N: " << VP_tree[i].R_kid_N 
+        << " | Left Bound: " << VP_tree[i].left_bound << " | Right Bound: " << VP_tree[i].right_bound << endl;
+    }
+}
 
 double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x)                // Function to calculate distance 
 { 
@@ -1443,6 +726,655 @@ for(int P = 0; P < ile_linii; P++)
 }
 }
 
+
+
+
+void DBSCAN_VP_TREE(VP *VP_tree, Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
+{
+
+for(int P = 0; P < ile_linii; P++)
+{
+    if(pkt[P].cluster2 != UNDEFINED)
+    {
+        continue;
+    }
+
+    int ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
+    
+    // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
+    // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
+
+    if(ile_sasiadow < minN)
+    {
+        pkt[P].cluster2 = NOISE;             // IF: N < minN => NOISE
+        continue;
+    }
+
+    C = C + 1;                              // Cluster number increment
+    pkt[P].cluster2 = C;                     // ELSE: N > minN => Cluster
+    
+    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << endl;     // Show changing Cluster number
+    
+    
+    for(int i=0; i<ile_linii; i++)
+    {
+        S_tab[i] = N_tab[i];           
+    }
+
+    int S_licznik = ile_sasiadow;
+  
+    for(int i=0; i<S_licznik; i++)                      // For Each Point Q in S
+    {
+        if(S_tab[i] != -1)
+        {
+            if(pkt[S_tab[i]].cluster2 == NOISE)          // IF: Q == NOISE then Q = Cluster
+            {
+                pkt[S_tab[i]].cluster2 = C;
+            }
+
+            if(pkt[S_tab[i]].cluster2 != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
+            {     
+                continue;
+            }
+
+            pkt[S_tab[i]].cluster2 = C;
+            ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
+
+            if( ile_sasiadow >= minN)
+            {
+                S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
+            }
+        }
+    }
+}
+}
+
+int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int minN, int ile_x)
+{
+    for(int i=0; i<ile_linii; i++)
+    {
+        N_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
+    }
+
+    int TC = 0;                     // Tree Counter
+    int flag_end = 0;
+
+    while(flag_end != 2)
+    {
+        flag_end = 0;
+
+        // cout << "TC: " << TC;
+
+        if ((DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) - VP_tree[TC].mu)  >=  Eps)
+        {
+            if (VP_tree[TC].R_kid_N > minN)
+            {
+                TC = VP_tree[TC].R_kid;
+                continue;
+            }else
+            {
+                break;
+            }
+        }else
+        {
+            flag_end++;
+        }
+        
+        
+        if ((VP_tree[TC].mu - DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x))  >  Eps)
+        {
+            if (VP_tree[TC].L_kid_N > minN)
+            {
+                TC = VP_tree[TC].L_kid;
+                continue;
+            }else
+            {
+                break;
+            }
+        }else
+        {
+            flag_end++;
+        }
+        
+        if(flag_end == 2){
+            break;
+        }
+    }
+
+    int kNN = 0;
+
+    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
+    
+    return kNN;
+}
+
+
+void kNN_TreeDist(VP *VP_tree, Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int minN, int ile_x, int TC, int *kNN)
+{
+    if (VP_tree[TC].index != Qindex)
+    {
+        if(DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) <= Eps)
+        {
+            N_tab[(*kNN)] = VP_tree[TC].index;
+            (*kNN)++;
+        }
+    }
+
+    if(VP_tree[TC].L_kid > -1){
+        kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].L_kid, kNN);
+    }
+    
+    if(VP_tree[TC].R_kid > -1){
+        kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].R_kid, kNN);
+    }
+}
+
+
+void Make_VP_Tree(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int *Tree_Counter, int lr, int index_parentnode)
+{
+
+    if (S_rozmiar == 0)
+    {
+        return;
+    }
+    ((*Tree_Counter))++;
+
+    if (S_rozmiar == 1)
+    {
+        VP_tree[(*Tree_Counter)].index = S_VP_tab[0];
+        VP_tree[(*Tree_Counter)].l_r = lr;
+        VP_tree[(*Tree_Counter)].index_parent_node = index_parentnode;
+        
+        if (index_parentnode != -1){
+            if (lr == -1)
+            {
+                VP_tree[index_parentnode].L_kid = *Tree_Counter;
+            }else
+            {
+                VP_tree[index_parentnode].R_kid = *Tree_Counter;
+            }
+        }
+        
+        // cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " <--- " << endl;
+        return;
+    }
+
+    VP_tree[(*Tree_Counter)].index = Select_VP(pkt, S_VP_tab, S_rozmiar, P_proc_S, D_proc_S, ile_x);
+    VP_tree[(*Tree_Counter)].l_r = lr;
+    VP_tree[(*Tree_Counter)].index_parent_node = index_parentnode;
+    
+    if (index_parentnode != -1){
+        if (lr == -1)
+        {
+            VP_tree[index_parentnode].L_kid = *Tree_Counter;
+        }else
+        {
+            VP_tree[index_parentnode].R_kid = *Tree_Counter;
+        }
+    }
+
+    int p_counter = 0;
+    int P_tabk = VP_tree[(*Tree_Counter)].index;
+    
+    double *Mediana_tab;
+    Mediana_tab = new double[S_rozmiar];
+
+    VP_tree[(*Tree_Counter)].mu = Mediana(pkt, Mediana_tab, &P_tabk, S_VP_tab, S_rozmiar, ile_x, p_counter);
+
+    delete [] Mediana_tab;
+
+    // cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " ||| ";
+
+    int *L_tab;
+    L_tab = new int[S_rozmiar];
+    
+    int *R_tab;
+    R_tab = new int[S_rozmiar];
+
+    int L_counter = 0;
+    int R_counter = 0;
+
+    for (int dc = 0; dc < S_rozmiar; dc++)
+    {
+        if (VP_tree[(*Tree_Counter)].index == S_VP_tab[dc])
+        {
+            continue;
+        }
+
+        if (DistFunc(&pkt[VP_tree[(*Tree_Counter)].index], &pkt[S_VP_tab[dc]], ile_x) < VP_tree[(*Tree_Counter)].mu)
+        {
+            L_tab[L_counter] = S_VP_tab[dc];
+            L_counter++; 
+        }else
+        {
+            R_tab[R_counter] = S_VP_tab[dc];
+            R_counter++;
+        } 
+    }
+    
+    // cout << *Tree_Counter << " = L_count: " << L_counter << " | R_count: " << R_counter << endl;
+
+    VP_tree[*Tree_Counter].L_kid_N = L_counter;
+    VP_tree[*Tree_Counter].R_kid_N = R_counter;
+
+    // int Parent = VP_tree[(*Tree_Counter)].index;             // Indeks Parent - w glownej tablicy danych
+    int Parent = *Tree_Counter;                                 // Indeks Parent - w tablicy drzewa
+    
+
+    if(L_counter > 0){
+        Make_VP_Tree(VP_tree, pkt, L_tab, L_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, -1, Parent);
+    }
+    
+    if(R_counter > 0){
+        Make_VP_Tree(VP_tree, pkt, R_tab, R_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, 1, Parent);
+    }
+    
+
+    delete [] L_tab;
+    delete [] R_tab;
+
+}
+
+
+
+double Mediana(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], int D_rozmiar, int ile_x, int p_counter)
+{
+    double med = 0.0;
+
+    if (D_rozmiar == 1)
+    {
+        med = DistFunc(&pkt[P_tab[p_counter]], &pkt[D_tab[0]], ile_x);
+    }else
+    {
+        for (int d = 0; d < D_rozmiar; d++)
+        {
+
+            Mediana_tab[d] = DistFunc( &pkt[P_tab[p_counter]], &pkt[D_tab[d]], ile_x);      // Liczenie odleglosci od punktu P do wszystkich ze zbioru D
+        }
+        
+
+        double temp_dist = 0;                                   // Sortowanie Babelkowe - START
+        for (int b = 0; b < D_rozmiar; b++)                     
+        {
+            for (int c = 0; c < (D_rozmiar-1); c++)
+            {
+                if(Mediana_tab[c] > Mediana_tab[c+1]){
+                    temp_dist = Mediana_tab[c+1];
+                    Mediana_tab[c+1] = Mediana_tab[c];
+                    Mediana_tab[c] = temp_dist;
+                }
+            }
+        }                                                      // Sortowanie Babelkowe - KONIEC
+
+
+        if (D_rozmiar%2 == 1)                                   // D_rozmiar = Nieparzysta  - Mediana to srodkowa wartosc
+        {
+            med = Mediana_tab[D_rozmiar/2];
+        }else                                                   // D_rozmiar = Parzysta     - Mediana to srednia z dwoch srodkowych wartosci
+        {
+            med = (Mediana_tab[(D_rozmiar/2) - 1] + Mediana_tab[(D_rozmiar/2)]) / 2.0;
+        }
+    }
+
+    return med;
+}
+
+
+
+int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x){
+    
+    int P_rozmiar = P_proc_S * S_rozmiar;
+    int D_rozmiar = D_proc_S * S_rozmiar;
+
+    if(P_rozmiar < 1){
+       P_rozmiar = 1; 
+    }
+
+    if(D_rozmiar < 1){
+       D_rozmiar = 1; 
+    }
+
+    int *P_tab;
+    int *D_tab;
+    double *Mediana_tab;
+    Mediana_tab = new double[D_rozmiar];
+    P_tab = new int[P_rozmiar];
+    D_tab = new int[D_rozmiar];
+
+    int best_p = 0;
+    double mu_pd = 0.0;
+    double var = 0.0;
+    
+    int Si = 0;                                                 // Iterator po S
+    int Pi = 0;                                                 // Iterator po P
+
+    double best_spread = -1;                                    // Problemy z "best_spread = 0.0" --> czasem wartosic wychodzily na tyle male ze pojawialy sie problemy z porownaniem
+
+    while (Pi < P_rozmiar)                                      // Wylosowanie punktow P ze zbioru S
+    {
+        if ( RandVal(0,1) <= P_proc_S)
+        {
+            P_tab[Pi] = S_VP_tab[Si];
+            
+            Pi++;
+        }
+            
+        Si++;
+        
+        if(Si >= S_rozmiar){                                    // Pirackie rozwiazanie problemu jesli wyjdziemy poza tablice S_VP_tab (poczatkowa) - zbieramy znowu punkty (mozliwe powtorzenia)
+            Si = 0;
+        }
+    }
+    
+    // cout << "P_tab:" << endl;                                   // Wyswietlanie tablicy P
+    // for (int i = 0; i < P_rozmiar; i++)
+    // {
+    //     cout << P_tab[i] << endl;
+    // }
+    
+    
+    for (int k = 0; k < P_rozmiar; k++)                         // Dla kazdego punktu p ze zbioru P
+    {
+        int Di = 0;                                             // Iterator po D
+
+        Si = 0;
+        while (Di < D_rozmiar)                                  // Wylosowanie punktow D ze zbioru S
+        {
+            if ( RandVal(0,1) <= D_proc_S)
+            {
+                D_tab[Di] = S_VP_tab[Si];
+                Di++;
+            } 
+            Si++;
+        
+            if(Si >= S_rozmiar){                                // Pirackie rozwiazanie problemu jesli wyjdziemy poza tablice S_VP_tab (poczatkowa) - zbieramy znowu punkty (mozliwe powtorzenia)
+                Si = 0;
+            }
+        }
+
+        // cout << "D_tab:" << endl;                               // Wyswietlanie tablicy D
+        // for (int i = 0; i < D_rozmiar; i++)
+        // {
+        //     cout << D_tab[i] << endl;
+        // }
+
+
+        double mu_pd = Mediana(pkt, Mediana_tab, P_tab, D_tab, D_rozmiar, ile_x, k);
+
+
+        var = 0;                                                // Liczenie Wariancji - START
+        for( int n = 0; n < D_rozmiar; n++)
+        {
+            var += pow(Mediana_tab[n] - mu_pd, 2);
+        }
+        var /= D_rozmiar;                                       // Liczenie Wariancji - KONIEC
+        
+
+        if (var > best_spread)                                  // Sprawdzenie punktu P - czy jest lepszy?        
+        {
+            best_spread = var;
+            best_p = P_tab[k];
+            // cout << "Better: " << best_p << " | War: " << best_spread << endl;
+        }
+    }
+
+    delete [] D_tab;
+    delete [] P_tab;
+
+    return best_p;
+}
+
+
+
+void DBSCAN_VP_TREE_2(VP *VP_tree, Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
+{
+
+for(int P = 0; P < ile_linii; P++)
+{
+    if(pkt[P].cluster3 != UNDEFINED)
+    {
+        continue;
+    }
+
+    int ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
+    
+    // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
+    // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
+
+    if(ile_sasiadow < minN)
+    {
+        pkt[P].cluster3 = NOISE;             // IF: N < minN => NOISE
+        continue;
+    }
+
+    C = C + 1;                              // Cluster number increment
+    pkt[P].cluster3 = C;                     // ELSE: N > minN => Cluster
+    
+    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << endl;     // Show changing Cluster number
+    
+    
+    for(int i=0; i<ile_linii; i++)
+    {
+        S_tab[i] = N_tab[i];           
+    }
+
+    int S_licznik = ile_sasiadow;
+  
+    for(int i=0; i<S_licznik; i++)                      // For Each Point Q in S
+    {
+        if(S_tab[i] != -1)
+        {
+            if(pkt[S_tab[i]].cluster3 == NOISE)          // IF: Q == NOISE then Q = Cluster
+            {
+                pkt[S_tab[i]].cluster3 = C;
+            }
+
+            if(pkt[S_tab[i]].cluster3 != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
+            {     
+                continue;
+            }
+
+            pkt[S_tab[i]].cluster3 = C;
+            ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
+
+            if( ile_sasiadow >= minN)
+            {
+                S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
+            }
+        }
+    }
+}
+}
+
+int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int minN, int ile_x)
+{
+    for(int i=0; i<ile_linii; i++)
+    {
+        N_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
+    }
+
+    int TC = 0;                     // Tree Counter
+    int flag_end = 0;
+
+    while(flag_end != 2)
+    {
+        flag_end = 0;
+
+        if ((DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) - VP_tree[TC].left_bound)  >  Eps)
+        {
+            if (VP_tree[TC].R_kid_N > minN)
+            {
+                TC = VP_tree[TC].R_kid;
+                continue;
+            }else
+            {
+                break;
+            }
+        }else
+        {
+            flag_end++;
+        }
+        
+        
+        if ((VP_tree[TC].right_bound - DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x))  >  Eps)
+        {
+            if (VP_tree[TC].L_kid_N > minN)
+            {
+                TC = VP_tree[TC].L_kid;
+                continue;
+            }else
+            {
+                break;
+            }
+        }else
+        {
+            flag_end++;
+        }
+        
+
+        if(flag_end == 2){
+            break;
+        }
+        
+    }
+
+    int kNN = 0;
+
+    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
+    
+    return kNN;
+}
+
+
+void Make_VP_Tree_2(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int *Tree_Counter, int lr, int index_parentnode)
+{
+
+    if (S_rozmiar == 0)
+    {
+        return;
+    }
+    ((*Tree_Counter))++;
+
+    if (S_rozmiar == 1)
+    {
+        VP_tree[(*Tree_Counter)].index = S_VP_tab[0];
+        VP_tree[(*Tree_Counter)].l_r = lr;
+        VP_tree[(*Tree_Counter)].index_parent_node = index_parentnode;
+        
+        if (index_parentnode != -1){
+            if (lr == -1)
+            {
+                VP_tree[index_parentnode].L_kid = *Tree_Counter;
+            }else
+            {
+                VP_tree[index_parentnode].R_kid = *Tree_Counter;
+            }
+        }
+        
+        // cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " <--- " << endl;
+        return;
+    }
+
+    VP_tree[(*Tree_Counter)].index = Select_VP(pkt, S_VP_tab, S_rozmiar, P_proc_S, D_proc_S, ile_x);
+    VP_tree[(*Tree_Counter)].l_r = lr;
+    VP_tree[(*Tree_Counter)].index_parent_node = index_parentnode;
+    
+    if (index_parentnode != -1){
+        if (lr == -1)
+        {
+            VP_tree[index_parentnode].L_kid = *Tree_Counter;
+        }else
+        {
+            VP_tree[index_parentnode].R_kid = *Tree_Counter;
+        }
+    }
+
+    int p_counter = 0;
+    int P_tabk = VP_tree[(*Tree_Counter)].index;
+    
+    double *Mediana_tab;
+    Mediana_tab = new double[S_rozmiar];
+
+    VP_tree[(*Tree_Counter)].mu = Mediana(pkt, Mediana_tab, &P_tabk, S_VP_tab, S_rozmiar, ile_x, p_counter);
+
+// Left Bound / Right Bound
+    if (S_rozmiar%2 == 1)                                                       // D_rozmiar = Nieparzysta  - Mediana to srodkowa wartosc
+    {
+        VP_tree[(*Tree_Counter)].left_bound = Mediana_tab[S_rozmiar/2 - 1];
+        VP_tree[(*Tree_Counter)].right_bound = Mediana_tab[S_rozmiar/2 + 1];
+    }else                                                                       // D_rozmiar = Parzysta     - Mediana to srednia z dwoch srodkowych wartosci
+    {
+        VP_tree[(*Tree_Counter)].left_bound = Mediana_tab[S_rozmiar/2 - 1];
+        VP_tree[(*Tree_Counter)].right_bound = Mediana_tab[S_rozmiar/2];
+    }
+
+    delete [] Mediana_tab;
+    
+    // cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " ||| ";
+
+    int *L_tab;
+    L_tab = new int[S_rozmiar];
+    
+    int *R_tab;
+    R_tab = new int[S_rozmiar];
+
+    int L_counter = 0;
+    int R_counter = 0;
+
+    for (int dc = 0; dc < S_rozmiar; dc++)
+    {
+        if (VP_tree[(*Tree_Counter)].index == S_VP_tab[dc])
+        {
+            continue;
+        }
+
+        if (DistFunc(&pkt[VP_tree[(*Tree_Counter)].index], &pkt[S_VP_tab[dc]], ile_x) < VP_tree[(*Tree_Counter)].mu)
+        {
+            L_tab[L_counter] = S_VP_tab[dc];
+            L_counter++; 
+        }else
+        {
+            R_tab[R_counter] = S_VP_tab[dc];
+            R_counter++;
+        } 
+    }
+
+    VP_tree[*Tree_Counter].L_kid_N = L_counter;
+    VP_tree[*Tree_Counter].R_kid_N = R_counter;
+
+    // int Parent = VP_tree[(*Tree_Counter)].index;             // Indeks Parent - w glownej tablicy danych
+    int Parent = *Tree_Counter;                                 // Indeks Parent - w tablicy drzewa
+    
+    if(L_counter > 0){
+        Make_VP_Tree_2(VP_tree, pkt, L_tab, L_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, -1, Parent);
+    }
+    
+    if(R_counter > 0){
+        Make_VP_Tree_2(VP_tree, pkt, R_tab, R_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, 1, Parent);
+    }
+    
+    delete [] L_tab;
+    delete [] R_tab;
+
+}
+
+
+
+// Additional functions
+
+/************************ RandVal *****************************************/
+double RandVal(double low,double high)
+{
+  return(((double) (rand() % RAND_MAX)/((double) RAND_MAX))*(high-low)+low);
+}
+
+
+/************************ iRandVal *****************************************/
+long iRandVal(long low,long high) 
+{
+  high++;
+  return (long) (((double) (rand() % RAND_MAX)/((double) RAND_MAX))*(high-low)+low);
+}
 
 
 
