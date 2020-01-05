@@ -10,16 +10,30 @@ library(dbscan)
 library(MASS)
 
 S <- matrix(c(1,0,0,1),2,2)
-mt1 <- c(10,10)
-mt2 <- c(0,0)
-n1 <- 10000
-n2 <- 10000
-n <- n1 + n2
+mt1 <- c(0,0)
+mt2 <- c(10,10)
+mt3 <- c(12,12)
+mt4 <- c(7, 11)
+mt5 <- c(-5, 12)
+mt6 <- c(-9, 12)
+
+n1 <- 1000
+n2 <- 1000
+n3 <- 1000
+n4 <- 1000
+n5 <- 1000
+n6 <- 1000
+n <- n1 + n2 + n3 + n4 + n5 + n6
 
 X1 <- mvrnorm(n1, mt1, S)
 X2 <- mvrnorm(n2, mt2, S)
+X3 <- mvrnorm(n3, mt3, S)
+X4 <- mvrnorm(n4, mt4, S)
+X5 <- mvrnorm(n5, mt5, S)
+X6 <- mvrnorm(n6, mt6, S)
 
-DATA_Cpp <- rbind(X1, X2)
+
+DATA_Cpp <- rbind(X1, X2, X3, X4, X5, X6)
 kNN1 <- kNNdistplot(DATA_Cpp, k = 5)
 abline(h=.1, col = "red", lty=2)
 abline(h=.2, col = "red", lty=2)
@@ -28,13 +42,16 @@ abline(h=.4, col = "red", lty=2)
 abline(h=.5, col = "red", lty=2)
 
 # Write to CSV
-write.csv(DATA_Cpp, "DataCpp-2D-20000.csv")
+write.csv(DATA_Cpp, "DataCpp-2D-6000.csv")
 
 
-plot(X1, ylim = c(-5,10), xlim = c(-5,10), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
+plot(X1, ylim = c(-5,15), xlim = c(-10,15), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
 abline(v = 0, h = 0, col = "gray")
 points(X2, pch = 19, col = "orange")
-
+points(X3, pch = 19, col = "orange")
+points(X4, pch = 19, col = "orange")
+points(X5, pch = 19, col = "red")
+points(X6, pch = 19, col = "red")
 
 ### Visualization
 Data_Cluster <- as.data.frame(read.table("Clustered_1.csv", header=FALSE,sep=","))
