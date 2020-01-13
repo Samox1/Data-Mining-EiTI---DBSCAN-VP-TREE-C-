@@ -259,11 +259,11 @@ cars2 = genNumericAttrsForFactor(cars,'maint')
 View(cars)
 View(cars2)
 
-
-###########################################################################################################################
-### KONIEC WPROWADZENIA ### KONIEC WPROWADZENIA ### KONIEC WPROWADZENIA ### KONIEC WPROWADZENIA ### KONIEC WPROWADZENIA ###
-###########################################################################################################################
-
+###########################################################################################################################################################################
+###########################################################################################################################################################################
+### KONIEC WPROWADZENIA ### KONIEC WPROWADZENIA ### KONIEC WPROWADZENIA ### KONIEC WPROWADZENIA ### KONIEC WPROWADZENIA ### KONIEC WPROWADZENIA ### KONIEC WPROWADZENIA ###
+###########################################################################################################################################################################
+###########################################################################################################################################################################
 
 #Data mining sem 2019z lab 1.2
 
@@ -330,6 +330,7 @@ AdultUCI[["education-num"]] <-NULL
 #konwersja danych z postacji relacyjnej (data.frame) na transakcyjnÄ (transactions)
 #?as
 adultTR <- as(AdultUCI, "transactions")
+View(as(adultTR, "data.frame"))
 #informacja dotyczÄce struktury obiektu transakcje
 #str(adultTR)
 #class(adultTR)
@@ -514,12 +515,17 @@ summary(iERules)
 length(iERules)
 inspect(head(iERules))
 
-########################################################################################
+########################################################################################################################################################################
+########################################################################################################################################################################
+########################################################################################################################################################################
 #Wykorzystanie hierarchii elementĂłw do odkrywania reguĹ asoscjacyjnych
 
 data("Groceries")
 str(Groceries)
 View(Groceries@itemInfo)
+
+View(as(Groceries,"data.frame"))
+
 
 #Hierarchia jest zapisana w skĹadowej iteminfo 
 #level2 - pierwszy poziom hierarchii
@@ -584,7 +590,7 @@ inspect(rulesAggFH[300:320])
 #usuwanie reguĹ potencjalnie nadmiarowych typu element -> poziom_X_hierarchii(element)
 rulesAggFH_Filter <- filterAggregate(rulesAggFH)
 summary(rulesAggFH_Filter)
-inspect(rulesAggFH[70:95])
+inspect(rulesAggFH_Filter[70:95])
 
 
 #################################################
