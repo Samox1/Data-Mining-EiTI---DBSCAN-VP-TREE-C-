@@ -676,7 +676,7 @@ for(int P = 0; P < ile_linii; P++)
         continue;
     }
 
-    int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, P, Eps, ile_x);
+    int ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, P, Eps, ile_x) + 1;
     
     // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
     // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
@@ -715,7 +715,7 @@ for(int P = 0; P < ile_linii; P++)
             }
 
             pkt[S_tab[i]].cluster = C;
-            ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, S_tab[i], Eps, ile_x);
+            ile_sasiadow = RangeQuery(pkt, N_tab, ile_linii, S_tab[i], Eps, ile_x) + 1;
 
             if( ile_sasiadow >= minN)
             {
@@ -739,7 +739,7 @@ for(int P = 0; P < ile_linii; P++)
         continue;
     }
 
-    int ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
+    int ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x) + 1;
     
     // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
     // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
@@ -778,7 +778,7 @@ for(int P = 0; P < ile_linii; P++)
             }
 
             pkt[S_tab[i]].cluster2 = C;
-            ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
+            ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x) + 1;
 
             if( ile_sasiadow >= minN)
             {
@@ -797,6 +797,7 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
     }
 
     int TC = 0;                     // Tree Counter
+    int TC1 = 0;
     int flag_end = 0;
 
     while(flag_end != 2)
@@ -808,7 +809,8 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
         if ((DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) - VP_tree[TC].mu)  >=  Eps)
         {
             if (VP_tree[TC].R_kid_N > minN)
-            {
+            {   
+                TC1 = TC;
                 TC = VP_tree[TC].R_kid;
                 continue;
             }else
@@ -825,6 +827,7 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
         {
             if (VP_tree[TC].L_kid_N > minN)
             {
+                TC1 = TC;
                 TC = VP_tree[TC].L_kid;
                 continue;
             }else
@@ -843,7 +846,7 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
 
     int kNN = 0;
 
-    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
+    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
     
     return kNN;
 }
@@ -1136,7 +1139,7 @@ for(int P = 0; P < ile_linii; P++)
         continue;
     }
 
-    int ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
+    int ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x) + 1;
     
     // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
     // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
@@ -1175,7 +1178,7 @@ for(int P = 0; P < ile_linii; P++)
             }
 
             pkt[S_tab[i]].cluster3 = C;
-            ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
+            ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x) + 1;
 
             if( ile_sasiadow >= minN)
             {
@@ -1194,6 +1197,7 @@ int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qin
     }
 
     int TC = 0;                     // Tree Counter
+    int TC1 = 0;
     int flag_end = 0;
 
     while(flag_end != 2)
@@ -1204,6 +1208,7 @@ int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qin
         {
             if (VP_tree[TC].R_kid_N > minN)
             {
+                TC1 = TC;
                 TC = VP_tree[TC].R_kid;
                 continue;
             }else
@@ -1220,6 +1225,7 @@ int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qin
         {
             if (VP_tree[TC].L_kid_N > minN)
             {
+                TC1 = TC;
                 TC = VP_tree[TC].L_kid;
                 continue;
             }else
@@ -1240,7 +1246,7 @@ int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qin
 
     int kNN = 0;
 
-    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
+    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
     
     return kNN;
 }

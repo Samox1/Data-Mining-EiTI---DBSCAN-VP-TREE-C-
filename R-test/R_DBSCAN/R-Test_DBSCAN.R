@@ -136,3 +136,79 @@ show(sp1)
 # show(res)
 # 
 # plot(iris[,1], iris[,3])
+
+
+#############################################################################################################################################################
+### TRZEBA w C++ :
+### 1) wyswietlic przypisywanie klastrow punktow dla DataCpp z 120 pkt
+### 2) wyswietlic cale drzewo zeby zobaczyc listy + ewentualnie stworzyc mape drzewa w R (zarys okregow - mediany)
+
+
+library(tidyverse)
+library(MASS)
+library(ggplot2)
+library(ggforce)
+library(dbscan)
+
+### --- Funkcja z biblioteki DBSCAN --- ###
+Data <- as.data.frame(read.table("Data_Clustered_4000_0-1-v2.csv", header=FALSE,sep=","))
+dbsca <- dbscan(Data[,1:2], 0.3, 6, borderPoints = TRUE)
+colur <- as.factor(dbsca[["cluster"]])
+
+jpeg("R-DBSCAN.jpg", width = 2000, height = 2000, quality = 100)
+sp <- ggplot(Data[,1:2], aes(x=Data[,1], y=Data[,2], colour = colur)) + geom_point() + scale_x_continuous() + scale_y_continuous() #+ theme(aspect.ratio = 1)
+sp <- sp + coord_fixed(ratio = 1)
+sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c(0,4))
+#sp <- sp + geom_point(aes(x=Data_Cluster[63,1], y=Data_Cluster[63,2], colour = 'black'))
+show(sp)
+dev.off()
+
+
+### --- Dane z C++ --- ###
+# Data_Cluster <- as.data.frame(read.table("Data_Clustered_4000.csv", header=FALSE,sep=","))
+Data_Cluster <- Data
+cluster <- as.factor(Data_Cluster[,3])
+
+jpeg("Cpp-DBSCAN.jpg", width = 2000, height = 2000, quality = 100)
+sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster)) + geom_point() + scale_x_continuous() + scale_y_continuous() #+ theme(aspect.ratio = 1)
+sp <- sp + coord_fixed(ratio = 1)
+sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c(0,4))
+#sp <- sp + geom_point(aes(x=Data_Cluster[63,1], y=Data_Cluster[63,2], colour = 'black'))
+show(sp)
+dev.off()
+
+
+### --- Dane z C++ --> VP-TREE v1 --- ###
+# Data_Cluster <- as.data.frame(read.table("Data_Clustered_20000.csv", header=FALSE,sep=","))
+cluster <- as.factor(Data_Cluster[,4])
+
+jpeg("Cpp-DBSCAN-VP-v1.jpg", width = 2000, height = 2000, quality = 100)
+sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster)) + geom_point() + scale_x_continuous() + scale_y_continuous() #+ theme(aspect.ratio = 1)
+sp <- sp + coord_fixed(ratio = 1)
+sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c(0,4))
+#sp <- sp + geom_point(aes(x=Data_Cluster[63,1], y=Data_Cluster[63,2], colour = 'black'))
+show(sp)
+dev.off()
+
+
+### --- Dane z C++ --> VP-TREE v2 --- ###
+# Data_Cluster <- as.data.frame(read.table("Data_Clustered_20000.csv", header=FALSE,sep=","))
+cluster <- as.factor(Data_Cluster[,5])
+
+jpeg("Cpp-DBSCAN-VP-v2.jpg", width = 2000, height = 2000, quality = 100)
+sp <- ggplot(Data_Cluster[,1:2], aes(x=V1, y=V2, colour = cluster)) + geom_point() + scale_x_continuous() + scale_y_continuous() #+ theme(aspect.ratio = 1)
+sp <- sp + coord_fixed(ratio = 1)
+sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c(0,4))
+#sp <- sp + geom_point(aes(x=Data_Cluster[63,1], y=Data_Cluster[63,2], colour = 'black'))
+show(sp)
+dev.off()
+
+table(colur)
+table(Data_Cluster[,3])
+table(Data_Cluster[,4])
+table(Data_Cluster[,5])
+
+
+Data[Data[,4] == 5,]
+
+
