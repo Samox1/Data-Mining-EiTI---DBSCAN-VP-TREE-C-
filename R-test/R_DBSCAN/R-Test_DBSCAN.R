@@ -150,9 +150,21 @@ library(ggplot2)
 library(ggforce)
 library(dbscan)
 
+### --- RYSOWANIE ODPOWIEDNIEJ WIELKOSCI OKREGOW --- ###
+gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
+  x <- xc + r*cos(seq(0, pi, length.out=100))
+  ymax <- yc + r*sin(seq(0, pi, length.out=100))
+  ymin <- yc + r*sin(seq(0, -pi, length.out=100))
+  annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
+}
+
+
 ### --- Funkcja z biblioteki DBSCAN --- ###
-Data <- as.data.frame(read.table("Data_Clustered_4000_0-1-v2.csv", header=FALSE,sep=","))
-dbsca <- dbscan(Data[,1:2], 0.3, 6, borderPoints = TRUE)
+rr = 0.5
+NN = 10
+# Data <- as.data.frame(read.table("Data_Clustered_4000_0-1-v2.csv", header=FALSE,sep=","))
+Data <- as.data.frame(read.table("Data_Clustere_4000_0-5_10_0-1.csv", header=FALSE,sep=","))
+dbsca <- dbscan(Data[,1:2], rr, NN, borderPoints = TRUE)
 colur <- as.factor(dbsca[["cluster"]])
 
 jpeg("R-DBSCAN.jpg", width = 2000, height = 2000, quality = 100)
@@ -161,6 +173,14 @@ sp <- sp + coord_fixed(ratio = 1)
 sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c(0,4))
 #sp <- sp + geom_point(aes(x=Data_Cluster[63,1], y=Data_Cluster[63,2], colour = 'black'))
 show(sp)
+dev.off()
+
+jpeg("R-DBSCAN-GG.jpg", width = 2000, height = 2000, quality = 100)
+square <- ggplot(Data[,1:2], aes(x=c(min(Data[,1]):max(Data[,1])), y=min(Data[,2]):max(Data[,2])))
+for(x in 1:length(Data[,1])){
+  square <- square + gg_circle(r=rr, xc=Data[x,1], yc=Data[x,2], color=colur[x], alpha=0.2)
+}
+show(square)
 dev.off()
 
 
@@ -177,6 +197,13 @@ sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c
 show(sp)
 dev.off()
 
+jpeg("Cpp-DBSCAN-GG.jpg", width = 2000, height = 2000, quality = 100)
+square <- ggplot(Data[,1:2], aes(x=c(min(Data[,1]):max(Data[,1])), y=min(Data[,2]):max(Data[,2])))
+for(x in 1:length(Data[,1])){
+  square <- square + gg_circle(r=rr, xc=Data[x,1], yc=Data[x,2], color=cluster[x], alpha=0.2)
+}
+show(square)
+dev.off()
 
 ### --- Dane z C++ --> VP-TREE v1 --- ###
 # Data_Cluster <- as.data.frame(read.table("Data_Clustered_20000.csv", header=FALSE,sep=","))
@@ -190,6 +217,13 @@ sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c
 show(sp)
 dev.off()
 
+jpeg("Cpp-DBSCAN-VP-v1-GG.jpg", width = 2000, height = 2000, quality = 100)
+square <- ggplot(Data[,1:2], aes(x=c(min(Data[,1]):max(Data[,1])), y=min(Data[,2]):max(Data[,2])))
+for(x in 1:length(Data[,1])){
+  square <- square + gg_circle(r=rr, xc=Data[x,1], yc=Data[x,2], color=cluster[x], alpha=0.2)
+}
+show(square)
+dev.off()
 
 ### --- Dane z C++ --> VP-TREE v2 --- ###
 # Data_Cluster <- as.data.frame(read.table("Data_Clustered_20000.csv", header=FALSE,sep=","))
@@ -201,6 +235,14 @@ sp <- sp + coord_fixed(ratio = 1)
 sp <- sp + geom_point(size=10, pch=1) #+ coord_cartesian(xlim = c(0,4), ylim = c(0,4))
 #sp <- sp + geom_point(aes(x=Data_Cluster[63,1], y=Data_Cluster[63,2], colour = 'black'))
 show(sp)
+dev.off()
+
+jpeg("Cpp-DBSCAN-VP-v2-GG.jpg", width = 2000, height = 2000, quality = 100)
+square <- ggplot(Data[,1:2], aes(x=c(min(Data[,1]):max(Data[,1])), y=min(Data[,2]):max(Data[,2])))
+for(x in 1:length(Data[,1])){
+  square <- square + gg_circle(r=rr, xc=Data[x,1], yc=Data[x,2], color=cluster[x], alpha=0.2)
+}
+show(square)
 dev.off()
 
 table(colur)
@@ -219,7 +261,23 @@ Tree1 <- as.data.frame(read.table("Tree1.csv", header=TRUE ,sep=","))
 Tree2 <- as.data.frame(read.table("Tree2.csv", header=TRUE ,sep=","))
 
 
+X <- seq(0.1,2, by=0.1)
+Y <- seq(0.1,1.05, by=0.05)
+R <- seq(0.1,2, by=0.1)
+X <- cbind(X, Y)
+X <- cbind(X, R)
+X <- as.data.frame(X)
 
 
+gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
+  x <- xc + r*cos(seq(0, pi, length.out=100))
+  ymax <- yc + r*sin(seq(0, pi, length.out=100))
+  ymin <- yc + r*sin(seq(0, -pi, length.out=100))
+  annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
+}
 
-
+square <- ggplot(X, aes(x=c(min(X):max(X)), y=min(Y):max(Y)))
+for(x in 1:length(X$X)){
+    square <- square + gg_circle(r=X$R[x], xc=X$X[x], yc=X$Y[x], color="blue", fill="red", alpha=0.2)
+}
+show(square)
