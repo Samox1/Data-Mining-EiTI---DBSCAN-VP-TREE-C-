@@ -58,6 +58,7 @@ void Save_File(Punkt *pkt, int ile_linii, int ile_x);
 void Clear_N_S(int *N_tab, int *S_tab, int ile_linii);
 void Clear_Cluster(Punkt *pkt, int ile_linii);
 void Show_VP_Tree(VP *VP_tree, int Tree_Counter);
+void Save_VP_Tree(VP *VP_tree, int Tree_Counter);
 
 double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x);
 int RangeQuery(Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int ile_x);
@@ -234,6 +235,8 @@ int main()
 
 // Show VP_Tree Structure
     // Show_VP_Tree(VP_tree2, Tree_Counter);
+    Save_VP_Tree(VP_tree, Tree_Counter);
+    Save_VP_Tree(VP_tree2, Tree_Counter);
 
 // --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
     
@@ -594,6 +597,31 @@ void Show_VP_Tree(VP *VP_tree, int Tree_Counter)
         << " | L_kid_N: " << VP_tree[i].L_kid_N << " | R_kid_N: " << VP_tree[i].R_kid_N 
         << " | Left Bound: " << VP_tree[i].left_bound << " | Right Bound: " << VP_tree[i].right_bound << endl;
     }
+}
+
+void Save_VP_Tree(VP *VP_tree, int Tree_Counter)
+{
+    string file_out = "Tree_Structure.csv";
+    cout << endl << "File output for TREE Structure: ";
+    cin >> file_out;
+    cout << "--- Tree Structure saving in: " << file_out << " --> ";
+    ofstream plik_out;
+    plik_out.open(file_out);
+
+    if(plik_out.good())
+    {   
+        plik_out << "ID," << "VP Index," << "Mediana," << "L_R," << "ID_Parent," << "L_kid," << "R_kid," << "L_kid_N," << "R_kid_N," << "Left Bound," << "Right Bound" << endl;
+
+        for (int i = 0; i < (Tree_Counter + 1); i++)
+        {
+            plik_out << i << "," << VP_tree[i].index << "," << VP_tree[i].mu << "," << VP_tree[i].l_r << "," << VP_tree[i].index_parent_node 
+            << "," << VP_tree[i].L_kid << "," << VP_tree[i].R_kid 
+            << "," << VP_tree[i].L_kid_N << "," << VP_tree[i].R_kid_N 
+            << "," << VP_tree[i].left_bound << "," << VP_tree[i].right_bound << endl;
+        }
+    }
+    plik_out.close();
+    cout << "Out File: Closed" << endl << endl;
 }
 
 double DistFunc(Punkt *pkt1, Punkt *pkt2, int ile_x)                // Function to calculate distance 

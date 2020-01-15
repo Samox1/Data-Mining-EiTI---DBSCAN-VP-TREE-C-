@@ -212,3 +212,14 @@ table(Data_Cluster[,5])
 Data[Data[,4] == 5,]
 
 
+##############################################################################################
+### Badanie Drzewa z C++
+
+Tree1 <- as.data.frame(read.table("Tree1.csv", header=TRUE ,sep=","))
+Tree2 <- as.data.frame(read.table("Tree2.csv", header=TRUE ,sep=","))
+
+
+
+
+
+
