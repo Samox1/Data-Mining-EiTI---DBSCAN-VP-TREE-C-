@@ -256,28 +256,54 @@ Data[Data[,4] == 5,]
 
 ##############################################################################################
 ### Badanie Drzewa z C++
+library(igraph)
 
 Tree1 <- as.data.frame(read.table("Tree1.csv", header=TRUE ,sep=","))
 Tree2 <- as.data.frame(read.table("Tree2.csv", header=TRUE ,sep=","))
 
+dat <- data.frame(parent=Tree1$ID_Parent, 
+                  node=Tree1$ID, 
+                  # text=as.character(Tree1$VP.Index))
+                  text=as.character(Tree1$L_kid_N+Tree1$R_kid_N))
+g <- graph.data.frame(dat)
+lay = layout.reingold.tilford(g)
+lay1= layout.
+par(mar=rep(0,4), mfrow=c(1,2))
+plot(g, layout=lay)
 
-X <- seq(0.1,2, by=0.1)
-Y <- seq(0.1,1.05, by=0.05)
-R <- seq(0.1,2, by=0.1)
-X <- cbind(X, Y)
-X <- cbind(X, R)
-X <- as.data.frame(X)
+
+# actors <- data.frame(name=c("Alice", "Bob", "Cecil", "David",
+#                             "Esmeralda"),
+#                      age=c(48,33,45,34,21),
+#                      gender=c("F","M","F","M","F"))
+# relations <- data.frame(from=c("Bob", "Cecil", "Cecil", "David",
+#                                "David", "Esmeralda"),
+#                         to=c("Alice", "Bob", "Alice", "Alice", "Bob", "Alice"),
+#                         same.dept=c(FALSE,FALSE,TRUE,FALSE,FALSE,TRUE),
+#                         friendship=c(4,5,5,2,1,1), advice=c(4,5,5,4,2,3))
+# g <- graph_from_data_frame(relations, directed=TRUE, vertices=actors)
+# print(g, e=TRUE, v=TRUE)
+# plot(g)
 
 
-gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
-  x <- xc + r*cos(seq(0, pi, length.out=100))
-  ymax <- yc + r*sin(seq(0, pi, length.out=100))
-  ymin <- yc + r*sin(seq(0, -pi, length.out=100))
-  annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
-}
+# X <- seq(0.1,2, by=0.1)
+# Y <- seq(0.1,1.05, by=0.05)
+# R <- seq(0.1,2, by=0.1)
+# X <- cbind(X, Y)
+# X <- cbind(X, R)
+# X <- as.data.frame(X)
+#
+# gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
+#   x <- xc + r*cos(seq(0, pi, length.out=100))
+#   ymax <- yc + r*sin(seq(0, pi, length.out=100))
+#   ymin <- yc + r*sin(seq(0, -pi, length.out=100))
+#   annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
+# }
+# 
+# square <- ggplot(X, aes(x=c(min(X):max(X)), y=min(Y):max(Y)))
+# for(x in 1:length(X$X)){
+#     square <- square + gg_circle(r=X$R[x], xc=X$X[x], yc=X$Y[x], color="blue", fill="red", alpha=0.2)
+# }
+# show(square)
 
-square <- ggplot(X, aes(x=c(min(X):max(X)), y=min(Y):max(Y)))
-for(x in 1:length(X$X)){
-    square <- square + gg_circle(r=X$R[x], xc=X$X[x], yc=X$Y[x], color="blue", fill="red", alpha=0.2)
-}
-show(square)
+
