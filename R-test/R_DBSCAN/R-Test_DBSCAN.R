@@ -256,11 +256,22 @@ Data[Data[,4] == 5,]
 
 ##############################################################################################
 ### Badanie Drzewa z C++
+library(tidyverse)
+library(MASS)
+# library(ggplot2)
+library(ggforce)
+library(dbscan)
 library(igraph)
+library(cowplot)
 
 Data120 <- as.data.frame(read.table("Data_Clustered_120_0-5_5_0-1.csv", header=FALSE,sep=","))
+Data120 <- as.data.frame(read.table("Data_Clustered_4000_0-5_10_0-1.csv", header=FALSE,sep=","))
+
 Tree1 <- as.data.frame(read.table("Tree1_120.csv", header=TRUE ,sep=","))
-# Tree2 <- as.data.frame(read.table("Tree2.csv", header=TRUE ,sep=","))
+Tree2 <- as.data.frame(read.table("Tree2_120.csv", header=TRUE ,sep=","))
+
+Tree1 <- as.data.frame(read.table("Tree1_4000_0-5_10_0-1.csv", header=TRUE ,sep=","))
+Tree2 <- as.data.frame(read.table("Tree2_4000_0-5_10_0-1.csv", header=TRUE ,sep=","))
 
 dat <- data.frame(parent=Tree1$ID_Parent, 
                   node=Tree1$ID, 
@@ -271,12 +282,32 @@ lay = layout.reingold.tilford(g)
 par(mar=rep(0,4), mfrow=c(1,2))
 plot(g, layout=lay)
 
-square <- ggplot(Data120[,1:2], aes(x=c(min(Data120[,1]):max(Data120[,1])), y=min(Data120[,2]):max(Data120[,2])))
+Cole <- c("red", "green", "blue", "violet", "gold")
+
+cluster <- as.factor(Data120[,4])
+square <- ggplot(Data120[,1:2], aes(x=V1, y=V2, colour= cluster)) + geom_point()
 for(x in 1:length(Data120[,1])){
   square <- square + gg_circle(r=Tree1$Mediana[Tree1$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color=, alpha=0.2)
+  square <- square + gg_circle(r=0.5, xc=Data120[x,1], yc=Data120[x,2], color=Cole[cluster[x]], alpha=0.2)
 }
 show(square)
+ggsave("CPP-DBSCAN-VP_TREE-v1-GG.png", plot = square, device = "png",
+       limitsize = FALSE)
+print("Rysunek Tree v1 - DONE")
 
+
+cluster <- as.factor(Data120[,5])
+jpeg("Cpp-DBSCAN-VP_TREE-v2-GG.jpg", width = 2000, height = 2000, quality = 100)
+square <- ggplot(Data120[,1:2], aes(x=V1, y=V2, colour= cluster)) + geom_point()
+for(x in 1:length(Data120[,1])){
+  square <- square + gg_circle(r=Tree1$Mediana[Tree2$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color=, alpha=0.2)
+}
+for(x in 1:length(Data120[,1])){
+  square <- square + gg_circle(r=0.5, xc=Data120[x,1], yc=Data120[x,2], color=Cole[cluster[x]], alpha=0.2)
+}
+show(square)
+dev.off()
+print("Rysunek Tree v2 - DONE")
 
 Data_Cluster <- Data120
 
@@ -337,12 +368,12 @@ table(Data_Cluster[,5])
 # X <- cbind(X, R)
 # X <- as.data.frame(X)
 #
-# gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
-#   x <- xc + r*cos(seq(0, pi, length.out=100))
-#   ymax <- yc + r*sin(seq(0, pi, length.out=100))
-#   ymin <- yc + r*sin(seq(0, -pi, length.out=100))
-#   annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
-# }
+gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
+  x <- xc + r*cos(seq(0, pi, length.out=100))
+  ymax <- yc + r*sin(seq(0, pi, length.out=100))
+  ymin <- yc + r*sin(seq(0, -pi, length.out=100))
+  annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
+}
 # 
 # square <- ggplot(X, aes(x=c(min(X):max(X)), y=min(Y):max(Y)))
 # for(x in 1:length(X$X)){
