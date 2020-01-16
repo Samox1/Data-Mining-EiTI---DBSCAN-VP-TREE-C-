@@ -258,8 +258,9 @@ Data[Data[,4] == 5,]
 ### Badanie Drzewa z C++
 library(igraph)
 
-Tree1 <- as.data.frame(read.table("Tree1.csv", header=TRUE ,sep=","))
-Tree2 <- as.data.frame(read.table("Tree2.csv", header=TRUE ,sep=","))
+Data120 <- as.data.frame(read.table("Data_Clustered_120_0-5_5_0-1.csv", header=FALSE,sep=","))
+Tree1 <- as.data.frame(read.table("Tree1_120.csv", header=TRUE ,sep=","))
+# Tree2 <- as.data.frame(read.table("Tree2.csv", header=TRUE ,sep=","))
 
 dat <- data.frame(parent=Tree1$ID_Parent, 
                   node=Tree1$ID, 
@@ -267,9 +268,52 @@ dat <- data.frame(parent=Tree1$ID_Parent,
                   text=as.character(Tree1$L_kid_N+Tree1$R_kid_N))
 g <- graph.data.frame(dat)
 lay = layout.reingold.tilford(g)
-lay1= layout.
 par(mar=rep(0,4), mfrow=c(1,2))
 plot(g, layout=lay)
+
+square <- ggplot(Data120[,1:2], aes(x=c(min(Data120[,1]):max(Data120[,1])), y=min(Data120[,2]):max(Data120[,2])))
+for(x in 1:length(Data120[,1])){
+  square <- square + gg_circle(r=Tree1$Mediana[Tree1$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color=, alpha=0.2)
+}
+show(square)
+
+
+Data_Cluster <- Data120
+
+### --- Dane z C++ --- ###
+# Data_Cluster <- as.data.frame(read.table("Data_Clustered_4000.csv", header=FALSE,sep=","))
+# Data_Cluster <- Data
+cluster <- as.factor(Data_Cluster[,3])
+
+square <- ggplot(Data[,1:2], aes(x=c(min(Data[,1]):max(Data[,1])), y=min(Data[,2]):max(Data[,2])))
+for(x in 1:length(Data[,1])){
+  square <- square + gg_circle(r=rr, xc=Data[x,1], yc=Data[x,2], color=cluster[x], alpha=0.2)
+}
+show(square)
+
+### --- Dane z C++ --> VP-TREE v1 --- ###
+# Data_Cluster <- as.data.frame(read.table("Data_Clustered_20000.csv", header=FALSE,sep=","))
+cluster <- as.factor(Data_Cluster[,4])
+square <- ggplot(Data[,1:2], aes(x=c(min(Data[,1]):max(Data[,1])), y=min(Data[,2]):max(Data[,2])))
+for(x in 1:length(Data[,1])){
+  square <- square + gg_circle(r=rr, xc=Data[x,1], yc=Data[x,2], color=cluster[x], alpha=0.2)
+}
+show(square)
+
+### --- Dane z C++ --> VP-TREE v2 --- ###
+# Data_Cluster <- as.data.frame(read.table("Data_Clustered_20000.csv", header=FALSE,sep=","))
+cluster <- as.factor(Data_Cluster[,5])
+
+square <- ggplot(Data[,1:2], aes(x=c(min(Data[,1]):max(Data[,1])), y=min(Data[,2]):max(Data[,2])))
+for(x in 1:length(Data[,1])){
+  square <- square + gg_circle(r=rr, xc=Data[x,1], yc=Data[x,2], color=cluster[x], alpha=0.2)
+}
+show(square)
+
+table(colur)
+table(Data_Cluster[,3])
+table(Data_Cluster[,4])
+table(Data_Cluster[,5])
 
 
 # actors <- data.frame(name=c("Alice", "Bob", "Cecil", "David",
