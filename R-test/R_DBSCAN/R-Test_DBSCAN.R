@@ -282,6 +282,7 @@ lay = layout.reingold.tilford(g)
 par(mar=rep(0,4), mfrow=c(1,2))
 plot(g, layout=lay)
 
+### --- TEST --- ###
 Cole <- c("red", "green", "blue", "violet", "gold")
 
 cluster <- as.factor(Data120[,4])
@@ -295,6 +296,7 @@ ggsave("CPP-DBSCAN-VP_TREE-v1-GG.png", plot = square, device = "png",
        limitsize = FALSE)
 print("Rysunek Tree v1 - DONE")
 
+### --- TEST --- ###
 
 cluster <- as.factor(Data120[,5])
 jpeg("Cpp-DBSCAN-VP_TREE-v2-GG.jpg", width = 2000, height = 2000, quality = 100)
