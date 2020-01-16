@@ -240,7 +240,7 @@ int main()
 
 // --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
     
-    // Show_Clustered_All(pkt, ile_linii, ile_x);
+    Show_Clustered_All(pkt, ile_linii, ile_x);
     
 // Saving CSV - with Cluster data
     Save_File(pkt, ile_linii, ile_x);

@@ -267,6 +267,8 @@ library(cowplot)
 Data120 <- as.data.frame(read.table("Data_Clustered_120_0-5_5_0-1.csv", header=FALSE,sep=","))
 Data120 <- as.data.frame(read.table("Data_Clustered_4000_0-5_10_0-1.csv", header=FALSE,sep=","))
 
+Data120 <- as.data.frame(read.table("Data_Clustered_120_0-5_4_0-1_0-9.csv", header=FALSE,sep=","))
+
 Tree1 <- as.data.frame(read.table("Tree1_120.csv", header=TRUE ,sep=","))
 Tree2 <- as.data.frame(read.table("Tree2_120.csv", header=TRUE ,sep=","))
 
@@ -284,19 +286,31 @@ plot(g, layout=lay)
 
 ### --- TEST --- ###
 Cole <- c("red", "green", "blue", "violet", "gold")
-
+Radi <- 0.5
 cluster <- as.factor(Data120[,4])
 square <- ggplot(Data120[,1:2], aes(x=V1, y=V2, colour= cluster)) + geom_point()
 for(x in 1:length(Data120[,1])){
   square <- square + gg_circle(r=Tree1$Mediana[Tree1$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color=, alpha=0.2)
-  square <- square + gg_circle(r=0.5, xc=Data120[x,1], yc=Data120[x,2], color=Cole[cluster[x]], alpha=0.2)
+  # square <- square + gg_circle(r=Radi, xc=Data120[x,1], yc=Data120[x,2], color=Cole[cluster[x]], alpha=0.2)
+  # print(x)
 }
 show(square)
-ggsave("CPP-DBSCAN-VP_TREE-v1-GG.png", plot = square, device = "png",
-       limitsize = FALSE)
+# ggsave("CPP-DBSCAN-VP_TREE-v1-GG.jpg", plot = square, device = "jpg",
+#         width = 4000, height = 4000, scale = 1, limitsize = FALSE)
 print("Rysunek Tree v1 - DONE")
+table(cluster)
+Data120[Data120[,4] == 3,]
 
-### --- TEST --- ###
+cluster <- as.factor(Data120[,3])
+square <- ggplot(Data120[,1:2], aes(x=V1, y=V2, colour= cluster)) + geom_point()
+for(x in 1:length(Data120[,1])){
+  # square <- square + gg_circle(r=Tree1$Mediana[Tree1$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color=, alpha=0.2)
+  square <- square + gg_circle(r=Radi, xc=Data120[x,1], yc=Data120[x,2], color=Cole[cluster[x]], alpha=0.2)
+  # print(x)
+}
+show(square)
+
+
 
 cluster <- as.factor(Data120[,5])
 jpeg("Cpp-DBSCAN-VP_TREE-v2-GG.jpg", width = 2000, height = 2000, quality = 100)
