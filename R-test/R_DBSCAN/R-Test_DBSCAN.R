@@ -10,6 +10,7 @@ library(dbscan)
 library(MASS)
 
 S <- matrix(c(1,0,0,1),2,2)
+mt0 <- c(5,5)
 mt1 <- c(0,0)
 mt2 <- c(10,10)
 mt3 <- c(12,12)
@@ -17,6 +18,7 @@ mt4 <- c(7, 11)
 mt5 <- c(-5, 12)
 mt6 <- c(-9, 12)
 
+n0 <- 15
 n1 <- 1000
 n2 <- 1000
 n3 <- 1000
@@ -25,16 +27,18 @@ n5 <- 1000
 n6 <- 1000
 n <- n1 + n2 + n3 + n4 + n5 + n6
 
-X1 <- mvrnorm(n1, mt1, S)
+X0 <- mvrnorm(n0, mt0, S)
+X1 <- mvrnorm(n0, mt1, S)
 X2 <- mvrnorm(n2, mt2, S)
 X3 <- mvrnorm(n3, mt3, S)
 X4 <- mvrnorm(n4, mt4, S)
 X5 <- mvrnorm(n5, mt5, S)
 X6 <- mvrnorm(n6, mt6, S)
 
-
+DATA_Cpp <- X0
 DATA_Cpp <- rbind(X1, X2, X3, X4, X5, X6)
-kNN1 <- kNNdistplot(DATA_Cpp, k = 5)
+
+kNN1 <- kNNdistplot(DATA_Cpp, k = 1)
 abline(h=.1, col = "red", lty=2)
 abline(h=.2, col = "red", lty=2)
 abline(h=.3, col = "red", lty=2)
@@ -42,10 +46,10 @@ abline(h=.4, col = "red", lty=2)
 abline(h=.5, col = "red", lty=2)
 
 # Write to CSV
-write.csv(DATA_Cpp, "DataCpp-2D-6000.csv")
+write.csv(DATA_Cpp, "DataCpp.csv")
 
 
-plot(X1, ylim = c(-5,15), xlim = c(-10,15), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
+plot(X0, ylim = c(-3,4), xlim = c(min(X0[,1]),max(X0[,1])), pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
 abline(v = 0, h = 0, col = "gray")
 points(X2, pch = 19, col = "orange")
 points(X3, pch = 19, col = "orange")
@@ -284,14 +288,15 @@ lay = layout.reingold.tilford(g)
 par(mar=rep(0,4), mfrow=c(1,2))
 plot(g, layout=lay)
 
+Data120 <- as.data.frame(read.table("Data_Cluster_15.csv", header=FALSE,sep=","))
 ### --- TEST --- ###
 Cole <- c("red", "green", "blue", "violet", "gold")
-Radi <- 0.5
+Radi <- 0.7
 cluster <- as.factor(Data120[,4])
 square <- ggplot(Data120[,1:2], aes(x=V1, y=V2, colour= cluster)) + geom_point()
 for(x in 1:length(Data120[,1])){
-  square <- square + gg_circle(r=Tree1$Mediana[Tree1$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color=, alpha=0.2)
-  # square <- square + gg_circle(r=Radi, xc=Data120[x,1], yc=Data120[x,2], color=Cole[cluster[x]], alpha=0.2)
+  # square <- square + gg_circle(r=Tree1$Mediana[Tree1$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color=, alpha=0.2)
+  square <- square + gg_circle(r=Radi, xc=Data120[x,1], yc=Data120[x,2], color=Cole[cluster[x]], alpha=0.2)
   # print(x)
 }
 show(square)
@@ -397,6 +402,7 @@ gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
 # }
 # show(square)
 
+Data_120 <- as.data.frame(read.table("Data_120.csv", header=FALSE ,sep=","))
 Qindex_Tree <- as.data.frame(read.table("Qindex-Tree.txt", header=FALSE ,sep=","))
 Data_Clu_Qin <- as.data.frame(read.table("Data_Clu_Qin_v1.csv", header=FALSE ,sep=","))
 Data_Clu_Qin[Data_Clu_Qin$V3 != Data_Clu_Qin$V4,]

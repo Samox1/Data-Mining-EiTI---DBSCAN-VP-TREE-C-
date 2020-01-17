@@ -767,7 +767,7 @@ for(int P = 0; P < ile_linii; P++)
         continue;
     }
 
-    int ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x) + 1;
+    int ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
     
     // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
     // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
@@ -806,7 +806,7 @@ for(int P = 0; P < ile_linii; P++)
             }
 
             pkt[S_tab[i]].cluster2 = C;
-            ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x) + 1;
+            ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
 
             if( ile_sasiadow >= minN)
             {
@@ -883,14 +883,14 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
 
 void kNN_TreeDist(VP *VP_tree, Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int minN, int ile_x, int TC, int *kNN)
 {
-    if (VP_tree[TC].index != Qindex)
-    {
+    // if (VP_tree[TC].index != Qindex)
+    // {
         if(DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) <= Eps)
         {
             N_tab[(*kNN)] = VP_tree[TC].index;
             (*kNN)++;
         }
-    }
+    // }
 
     if(VP_tree[TC].L_kid > -1){
         kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].L_kid, kNN);
