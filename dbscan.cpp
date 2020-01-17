@@ -875,6 +875,7 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
     int kNN = 0;
 
     kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
+    cout << Qindex << "," << VP_tree[TC].index << "," << kNN << endl;                                         // <--- cout << Qindex << "," << VP_tree[TC].index << endl;
     
     return kNN;
 }

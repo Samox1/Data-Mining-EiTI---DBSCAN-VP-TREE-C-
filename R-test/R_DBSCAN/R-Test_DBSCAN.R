@@ -397,4 +397,21 @@ gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
 # }
 # show(square)
 
+Qindex_Tree <- as.data.frame(read.table("Qindex-Tree.txt", header=FALSE ,sep=","))
+Data_Clu_Qin <- as.data.frame(read.table("Data_Clu_Qin_v1.csv", header=FALSE ,sep=","))
+Data_Clu_Qin[Data_Clu_Qin$V3 != Data_Clu_Qin$V4,]
+Data_Clu_Qin[Data_Clu_Qin$V3 != Data_Clu_Qin$V4 | Data_Clu_Qin$V3 != Data_Clu_Qin$V5,]
+Data_Clu_Qin[Data_Clu_Qin$V3 != Data_Clu_Qin$V4 | Data_Clu_Qin$V4 != Data_Clu_Qin$V5,]
 
+plot(Qindex_Tree)
+Qindex_Tree[Qindex_Tree$V1 == 54 | Qindex_Tree$V1 == 62,]
+Qindex_Tree[Qindex_Tree$V2 == 24,]
+
+dat <- data.frame(parent=Qindex_Tree$V2, 
+                  node=Qindex_Tree$V1, 
+                  # text=as.character(Tree1$VP.Index))
+                  text=as.character(Tree1$L_kid_N+Tree1$R_kid_N))
+g <- graph.data.frame(dat)
+lay = layout.reingold.tilford(g)
+par(mar=rep(0,4), mfrow=c(1,2))
+plot(g, layout=lay)
