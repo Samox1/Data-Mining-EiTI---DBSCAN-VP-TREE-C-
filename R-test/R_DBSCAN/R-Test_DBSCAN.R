@@ -404,7 +404,9 @@ gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
 
 Data_120 <- as.data.frame(read.table("Data_120.csv", header=FALSE ,sep=","))
 Qindex_Tree <- as.data.frame(read.table("Qindex-Tree.txt", header=FALSE ,sep=","))
+Qindex_Tree <- as.data.frame(read.table("Dat120.csv", header=FALSE ,sep=","))
 Data_Clu_Qin <- as.data.frame(read.table("Data_Clu_Qin_v1.csv", header=FALSE ,sep=","))
+Data_Clu_Qin <- as.data.frame(read.table("Dat120.csv", header=FALSE ,sep=","))
 Data_Clu_Qin[Data_Clu_Qin$V3 != Data_Clu_Qin$V4,]
 Data_Clu_Qin[Data_Clu_Qin$V3 != Data_Clu_Qin$V4 | Data_Clu_Qin$V3 != Data_Clu_Qin$V5,]
 Data_Clu_Qin[Data_Clu_Qin$V3 != Data_Clu_Qin$V4 | Data_Clu_Qin$V4 != Data_Clu_Qin$V5,]
@@ -421,3 +423,38 @@ g <- graph.data.frame(dat)
 lay = layout.reingold.tilford(g)
 par(mar=rep(0,4), mfrow=c(1,2))
 plot(g, layout=lay)
+
+
+######################################################################################################################################################
+
+
+Data120 <- as.data.frame(read.table("Dat_Clu_2000_Test.csv", header=FALSE ,sep=","))
+
+Data120 <- as.data.frame(read.table("Data_Clustered_120_0-5_4_0-1_0-9_Test.csv", header=FALSE,sep=","))
+Tree1 <- as.data.frame(read.table("Tree1_120_0-5_4_0-1_0-9_Test.csv", header=TRUE ,sep=","))
+Tree2 <- as.data.frame(read.table("Tree2_120_0-5_4_0-1_0-9_Test.csv", header=TRUE ,sep=","))
+
+Data120 <- as.data.frame(read.table("Data_Clustered_120_0-5_4_0-9_0-9_Test.csv", header=FALSE,sep=","))
+Tree1 <- as.data.frame(read.table("Tree1_120_0-5_4_0-9_0-9_Test.csv", header=TRUE ,sep=","))
+Tree2 <- as.data.frame(read.table("Tree2_120_0-5_4_0-9_0-9_Test.csv", header=TRUE ,sep=","))
+
+### --- TEST --- ###
+Cole <- c("red", "green", "blue", "violet", "gold")
+Radi <- 0.5
+cluster <- as.factor(Data120[,4])
+square <- ggplot(Data120[,1:2], aes(x=V1, y=V2, colour= cluster)) + geom_point()
+for(x in 1:length(Data120[,1])){
+  # square <- square + gg_circle(r=Tree1$Mediana[Tree1$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color=, alpha=0.2)
+  square <- square + gg_circle(r=Radi, xc=Data120[x,1], yc=Data120[x,2], color=Cole[cluster[x]], alpha=0.2)
+}
+show(square)
+# ggsave("CPP-DBSCAN-VP_TREE-v1-GG.jpg", plot = square, device = "jpg",
+#         width = 4000, height = 4000, scale = 1, limitsize = FALSE)
+print("Rysunek Tree v1 - DONE")
+
+table(Data120[,3])
+table(Data120[,4])
+table(Data120[,5])
+
+
+
