@@ -268,6 +268,13 @@ library(dbscan)
 library(igraph)
 library(cowplot)
 
+gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
+  x <- xc + r*cos(seq(0, pi, length.out=100))
+  ymax <- yc + r*sin(seq(0, pi, length.out=100))
+  ymin <- yc + r*sin(seq(0, -pi, length.out=100))
+  annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
+}
+
 Data120 <- as.data.frame(read.table("Data_Clustered_120_0-5_5_0-1.csv", header=FALSE,sep=","))
 Data120 <- as.data.frame(read.table("Data_Clustered_4000_0-5_10_0-1.csv", header=FALSE,sep=","))
 
@@ -428,7 +435,7 @@ plot(g, layout=lay)
 ######################################################################################################################################################
 
 
-Data120 <- as.data.frame(read.table("Dat_Clu_2000_Test.csv", header=FALSE ,sep=","))
+Data120 <- as.data.frame(read.table("Data_C3_2000.csv", header=FALSE ,sep=","))
 
 Data120 <- as.data.frame(read.table("Data_Clustered_120_0-5_4_0-1_0-9_Test.csv", header=FALSE,sep=","))
 Tree1 <- as.data.frame(read.table("Tree1_120_0-5_4_0-1_0-9_Test.csv", header=TRUE ,sep=","))
@@ -441,7 +448,7 @@ Tree2 <- as.data.frame(read.table("Tree2_120_0-5_4_0-9_0-9_Test.csv", header=TRU
 ### --- TEST --- ###
 Cole <- c("red", "green", "blue", "violet", "gold")
 Radi <- 0.5
-cluster <- as.factor(Data120[,4])
+cluster <- as.factor(Data120[,5])
 square <- ggplot(Data120[,1:2], aes(x=V1, y=V2, colour= cluster)) + geom_point()
 for(x in 1:length(Data120[,1])){
   # square <- square + gg_circle(r=Tree1$Mediana[Tree1$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color=, alpha=0.2)
@@ -452,9 +459,22 @@ show(square)
 #         width = 4000, height = 4000, scale = 1, limitsize = FALSE)
 print("Rysunek Tree v1 - DONE")
 
+Tree1 <- as.data.frame(read.table("Tree1_120.csv", header=TRUE ,sep=","))
+
+Data120 <- as.data.frame(read.table("Data_C1_6000.csv", header=FALSE ,sep=","))
 table(Data120[,3])
 table(Data120[,4])
 table(Data120[,5])
 
+Data120[Data120$V3 != Data120$V4,]
+
+dat <- data.frame(parent=Tree1$ID_Parent, 
+                  node=Tree1$ID, 
+                  # text=as.character(Tree1$VP.Index))
+                  text=as.character(Tree1$L_kid_N+Tree1$R_kid_N))
+g <- graph.data.frame(dat)
+lay = layout.reingold.tilford(g)
+par(mar=rep(0,4), mfrow=c(1,2))
+plot(g, layout=lay)
 
 
