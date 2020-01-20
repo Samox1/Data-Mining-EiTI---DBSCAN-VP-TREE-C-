@@ -40,7 +40,7 @@ struct VP{
         int R_kid = -1;
         int L_kid_N = 0;
         int R_kid_N = 0;
-        int l_r = 0;                    // Znak czy Lewo(-1) / Prawo(1) (Left(-1) / Right(1))
+        int l_r = 0;                    // Znak czy Lewo(-1) / Prawo(1) =>  Left = -1 / Right = 1
         double mu = 0.0;                // Mediana odleglosci od punktu do pozostalych
         double left_bound = 0.0;
         double right_bound = 0.0;
@@ -133,12 +133,21 @@ int main()
 
     cout << endl << "Epsilon (double): ";
     cin >> Eps;
+    
+    do{
     cout << "Minimal number of Neighbors = minN (int)): ";
     cin >> minN;
+    }while(minN < 1);      
+
+    do{
     cout << "P Random Sample of S (0-1): " ;
     cin >> P_proc_S;
+    }while(P_proc_S < 0.0 || P_proc_S > 1.0);
+
+    do{
     cout << "D Random Sample of S (0-1): " ;
     cin >> D_proc_S;
+    }while(D_proc_S < 0.0 || D_proc_S > 1.0);
 
     N_tab = new int[ile_linii];                                                 // Neighbors tab - index for N in pkt tab
     S_tab = new int[ile_linii];                                                 // Seed tab - index for S in pkt tab
@@ -250,7 +259,7 @@ int main()
 
 // --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
     
-    Show_Clustered_All(pkt, ile_linii, ile_x);
+    // Show_Clustered_All(pkt, ile_linii, ile_x);
     Show_C_All(pkt, ile_linii, ile_x);
 // Saving CSV - with Cluster data
     Save_File(pkt, ile_linii, ile_x);
@@ -890,89 +899,85 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
     int TC = 0;                     // Tree Counter
     int TC1 = 0;
     int TC2 = 0;
-    int TC3 = 0;
-    int flag_end = 0;
+    // int TC3 = 0;
+    // int flag_end = 0;
 
     // cout << endl << "Start Searching Tree for: " << Qindex << endl;
 
-    while(flag_end != 2)
+    
+    // while(flag_end != 2)
+    while(1)
     {
-        flag_end = 0;
-
-        if (VP_tree[TC].R_kid)
-        {
-            /* code */
-        }
-        
-
-        cout << TC << " (" << VP_tree[TC].L_kid_N << "|" << VP_tree[TC].R_kid_N << ") --> ";
-        // cout << "TC1: " << TC1 << endl;
-        // cout << "TC2: " << TC2 << endl;
+        // cout << endl << TC << ":" << VP_tree[TC].l_r << " (" << VP_tree[TC].L_kid_N << "|" << VP_tree[TC].R_kid_N << ") --> ";
+        // cout << "TC1: " << TC1 << ":" << VP_tree[TC1].l_r << endl;
+        // cout << "TC2: " << TC2 << ":" << VP_tree[TC2].l_r << endl;
 
         if ((DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) - VP_tree[TC].mu)  >=  Eps)
-        {
-            if (VP_tree[TC].R_kid_N > minN)
-            {   
+        {  
                 // TC2 = TC1;
+                // if(TC1 != 0){
+                //     TC2 = VP_tree[TC1].index_parent_node;
+                // }
                 // TC1 = TC;
                 TC = VP_tree[TC].R_kid;
+                if((VP_tree[TC].L_kid_N) > minN && (VP_tree[TC].R_kid_N) > minN){ 
                 continue;
-            }else
-            {
-                break;
-            }
-        }else
-        {
-            flag_end++;
+                }
+                else
+                {
+                    break;
+                }
         }
-        
         
         if ((VP_tree[TC].mu - DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x))  >  Eps)
         {
-            if ((VP_tree[TC].L_kid_N) > minN)
-            {
-                // TC3 = TC2;
-                // TC2 = VP_tree[TC].L_kid;
+                // if(TC1 != 0){
+                //     TC2 = VP_tree[TC1].index_parent_node;
+                // }
                 TC2 = TC1;
                 TC1 = TC;
                 TC = VP_tree[TC].L_kid;
+                if((VP_tree[TC].L_kid_N) > minN && (VP_tree[TC].R_kid_N) > minN){ 
                 continue;
-            }else
-            {
-                break;  
-            }
-        }else
-        {
-            flag_end++;
+                }
+                else
+                { 
+                    break;
+                }
         }
-        
-        if(flag_end == 2){
-            break;
-        }
+
+        break;
     }
 
     int kNN = 0;
     // TC1 = 0;
     
-    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
+    // kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
     
-    cout << endl << "TC (kNN): " << TC << endl;
+    // cout << endl << "TC (kNN): " << TC << endl;
     // cout << "TC1 (kNN): " << TC1 << endl;
     // cout << "TC2 (kNN): " << TC2 << endl;
-    cout << "Update TC --> Q: " << Qindex << " = " << TC << " = " << kNN << endl;                                         // <--- cout << Qindex << "," << VP_tree[TC].index << endl;
-
+    // cout << "Update TC --> Q: " << Qindex << " = " << TC << " = " << kNN << endl;                                         // <--- cout << Qindex << "," << VP_tree[TC].index << endl;
     
     // if (kNN < minN)
     // {
-    //     kNN = 0;
-        // kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
-
+        // kNN = 0;
+        kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC2, &kNN);
         // cout << "Update TC1 --> " << Qindex << " = " << VP_tree[TC1].index << " = " << kNN << endl;
 
-        // if (kNN < minN && TC2 != TC1)
+        // if (kNN < minN && TC1 != 0)
         // {
+            // if(VP)
+            // kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
             // kNN = 0;
-            // kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC2, &kNN);
+            // cout << endl << kNN << " | " ;
+            // if(VP_tree[TC1].l_r == -1){
+            //     kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[VP_tree[TC1].index_parent_node].R_kid, &kNN);
+            // }
+            // else{
+            //     kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[VP_tree[TC1].index_parent_node].L_kid, &kNN);
+            // }
+            // cout << kNN << endl;
             // cout << "Update TC2 --> " << Qindex << " = " << VP_tree[TC2].index << " = " << kNN << endl;
         // }
     // }
