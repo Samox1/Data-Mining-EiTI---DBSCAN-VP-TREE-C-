@@ -925,23 +925,26 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
                 }
                 else
                 {
+                    // TC2 = VP_tree[TC].index_parent_node;
                     break;
                 }
         }
         
         if ((VP_tree[TC].mu - DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x))  >  Eps)
         {
-                // if(TC1 != 0){
-                //     TC2 = VP_tree[TC1].index_parent_node;
-                // }
-                TC2 = TC1;
-                TC1 = TC;
+                
+                // TC2 = TC1;
+                // TC1 = TC;
                 TC = VP_tree[TC].L_kid;
-                if((VP_tree[TC].L_kid_N) > minN && (VP_tree[TC].R_kid_N) > minN){ 
+                // if(TC != 0){
+                    // TC2 = VP_tree[TC].index_parent_node;
+                // }
+                if((VP_tree[TC].L_kid_N) > minN && (VP_tree[TC].R_kid_N) > minN ){ 
                 continue;
                 }
                 else
                 { 
+                    TC2 = VP_tree[TC].index_parent_node;
                     break;
                 }
         }
