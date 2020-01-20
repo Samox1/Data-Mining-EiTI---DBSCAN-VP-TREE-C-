@@ -53,6 +53,7 @@ void Show_Imported_First3(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Imported_All(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Clustered(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Clustered_All(Punkt *pkt, int ile_linii, int ile_x);
+void Show_C_All(Punkt *pkt, int ile_linii, int ile_x);
 void Save_File(Punkt *pkt, int ile_linii, int ile_x);
 
 void Clear_N_S(int *N_tab, int *S_tab, int ile_linii);
@@ -69,6 +70,7 @@ void DBSCAN_Origin(Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii
 double RandVal(double low,double high);
 long iRandVal(long low,long high);
 double Mediana(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], int D_rozmiar, int ile_x, int p_counter);
+double Mediana_VAR(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], int D_rozmiar, int ile_x, int p_counter);
 
 int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x);
 void Make_VP_Tree(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x, int *Tree_Counter, int lr, int index_parentnode);
@@ -148,6 +150,7 @@ int main()
     auto stop = high_resolution_clock::now();                                   // Time - STOP
     auto duration = duration_cast<microseconds>(stop - start);                  // Time - Caltulation
     cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;       // Time - show Function duration
+    cout << "DBSCAN Time: " << (double) duration.count() / 1000000.0 << " s" << endl;
 
 // Show every point and his Cluster number
     // Show_Clustered(pkt, ile_linii, ile_x);
@@ -181,7 +184,7 @@ int main()
     auto stop2 = high_resolution_clock::now();                                          // Time - STOP
     auto duration2 = duration_cast<microseconds>(stop2 - start2);                       // Time - Caltulation
     cout << endl << "MAKE_VP_TREE Time: " << duration2.count() << " us" << endl;        // Time - show Function duration
-
+    cout << "MAKE_VP_TREE Time: " << (double)duration2.count() / 1000000.0 << " s" << endl;        // Time - show Function duration
 
     auto start1 = high_resolution_clock::now();                                         // Time - START
 // DBSCAN_VP-TREE --- START //
@@ -189,7 +192,9 @@ int main()
 // DBSCAN_VP-TREE --- END //
     auto stop1 = high_resolution_clock::now();                                          // Time - STOP
     auto duration1 = duration_cast<microseconds>(stop1 - start1);                       // Time - Caltulation
-    cout << "DBSCAN_VP_TREE Time: " << duration1.count() << " us" << endl;      // Time - show Function duration
+    cout << "DBSCAN_VP_TREE Time: " << duration1.count() << " us" << endl;              // Time - show Function duration  
+    cout << "DBSCAN_VP_TREE Time: " << (double)duration1.count() / 1000000.0 << " s" << endl;      // Time - show Function duration
+    cout << "DBSCAN_VP_TREE Time (SUMA): " << (double)(duration1.count()+duration2.count()) / 1000000.0 << " s" << endl;
     
 // Show VP_Tree Structure
     // Show_VP_Tree(VP_tree, Tree_Counter);
@@ -203,6 +208,7 @@ int main()
 
 // --- VP-TREE - ver 2 - Improved Condition ------------------------------------------------------------------------------------------------------------- //
 
+// --- Comme START --- //
     for (int i = 0; i < ile_linii; i++)                                                 // Wpisywanie indeksow do startowej tablicy S do tworzenia drzewa VP-Tree
     {
         S_VP_tab[i] = i;
@@ -223,7 +229,7 @@ int main()
     auto stop4 = high_resolution_clock::now();                                          // Time - STOP
     auto duration4 = duration_cast<microseconds>(stop4 - start4);                       // Time - Caltulation
     cout << endl << "MAKE_VP_TREE_2 Time: " << duration4.count() << " us" << endl;      // Time - show Function duration
-
+    cout << "MAKE_VP_TREE_2 Time: " << (double)duration4.count() / 1000000.0 << " s" << endl;      // Time - show Function duration
 
     auto start3 = high_resolution_clock::now();                                         // Time - START
 // DBSCAN_VP-TREE --- START //
@@ -232,6 +238,10 @@ int main()
     auto stop3 = high_resolution_clock::now();                                          // Time - STOP
     auto duration3 = duration_cast<microseconds>(stop3 - start3);                       // Time - Caltulation
     cout << "DBSCAN_VP_TREE_2 Time: " << duration3.count() << " us" << endl;    // Time - show Function duration
+    cout << "DBSCAN_VP_TREE_2 Time: " << (double)duration3.count() / 1000000.0 << " s" << endl;    // Time - show Function duration
+    cout << "DBSCAN_VP_TREE_2 Time (SUMA): " << (double)(duration3.count()+duration4.count()) / 1000000.0 << " s" << endl;    // Time - show Function duration
+
+// --- Comme END --- //
 
 // Show VP_Tree Structure
     // Show_VP_Tree(VP_tree2, Tree_Counter);
@@ -240,8 +250,8 @@ int main()
 
 // --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
     
-    // Show_Clustered_All(pkt, ile_linii, ile_x);
-    
+    Show_Clustered_All(pkt, ile_linii, ile_x);
+    Show_C_All(pkt, ile_linii, ile_x);
 // Saving CSV - with Cluster data
     Save_File(pkt, ile_linii, ile_x);
 
@@ -498,6 +508,56 @@ void Show_Clustered_All(Punkt *pkt, int ile_linii, int ile_x)
         cout << pkt[i].cluster3 << endl;
     }
 }
+
+void Show_C_All(Punkt *pkt, int ile_linii, int ile_x)
+{
+    cout << endl;
+    int Tab_C[1000];
+    int Tab_C1[1000];
+    int Tab_C2[1000];
+    for (int i = 0; i < 1000; i++)
+    {
+        Tab_C[i] = 0;
+        Tab_C1[i] = 0;
+        Tab_C2[i] = 0;
+    }
+    
+    for(int i=0; i<ile_linii; i++)
+    {
+        Tab_C[pkt[i].cluster + 1]++;
+        Tab_C1[pkt[i].cluster2 + 1]++;
+        Tab_C2[pkt[i].cluster3 + 1]++;
+    }
+
+    cout << "DBSCAN Original - Class:" << endl;
+    for (int i = 0; i < 1000; i++)
+    {
+        if (Tab_C[i] > 0)
+        {
+            cout << "Class: " << i << " = " << Tab_C[i] << endl;
+        }
+    }
+
+    cout << endl << "DBSCAN VP_Tree v1 - Class:" << endl;
+    for (int i = 0; i < 1000; i++)
+    {
+        if (Tab_C1[i] > 0)
+        {
+            cout << "Class: " << i << " = " << Tab_C1[i] << endl;
+        }
+    }
+
+    cout << endl << "DBSCAN VP_Tree v2 - Class:" << endl;
+    for (int i = 0; i < 1000; i++)
+    {
+        if (Tab_C2[i] > 0)
+        {
+            cout << "Class: " << i << " = " << Tab_C2[i] << endl;
+        }
+    }
+    
+}
+
 
 void Save_File(Punkt *pkt, int ile_linii, int ile_x)
 {
@@ -782,7 +842,7 @@ for(int P = 0; P < ile_linii; P++)
     C = C + 1;                              // Cluster number increment
     pkt[P].cluster2 = C;                     // ELSE: N > minN => Cluster
     // cout << "CLUSTER," << C << "," << P << endl;
-    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << endl;     // Show changing Cluster number
+    // cout << "********************** Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << "| kNN = " << ile_sasiadow << endl;     // Show changing Cluster number
     
     
     for(int i=0; i<ile_linii; i++)
@@ -830,20 +890,31 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
     int TC = 0;                     // Tree Counter
     int TC1 = 0;
     int TC2 = 0;
+    int TC3 = 0;
     int flag_end = 0;
 
-    cout << endl << "Start Searching Tree for: " << Qindex << endl;
+    // cout << endl << "Start Searching Tree for: " << Qindex << endl;
 
     while(flag_end != 2)
     {
         flag_end = 0;
 
-        cout << "TC: " << TC << endl;
+        if (VP_tree[TC].R_kid)
+        {
+            /* code */
+        }
+        
+
+        cout << TC << " (" << VP_tree[TC].L_kid_N << "|" << VP_tree[TC].R_kid_N << ") --> ";
+        // cout << "TC1: " << TC1 << endl;
+        // cout << "TC2: " << TC2 << endl;
 
         if ((DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) - VP_tree[TC].mu)  >=  Eps)
         {
             if (VP_tree[TC].R_kid_N > minN)
             {   
+                // TC2 = TC1;
+                // TC1 = TC;
                 TC = VP_tree[TC].R_kid;
                 continue;
             }else
@@ -858,8 +929,12 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
         
         if ((VP_tree[TC].mu - DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x))  >  Eps)
         {
-            if (VP_tree[TC].L_kid_N > minN)
+            if ((VP_tree[TC].L_kid_N) > minN)
             {
+                // TC3 = TC2;
+                // TC2 = VP_tree[TC].L_kid;
+                TC2 = TC1;
+                TC1 = TC;
                 TC = VP_tree[TC].L_kid;
                 continue;
             }else
@@ -877,9 +952,30 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
     }
 
     int kNN = 0;
-
+    // TC1 = 0;
+    
     kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
-    // cout << Qindex << "," << VP_tree[TC].index << "," << kNN << endl;                                         // <--- cout << Qindex << "," << VP_tree[TC].index << endl;
+    
+    cout << endl << "TC (kNN): " << TC << endl;
+    // cout << "TC1 (kNN): " << TC1 << endl;
+    // cout << "TC2 (kNN): " << TC2 << endl;
+    cout << "Update TC --> Q: " << Qindex << " = " << TC << " = " << kNN << endl;                                         // <--- cout << Qindex << "," << VP_tree[TC].index << endl;
+
+    
+    // if (kNN < minN)
+    // {
+    //     kNN = 0;
+        // kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
+
+        // cout << "Update TC1 --> " << Qindex << " = " << VP_tree[TC1].index << " = " << kNN << endl;
+
+        // if (kNN < minN && TC2 != TC1)
+        // {
+            // kNN = 0;
+            // kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC2, &kNN);
+            // cout << "Update TC2 --> " << Qindex << " = " << VP_tree[TC2].index << " = " << kNN << endl;
+        // }
+    // }
     
     return kNN;
 }
@@ -1005,59 +1101,20 @@ void Make_VP_Tree(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, double 
         Make_VP_Tree(VP_tree, pkt, R_tab, R_counter, P_proc_S, D_proc_S, ile_x, Tree_Counter, 1, Parent);
     }
     
-
     delete [] L_tab;
     delete [] R_tab;
-
-}
-
-
-
-double Mediana(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], int D_rozmiar, int ile_x, int p_counter)
-{
-    double med = 0.0;
-
-    if (D_rozmiar == 1)
-    {
-        med = DistFunc(&pkt[P_tab[p_counter]], &pkt[D_tab[0]], ile_x);
-    }else
-    {
-        for (int d = 0; d < D_rozmiar; d++)
-        {
-
-            Mediana_tab[d] = DistFunc( &pkt[P_tab[p_counter]], &pkt[D_tab[d]], ile_x);      // Liczenie odleglosci od punktu P do wszystkich ze zbioru D
-        }
-        
-
-        double temp_dist = 0;                                   // Sortowanie Babelkowe - START
-        for (int b = 0; b < D_rozmiar; b++)                     
-        {
-            for (int c = 0; c < (D_rozmiar-1); c++)
-            {
-                if(Mediana_tab[c] > Mediana_tab[c+1]){
-                    temp_dist = Mediana_tab[c+1];
-                    Mediana_tab[c+1] = Mediana_tab[c];
-                    Mediana_tab[c] = temp_dist;
-                }
-            }
-        }                                                      // Sortowanie Babelkowe - KONIEC
-
-
-        if (D_rozmiar%2 == 1)                                   // D_rozmiar = Nieparzysta  - Mediana to srodkowa wartosc
-        {
-            med = Mediana_tab[D_rozmiar/2];
-        }else                                                   // D_rozmiar = Parzysta     - Mediana to srednia z dwoch srodkowych wartosci
-        {
-            med = (Mediana_tab[(D_rozmiar/2) - 1] + Mediana_tab[(D_rozmiar/2)]) / 2.0;
-        }
-    }
-
-    return med;
 }
 
 
 
 int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double D_proc_S, int ile_x){
+
+    // cout << "*** S_romiar = " << S_rozmiar << endl;
+    // if (S_rozmiar <= 300)
+    // {
+    //     P_proc_S = 0.99;
+    //     D_proc_S = 0.99;
+    // }
     
     int P_rozmiar = P_proc_S * S_rozmiar;
     int D_rozmiar = D_proc_S * S_rozmiar;
@@ -1070,6 +1127,95 @@ int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double 
        D_rozmiar = 1; 
     }
 
+
+// // ----------------------------------------
+//    if (P_rozmiar<8 && S_rozmiar>8)
+//    {
+//        P_rozmiar = 8;
+//    }
+   
+//    if (D_rozmiar<8 && S_rozmiar>8)
+//    {
+//        D_rozmiar = 8;
+//    }
+
+// // ----------------------------------------
+//    if (P_rozmiar<7 && S_rozmiar>7)
+//    {
+//        P_rozmiar = 7;
+//    }
+   
+//    if (D_rozmiar<7 && S_rozmiar>7)
+//    {
+//        D_rozmiar = 7;
+//    }
+
+// // ----------------------------------------
+//    if (P_rozmiar<6 && S_rozmiar>6)
+//    {
+//        P_rozmiar = 6;
+//    }
+   
+//    if (D_rozmiar<6 && S_rozmiar>6)
+//    {
+//        D_rozmiar = 6;
+//    }
+
+// // ----------------------------------------
+//    if (P_rozmiar<5 && S_rozmiar>5)
+//    {
+//        P_rozmiar = 5;
+//    }
+   
+//    if (D_rozmiar<5 && S_rozmiar>5)
+//    {
+//        D_rozmiar = 5;
+//    }
+
+// // ----------------------------------------
+//    if (P_rozmiar<4 && S_rozmiar>4)
+//    {
+//        P_rozmiar = 4;
+//    }
+   
+//    if (D_rozmiar<4 && S_rozmiar>4)
+//    {
+//        D_rozmiar = 4;
+//    }
+
+// ----------------------------------------
+   if (P_rozmiar<3 && S_rozmiar>3)
+   {
+       P_rozmiar = 3;
+   }
+   
+   if (D_rozmiar<3 && S_rozmiar>3)
+   {
+       D_rozmiar = 3;
+   }
+
+// ----------------------------------------
+   if (P_rozmiar<2 && S_rozmiar>2)
+   {
+       P_rozmiar = 2;
+   }
+   
+   if (D_rozmiar<2 && S_rozmiar>2)
+   {
+       D_rozmiar = 2;
+   }
+
+
+// ----------------------------------------
+   if(D_rozmiar==S_rozmiar)
+   {
+       D_rozmiar=S_rozmiar-1;
+   }
+
+    // cout << "*** S_romiar = " << S_rozmiar << endl;
+    // cout << "P_rozmiar = " << P_rozmiar << endl;
+    // cout << "D_rozmiar = " << D_rozmiar << endl;
+    
     int *P_tab;
     int *D_tab;
     double *Mediana_tab;
@@ -1084,15 +1230,29 @@ int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double 
     int Si = 0;                                                 // Iterator po S
     int Pi = 0;                                                 // Iterator po P
 
+    int flag_for = 0;
+
     double best_spread = -1;                                    // Problemy z "best_spread = 0.0" --> czasem wartosic wychodzily na tyle male ze pojawialy sie problemy z porownaniem
 
     while (Pi < P_rozmiar)                                      // Wylosowanie punktow P ze zbioru S
     {
+        flag_for = 0;
+
         if ( RandVal(0,1) <= P_proc_S)
         {
-            P_tab[Pi] = S_VP_tab[Si];
-            
-            Pi++;
+            for (int z = 0; z < Pi; z++)
+            {
+                if (P_tab[z] == S_VP_tab[Si])
+                {
+                    flag_for = 1;
+                    break;
+                }
+            }
+            if (flag_for == 0)
+            {
+                P_tab[Pi] = S_VP_tab[Si]; 
+                Pi++;
+            }
         }
             
         Si++;
@@ -1102,13 +1262,6 @@ int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double 
         }
     }
     
-    // cout << "P_tab:" << endl;                                   // Wyswietlanie tablicy P
-    // for (int i = 0; i < P_rozmiar; i++)
-    // {
-    //     cout << P_tab[i] << endl;
-    // }
-    
-    
     for (int k = 0; k < P_rozmiar; k++)                         // Dla kazdego punktu p ze zbioru P
     {
         int Di = 0;                                             // Iterator po D
@@ -1116,11 +1269,29 @@ int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double 
         Si = 0;
         while (Di < D_rozmiar)                                  // Wylosowanie punktow D ze zbioru S
         {
+            flag_for = 0;
+
             if ( RandVal(0,1) <= D_proc_S)
             {
-                D_tab[Di] = S_VP_tab[Si];
-                Di++;
-            } 
+                for (int z = 0; z < Di; z++)
+                {
+                    if (D_tab[z] == S_VP_tab[Si])
+                    {
+                        flag_for = 1;
+                        break;
+                    }
+                }
+                if (P_tab[k] == S_VP_tab[Si])
+                {
+                    flag_for = 1;
+                }
+                
+                if (flag_for == 0)
+                {
+                    D_tab[Di] = S_VP_tab[Si];
+                    Di++;
+                } 
+            }
             Si++;
         
             if(Si >= S_rozmiar){                                // Pirackie rozwiazanie problemu jesli wyjdziemy poza tablice S_VP_tab (poczatkowa) - zbieramy znowu punkty (mozliwe powtorzenia)
@@ -1128,24 +1299,22 @@ int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double 
             }
         }
 
-        // cout << "D_tab:" << endl;                               // Wyswietlanie tablicy D
-        // for (int i = 0; i < D_rozmiar; i++)
-        // {
-        //     cout << D_tab[i] << endl;
+        // for(int z = 0; z < D_rozmiar; z++){
+        //     cout << "P_tab: " << P_tab[k] << "| D_tab: " << D_tab[z] << endl;
         // }
+        
 
+        double mu_pd = Mediana_VAR(pkt, Mediana_tab, P_tab, D_tab, D_rozmiar, ile_x, k);
+        // cout << mu_pd << endl;
 
-        double mu_pd = Mediana(pkt, Mediana_tab, P_tab, D_tab, D_rozmiar, ile_x, k);
-
-
-        var = 0;                                                // Liczenie Wariancji - START
-        for( int n = 0; n < D_rozmiar; n++)
+        var = 0;
+        for( int n = 0; n < D_rozmiar; n++)              // Liczenie Wariancji - START
         {
             var += pow(Mediana_tab[n] - mu_pd, 2);
         }
-        var /= D_rozmiar;                                       // Liczenie Wariancji - KONIEC
+        var /= (D_rozmiar);                         // Liczenie Wariancji - KONIEC
         
-
+                                
         if (var > best_spread)                                  // Sprawdzenie punktu P - czy jest lepszy?        
         {
             best_spread = var;
@@ -1160,6 +1329,109 @@ int Select_VP(Punkt *pkt, int *S_VP_tab, int S_rozmiar, double P_proc_S, double 
     return best_p;
 }
 
+
+double Mediana(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], int D_rozmiar, int ile_x, int p_counter)
+{
+    // cout << "Liczenie Mediany" << endl;
+    double med = 0.0;
+    double *med2;
+
+    if (D_rozmiar == 1)
+    {
+        med = 0.00000;
+        // med = DistFunc(&pkt[P_tab[p_counter]], &pkt[D_tab[0]], ile_x);
+        // cout << "Wyswietlanie D_TAB: " << P_tab[p_counter] << "| D_tab[0]: " << D_tab[0] << endl;
+        // cout << med << endl;
+    }else
+    {
+        for (int d = 0; d < D_rozmiar; d++)
+        {
+            Mediana_tab[d] = DistFunc( &pkt[P_tab[p_counter]], &pkt[D_tab[d]], ile_x);      // Liczenie odleglosci od punktu P do wszystkich ze zbioru D
+            // cout << Mediana_tab[d] << endl;
+        }
+        
+        // cout << "Wyswietlanie D_TAB: " << P_tab[p_counter] << endl;
+        // for (int b = 0; b < D_rozmiar; b++)                     
+        // {
+        //     cout << D_tab[b] << " = " << Mediana_tab[b] << endl;
+        // }
+
+        double temp_dist = 0;                                   // Sortowanie Babelkowe - START
+        for (int b = 0; b < D_rozmiar; b++)                     
+        {
+            for (int c = 0; c < (D_rozmiar-1); c++)
+            {
+                if(Mediana_tab[c] > Mediana_tab[c+1]){
+                    temp_dist = Mediana_tab[c+1];
+                    Mediana_tab[c+1] = Mediana_tab[c];
+                    Mediana_tab[c] = temp_dist;
+                }
+            }
+        }                                                      // Sortowanie Babelkowe - KONIEC
+
+        med2 = Mediana_tab + 1;
+        D_rozmiar = D_rozmiar - 1;
+
+        // cout << "Wyswietlanie Posortowanej Mediany: " << P_tab[p_counter] << endl;
+        // for (int b = 0; b < D_rozmiar; b++)                     
+        // {
+        //     cout << " = " << med2[b] << endl;
+        // }
+
+        if (D_rozmiar%2 == 1)                                   // D_rozmiar = Nieparzysta  - Mediana to srodkowa wartosc
+        {
+            med = med2[D_rozmiar/2];
+        }else                                                   // D_rozmiar = Parzysta     - Mediana to srednia z dwoch srodkowych wartosci
+        {
+            med = (med2[(D_rozmiar/2) - 1] + med2[(D_rozmiar/2)]) / 2.0;
+        }
+    }
+
+    // cout << "Mediana (double) = " << med << endl;
+    return med;
+}
+
+
+double Mediana_VAR(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], int D_rozmiar, int ile_x, int p_counter)
+{
+    // cout << "Liczenie Mediany" << endl;
+    double med = 0.0;
+    double *med2;
+
+    if (D_rozmiar == 1)
+    {
+        med = DistFunc(&pkt[P_tab[p_counter]], &pkt[D_tab[0]], ile_x);
+    }else
+    {
+        for (int d = 0; d < D_rozmiar; d++)
+        {
+            Mediana_tab[d] = DistFunc( &pkt[P_tab[p_counter]], &pkt[D_tab[d]], ile_x);      // Liczenie odleglosci od punktu P do wszystkich ze zbioru D
+        }
+
+        double temp_dist = 0;                                   // Sortowanie Babelkowe - START
+        for (int b = 0; b < D_rozmiar; b++)                     
+        {
+            for (int c = 0; c < (D_rozmiar-1); c++)
+            {
+                if(Mediana_tab[c] > Mediana_tab[c+1]){
+                    temp_dist = Mediana_tab[c+1];
+                    Mediana_tab[c+1] = Mediana_tab[c];
+                    Mediana_tab[c] = temp_dist;
+                }
+            }
+        }                                                      // Sortowanie Babelkowe - KONIEC
+
+        if (D_rozmiar%2 == 1)                                   // D_rozmiar = Nieparzysta  - Mediana to srodkowa wartosc
+        {
+            med = Mediana_tab[D_rozmiar/2];
+        }else                                                   // D_rozmiar = Parzysta     - Mediana to srednia z dwoch srodkowych wartosci
+        {
+            med = (Mediana_tab[(D_rozmiar/2) - 1] + Mediana_tab[(D_rozmiar/2)]) / 2.0;
+        }
+    }
+
+    return med;
+}
 
 
 void DBSCAN_VP_TREE_2(VP *VP_tree, Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
@@ -1187,8 +1459,7 @@ for(int P = 0; P < ile_linii; P++)
     C = C + 1;                              // Cluster number increment
     pkt[P].cluster3 = C;                     // ELSE: N > minN => Cluster
     // cout << "CLUSTER," << C << "," << P << endl;
-
-    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << endl;     // Show changing Cluster number
+    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << "| kNN = " << ile_sasiadow << endl;     // Show changing Cluster number
     
     for(int i=0; i<ile_linii; i++)
     {
@@ -1234,6 +1505,7 @@ int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qin
 
     int TC = 0;                     // Tree Counter
     int TC1 = 0;
+    int TC2 = 0;
     int flag_end = 0;
 
     while(flag_end != 2)
@@ -1244,6 +1516,7 @@ int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qin
         {
             if (VP_tree[TC].R_kid_N > minN)
             {
+                // TC2 = TC1;
                 // TC1 = TC;
                 TC = VP_tree[TC].R_kid;
                 continue;
@@ -1261,6 +1534,7 @@ int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qin
         {
             if (VP_tree[TC].L_kid_N > minN)
             {
+                TC2 = TC1;
                 TC1 = TC;
                 TC = VP_tree[TC].L_kid;
                 continue;
@@ -1282,7 +1556,7 @@ int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qin
 
     int kNN = 0;
 
-    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
+    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC2, &kNN);
     
     return kNN;
 }
@@ -1337,7 +1611,11 @@ void Make_VP_Tree_2(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, doubl
     double *Mediana_tab;
     Mediana_tab = new double[S_rozmiar];
 
-    VP_tree[(*Tree_Counter)].mu = Mediana(pkt, Mediana_tab, &P_tabk, S_VP_tab, S_rozmiar, ile_x, p_counter);
+    VP_tree[(*Tree_Counter)].mu = Mediana_VAR(pkt, Mediana_tab, &P_tabk, S_VP_tab, S_rozmiar, ile_x, p_counter);
+
+    // double *med2;
+    // med2 = Mediana_tab + 1;
+    // int S_rozmiar2 = S_rozmiar - 1;
 
 // Left Bound / Right Bound
     if (S_rozmiar%2 == 1)                                                       // D_rozmiar = Nieparzysta  - Mediana to srodkowa wartosc
@@ -1350,6 +1628,18 @@ void Make_VP_Tree_2(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, doubl
         VP_tree[(*Tree_Counter)].right_bound = Mediana_tab[S_rozmiar/2];
     }
 
+    // Left Bound / Right Bound
+    // if (S_rozmiar2%2 == 1)                                                       // D_rozmiar = Nieparzysta  - Mediana to srodkowa wartosc
+    // {
+    //     VP_tree[(*Tree_Counter)].left_bound = med2[S_rozmiar2/2 - 1];
+    //     VP_tree[(*Tree_Counter)].right_bound = med2[S_rozmiar2/2 + 1];
+    // }else                                                                       // D_rozmiar = Parzysta     - Mediana to srednia z dwoch srodkowych wartosci
+    // {
+    //     VP_tree[(*Tree_Counter)].left_bound = med2[S_rozmiar2/2 - 1];
+    //     VP_tree[(*Tree_Counter)].right_bound = med2[S_rozmiar2/2];
+    // }
+
+
     delete [] Mediana_tab;
     
     // cout << "["<<*Tree_Counter<<"]"<< "VP Index: " << VP_tree[(*Tree_Counter)].index << " | Mediana: " << VP_tree[(*Tree_Counter)].mu << " | L_R: " << VP_tree[(*Tree_Counter)].l_r << " | ID_Parent: " << VP_tree[(*Tree_Counter)].index_parent_node << " ||| ";
@@ -1358,7 +1648,7 @@ void Make_VP_Tree_2(VP *VP_tree, Punkt *pkt, int *S_VP_tab, int S_rozmiar, doubl
     L_tab = new int[S_rozmiar];
     
     int *R_tab;
-    R_tab = new int[S_rozmiar];
+    R_tab = new int[S_rozmiar];                                                     // <<<<<<<<<-------------------- POPATRZEC
 
     int L_counter = 0;
     int R_counter = 0;

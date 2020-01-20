@@ -461,12 +461,14 @@ print("Rysunek Tree v1 - DONE")
 
 Tree1 <- as.data.frame(read.table("Tree1_120.csv", header=TRUE ,sep=","))
 
-Data120 <- as.data.frame(read.table("Data_C1_6000.csv", header=FALSE ,sep=","))
+Data120 <- as.data.frame(read.table("Data_C1_60006.csv", header=FALSE ,sep=","))
+Data120 <- as.data.frame(read.table("DataCpp-2D-6000.csv", header=TRUE ,sep=","))
 table(Data120[,3])
 table(Data120[,4])
 table(Data120[,5])
 
 Data120[Data120$V3 != Data120$V4,]
+Data120[Data120$V4 == 2,]
 
 dat <- data.frame(parent=Tree1$ID_Parent, 
                   node=Tree1$ID, 
