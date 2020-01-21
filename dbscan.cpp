@@ -46,8 +46,7 @@ struct VP{
         double right_bound = 0.0;
 };
 
-double TC_Time_mean = 0.0;
-double kNN_Time_mean = 0.0;
+int *Negative_Global;
 
 void Import_CSV_Metadata(Punkt *pkt, int &ile_linii, int &ile_x, string &file_in, int &start_ind, int &start_linia);
 void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x, string file_in, int start_ind, int start_linia);
@@ -151,8 +150,14 @@ int main()
     cin >> D_proc_S;
     }while(D_proc_S < 0.0 || D_proc_S > 1.0);
 
+    Negative_Global = new int[ile_linii];
     N_tab = new int[ile_linii];                                                 // Neighbors tab - index for N in pkt tab
     S_tab = new int[ile_linii];                                                 // Seed tab - index for S in pkt tab
+
+    for(int i=0; i<ile_linii; i++)
+    {
+        Negative_Global[i] = -1;                                                // Czyszczenie listy indeksow sasiadow
+    }
 
     auto start = high_resolution_clock::now();                                  // Time - START
 // DBSCAN --- START //
@@ -747,6 +752,7 @@ int S_N_Merge(int *S_tab, int *N_tab, int S_licznik, int N_licznik, int ile_lini
             if(S_tab[j] == N_tab[i])
             {
                 flaga = 1;
+                break;
             }
         }
 
@@ -833,93 +839,93 @@ for(int P = 0; P < ile_linii; P++)
 void DBSCAN_VP_TREE(VP *VP_tree, Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
 {
 
-for(int P = 0; P < ile_linii; P++)
-{
-    if(pkt[P].cluster2 != UNDEFINED)
-    {
-        continue;
-    }
-
-    int ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
+    int S_licznik = 0;
+    int ile_sasiadow = 0;
+    int P = 0;
+    int i = 0;
     
-    // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
-    // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
 
-    if(ile_sasiadow < minN)
+    for(P = 0; P < ile_linii; P++)
     {
-        pkt[P].cluster2 = NOISE;             // IF: N < minN => NOISE
-        // cout << "NOISE,-1," << P << endl;
-        continue;
-    }
-
-    C = C + 1;                              // Cluster number increment
-    pkt[P].cluster2 = C;                     // ELSE: N > minN => Cluster
-    // cout << "CLUSTER," << C << "," << P << endl;
-    // cout << "********************** Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << "| kNN = " << ile_sasiadow << endl;     // Show changing Cluster number
-    
-    
-    for(int i=0; i<ile_sasiadow; i++)
-    {
-        S_tab[i] = N_tab[i];           
-    }
-
-    int S_licznik = ile_sasiadow;
-  
-    for(int i=0; i<S_licznik; i++)                      // For Each Point Q in S
-    {
-        if(S_tab[i] != -1)
+        if(pkt[P].cluster2 != UNDEFINED)
         {
-            if(pkt[S_tab[i]].cluster2 == NOISE)          // IF: Q == NOISE then Q = Cluster
+            continue;
+        }
+
+        ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
+
+        // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
+        // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
+
+        if(ile_sasiadow < minN)
+        {
+            pkt[P].cluster2 = NOISE;             // IF: N < minN => NOISE
+            // cout << "NOISE,-1," << P << endl;
+            continue;
+        }
+
+        C = C + 1;                              // Cluster number increment
+        pkt[P].cluster2 = C;                     // ELSE: N > minN => Cluster
+        // cout << "CLUSTER," << C << "," << P << endl;
+        // cout << "********************** Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << "| kNN = " << ile_sasiadow << endl;     // Show changing Cluster number
+
+        for(i=0; i<ile_sasiadow; i++)
+        {
+            S_tab[i] = N_tab[i];           
+        }
+
+        S_licznik = ile_sasiadow;
+    
+        for(i=0; i<S_licznik; i++)                      // For Each Point Q in S
+        {
+            if(S_tab[i] != -1)
             {
+                // if(pkt[S_tab[i]].cluster2 == NOISE)          // IF: Q == NOISE then Q = Cluster
+                // {
+                //     pkt[S_tab[i]].cluster2 = C;
+                //     // cout << "CLUSTER," << C << "," << S_tab[i] << endl;
+                // }
+
+                if(pkt[S_tab[i]].cluster2 != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
+                {     
+                    if(pkt[S_tab[i]].cluster2 == NOISE)          // IF: Q == NOISE then Q = Cluster
+                    {
+                        pkt[S_tab[i]].cluster2 = C;
+                        // cout << "CLUSTER," << C << "," << S_tab[i] << endl;
+                    }
+                    continue;
+                }
+
                 pkt[S_tab[i]].cluster2 = C;
                 // cout << "CLUSTER," << C << "," << S_tab[i] << endl;
-            }
+                ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
 
-            if(pkt[S_tab[i]].cluster2 != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
-            {     
-                continue;
-            }
-
-            pkt[S_tab[i]].cluster2 = C;
-            // cout << "CLUSTER," << C << "," << S_tab[i] << endl;
-            ile_sasiadow = RangeQuery_Tree(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
-
-            if( ile_sasiadow >= minN)
-            {
-                S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
+                if( ile_sasiadow >= minN)
+                {
+                    S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
+                }
             }
         }
     }
 }
-}
+
 
 int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int minN, int ile_x)
 {
-    for(int i=0; i<ile_linii; i++)
-    {
-        N_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
-    }
+    // for(int i=0; i<ile_linii; i++)
+    // {
+    //     N_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
+    // }
+
+    memcpy(N_tab, Negative_Global, ile_linii*sizeof(int));
 
     int TC = 0;                     // Tree Counter
-    int TC1 = 0;
-    int TC2 = 0;
-
     int kNN = 0;
-    int kNN_counter = 0;
     double dist = 0;
-    // int TC3 = 0;
-    // int flag_end = 0;
 
-    // cout << endl << "Start Searching Tree for: " << Qindex << endl;
-    
-    // while(flag_end != 2)
     while(1)
     {
-        // cout << endl << TC << ":" << VP_tree[TC].l_r << " (" << VP_tree[TC].L_kid_N << "|" << VP_tree[TC].R_kid_N << ") --> ";
-        // cout << "TC1: " << TC1 << ":" << VP_tree[TC1].l_r << endl;
-        // cout << "TC2: " << TC2 << ":" << VP_tree[TC2].l_r << endl;
         dist = DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x);
-        // cout << kNN << ": " << dist << " / " << TC << " --> ";
 
         if(dist <= Eps){
             N_tab[kNN] = VP_tree[TC].index;
@@ -944,46 +950,15 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
             continue;
         }
 
-        // cout << "Break" << endl;
         break;
     }
 
-    
-    // TC1 = 0;
+
     if(TC > -1)
     {
         kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
     }
-    // cout << endl << "TC (kNN): " << TC << endl;
-    // cout << "TC1 (kNN): " << TC1 << endl;
-    // cout << "TC2 (kNN): " << TC2 << endl;
-    // cout << "Update TC --> Q: " << Qindex << " = " << TC << " = " << kNN << endl;                                         // <--- cout << Qindex << "," << VP_tree[TC].index << endl;
-    
-    // if (kNN < minN)
-    // {
-        // kNN = 0;
-        // cout << endl << "kNN Search: " ;
-        // kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
-        
-        // cout << "Update TC1 --> " << Qindex << " = " << VP_tree[TC1].index << " = " << kNN << endl;
-
-        // if (kNN < minN && TC1 != 0)
-        // {
-            // if(VP)
-            // kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
-            // kNN = 0;
-            // cout << endl << kNN << " | " ;
-            // if(VP_tree[TC1].l_r == -1){
-            //     kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[VP_tree[TC1].index_parent_node].R_kid, &kNN);
-            // }
-            // else{
-            //     kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[VP_tree[TC1].index_parent_node].L_kid, &kNN);
-            // }
-            // cout << kNN << endl;
-            // cout << "Update TC2 --> " << Qindex << " = " << VP_tree[TC2].index << " = " << kNN << endl;
-        // }
-    // }
-    
+   
     return kNN;
 }
 
@@ -1002,15 +977,12 @@ void kNN_TreeDist(VP *VP_tree, Punkt *pkt, int *N_tab, int ile_linii, int Qindex
     // }
 
     if(VP_tree[TC].L_kid > -1){
-        // cout << "--> *L: " ;
         kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].L_kid, kNN);
     }
     
     if(VP_tree[TC].R_kid > -1){
-        // cout << "--> *R: " ;
         kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].R_kid, kNN);
     }
-    // cout << endl;
 }
 
 
@@ -1449,127 +1421,112 @@ double Mediana_VAR(Punkt *pkt, double Mediana_tab[], int P_tab[], int D_tab[], i
 void DBSCAN_VP_TREE_2(VP *VP_tree, Punkt *pkt, int *S_tab, int *N_tab, double Eps, int ile_linii, int minN, int C, int ile_x)
 {
 
-for(int P = 0; P < ile_linii; P++)
-{
-    if(pkt[P].cluster3 != UNDEFINED)
-    {
-        continue;
-    }
+    int S_licznik = 0;
+    int ile_sasiadow = 0;
+    int P = 0;
+    int i = 0;
 
-    int ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
-    
-    // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
-    // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
-
-    if(ile_sasiadow < minN)
+    for(int P = 0; P < ile_linii; P++)
     {
-        pkt[P].cluster3 = NOISE;             // IF: N < minN => NOISE
-        // cout << "NOISE,-1," << P << endl;
-        continue;
-    }
-
-    C = C + 1;                              // Cluster number increment
-    pkt[P].cluster3 = C;                     // ELSE: N > minN => Cluster
-    // cout << "CLUSTER," << C << "," << P << endl;
-    // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << "| kNN = " << ile_sasiadow << endl;     // Show changing Cluster number
-    
-    for(int i=0; i<ile_linii; i++)
-    {
-        S_tab[i] = N_tab[i];           
-    }
-
-    int S_licznik = ile_sasiadow;
-  
-    for(int i=0; i<S_licznik; i++)                      // For Each Point Q in S
-    {
-        if(S_tab[i] != -1)
+        if(pkt[P].cluster3 != UNDEFINED)
         {
-            if(pkt[S_tab[i]].cluster3 == NOISE)          // IF: Q == NOISE then Q = Cluster
+            continue;
+        }
+
+        ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, P, Eps, minN, ile_x);
+
+        // cout << "Punkt: " << P << " -> x: " << pkt[P].x << " | y: " << pkt[P].y << endl;
+        // cout << "Ile sasiadow: " << ile_sasiadow << endl << endl;
+
+        if(ile_sasiadow < minN)
+        {
+            pkt[P].cluster3 = NOISE;             // IF: N < minN => NOISE
+            // cout << "NOISE,-1," << P << endl;
+            continue;
+        }
+
+        C = C + 1;                              // Cluster number increment
+        pkt[P].cluster3 = C;                     // ELSE: N > minN => Cluster
+        // cout << "CLUSTER," << C << "," << P << endl;
+        // cout << "Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << "| kNN = " << ile_sasiadow << endl;     // Show changing Cluster number
+
+        for(i=0; i<ile_linii; i++)
+        {
+            S_tab[i] = N_tab[i];           
+        }
+
+        S_licznik = ile_sasiadow;
+    
+        for(i=0; i<S_licznik; i++)                      // For Each Point Q in S
+        {
+            if(S_tab[i] != -1)
             {
+                if(pkt[S_tab[i]].cluster3 == NOISE)          // IF: Q == NOISE then Q = Cluster
+                {
+                    pkt[S_tab[i]].cluster3 = C;
+                    // cout << "CLUSTER," << C << "," << S_tab[i] << endl;
+                }
+
+                if(pkt[S_tab[i]].cluster3 != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
+                {     
+                    continue;
+                }
+
                 pkt[S_tab[i]].cluster3 = C;
                 // cout << "CLUSTER," << C << "," << S_tab[i] << endl;
-            }
+                ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
 
-            if(pkt[S_tab[i]].cluster3 != UNDEFINED)      // IF: Q == NOISE or CLUSTER then leave Q
-            {     
-                continue;
-            }
-
-            pkt[S_tab[i]].cluster3 = C;
-            // cout << "CLUSTER," << C << "," << S_tab[i] << endl;
-            ile_sasiadow = RangeQuery_Tree_2(VP_tree, pkt, N_tab, ile_linii, S_tab[i], Eps, minN, ile_x);
-
-            if( ile_sasiadow >= minN)
-            {
-                S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
+                if( ile_sasiadow >= minN)
+                {
+                    S_licznik = S_N_Merge(S_tab, N_tab, S_licznik, ile_sasiadow, ile_linii);
+                }
             }
         }
     }
-}
 }
 
 int RangeQuery_Tree_2(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qindex, double Eps, int minN, int ile_x)
 {
-    for(int i=0; i<ile_linii; i++)
-    {
-        N_tab[i] = -1;              // Czyszczenie listy indeksow sasiadow
-    }
+    memcpy(N_tab, Negative_Global, ile_linii*sizeof(int));
 
     int TC = 0;                     // Tree Counter
-    int TC1 = 0;
-    int TC2 = 0;
-    int flag_end = 0;
+    int kNN = 0;                    // NN Counter (in Epsilon)
+    double dist = 0;                // Distance variable
 
-    while(flag_end != 2)
+    while(1)
     {
-        flag_end = 0;
+        dist = DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x);
 
-        if ((DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) - VP_tree[TC].left_bound)  >  Eps)
+        if(dist <= Eps){
+            N_tab[kNN] = VP_tree[TC].index;
+            kNN++;
+        }
+
+        if ((dist - VP_tree[TC].left_bound)  >  Eps)
         {
-            if (VP_tree[TC].R_kid_N > minN)
-            {
-                // TC2 = TC1;
-                // TC1 = TC;
-                TC = VP_tree[TC].R_kid;
-                continue;
-            }else
-            {
+            TC = VP_tree[TC].R_kid;
+            if(TC < 0){
                 break;
             }
-        }else
-        {
-            flag_end++;
+            continue;
         }
         
-        
-        if ((VP_tree[TC].right_bound - DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x))  >  Eps)
+        if ((VP_tree[TC].right_bound - dist)  >  Eps)
         {
-            if (VP_tree[TC].L_kid_N > minN)
-            {
-                TC2 = TC1;
-                TC1 = TC;
-                TC = VP_tree[TC].L_kid;
-                continue;
-            }else
-            {
+            TC = VP_tree[TC].L_kid;
+            if(TC < 0){
                 break;
             }
-        }else
-        {
-            flag_end++;
+            continue;
         }
         
-
-        if(flag_end == 2){
-            break;
-        }
-        
+        break;
     }
 
-    int kNN = 0;
+    if(TC > -1){
+        kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
+    }
 
-    kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC2, &kNN);
-    
     return kNN;
 }
 
