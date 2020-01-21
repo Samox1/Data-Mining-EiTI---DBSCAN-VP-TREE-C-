@@ -207,8 +207,8 @@ int main()
     cout << "DBSCAN_VP_TREE Time: " << (double)duration1.count() / 1000000.0 << " s" << endl;      // Time - show Function duration
     cout << "DBSCAN_VP_TREE Time (SUMA): " << (double)(duration1.count()+duration2.count()) / 1000000.0 << " s" << endl;
     
-    cout << endl << "TC Time (mean) = " << TC_Time_mean/(double)ile_linii << " ms" << endl;
-    cout << endl << "kNN Time (mean) = " << kNN_Time_mean/(double)ile_linii << " ms" << endl;
+    // cout << endl << "TC Time (mean) = " << TC_Time_mean/(double)ile_linii << " ms" << endl;
+    // cout << endl << "kNN Time (mean) = " << kNN_Time_mean/(double)ile_linii << " ms" << endl;
 // Show VP_Tree Structure
     // Show_VP_Tree(VP_tree, Tree_Counter);
 
@@ -858,7 +858,7 @@ for(int P = 0; P < ile_linii; P++)
     // cout << "********************** Punkt: " << P << " | Cluster: " << pkt[P].cluster2 << "| kNN = " << ile_sasiadow << endl;     // Show changing Cluster number
     
     
-    for(int i=0; i<ile_linii; i++)
+    for(int i=0; i<ile_sasiadow; i++)
     {
         S_tab[i] = N_tab[i];           
     }
@@ -904,6 +904,8 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
     int TC1 = 0;
     int TC2 = 0;
 
+    int kNN = 0;
+    int kNN_counter = 0;
     double dist = 0;
     // int TC3 = 0;
     // int flag_end = 0;
@@ -916,52 +918,42 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
         // cout << endl << TC << ":" << VP_tree[TC].l_r << " (" << VP_tree[TC].L_kid_N << "|" << VP_tree[TC].R_kid_N << ") --> ";
         // cout << "TC1: " << TC1 << ":" << VP_tree[TC1].l_r << endl;
         // cout << "TC2: " << TC2 << ":" << VP_tree[TC2].l_r << endl;
+        dist = DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x);
+        // cout << kNN << ": " << dist << " / " << TC << " --> ";
 
-        if ((DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) - VP_tree[TC].mu)  >=  Eps)
+        if(dist <= Eps){
+            N_tab[kNN] = VP_tree[TC].index;
+            kNN++;
+        }
+
+        if ((dist - VP_tree[TC].mu)  >=  Eps)
         {  
-                // TC2 = TC1;
-                // if(TC1 != 0){
-                //     TC2 = VP_tree[TC1].index_parent_node;
-                // }
-                // TC1 = TC;
-                TC = VP_tree[TC].R_kid;
-                if((VP_tree[TC].L_kid_N) > minN && (VP_tree[TC].R_kid_N) > minN){ 
-                continue;
-                }
-                else
-                {
-                    // TC2 = VP_tree[TC].index_parent_node;
-                    break;
-                }
+            TC = VP_tree[TC].R_kid;
+            if(TC < 0){
+                break;
+            }
+            continue;
         }
         
-        if ((VP_tree[TC].mu - DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x))  >  Eps)
+        if ((VP_tree[TC].mu - dist)  >  Eps)
         {
-                
-                // TC2 = TC1;
-                TC1 = TC;
-                TC = VP_tree[TC].L_kid;
-                // if(TC != 0){
-                    // TC2 = VP_tree[TC].index_parent_node;
-                // }
-                if((VP_tree[TC].L_kid_N) > minN && (VP_tree[TC].R_kid_N) > minN ){ 
-                continue;
-                }
-                else
-                { 
-                    // TC2 = VP_tree[TC].index_parent_node;
-                    break;
-                }
+            TC = VP_tree[TC].L_kid;
+            if(TC < 0){
+                break;
+            }
+            continue;
         }
 
+        // cout << "Break" << endl;
         break;
     }
 
-    int kNN = 0;
+    
     // TC1 = 0;
-    
-    // kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
-    
+    if(TC > -1)
+    {
+        kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC, &kNN);
+    }
     // cout << endl << "TC (kNN): " << TC << endl;
     // cout << "TC1 (kNN): " << TC1 << endl;
     // cout << "TC2 (kNN): " << TC2 << endl;
@@ -970,8 +962,8 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
     // if (kNN < minN)
     // {
         // kNN = 0;
-        cout << endl << "kNN Search: " ;
-        kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
+        // cout << endl << "kNN Search: " ;
+        // kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
         
         // cout << "Update TC1 --> " << Qindex << " = " << VP_tree[TC1].index << " = " << kNN << endl;
 
@@ -1000,7 +992,7 @@ void kNN_TreeDist(VP *VP_tree, Punkt *pkt, int *N_tab, int ile_linii, int Qindex
 {
     // if (VP_tree[TC].index != Qindex)
     // {
-        cout << "TC-" << TC << "-" << DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x);
+        // cout << "TC-" << TC << "-" << DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x);
 
         if(DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) <= Eps)
         {
@@ -1010,14 +1002,15 @@ void kNN_TreeDist(VP *VP_tree, Punkt *pkt, int *N_tab, int ile_linii, int Qindex
     // }
 
     if(VP_tree[TC].L_kid > -1){
-        cout << "--> L: " ;
+        // cout << "--> *L: " ;
         kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].L_kid, kNN);
     }
     
     if(VP_tree[TC].R_kid > -1){
-        cout << "--> R: " ;
+        // cout << "--> *R: " ;
         kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].R_kid, kNN);
     }
+    // cout << endl;
 }
 
 
