@@ -46,6 +46,8 @@ struct VP{
         double right_bound = 0.0;
 };
 
+double TC_Time_mean = 0.0;
+double kNN_Time_mean = 0.0;
 
 void Import_CSV_Metadata(Punkt *pkt, int &ile_linii, int &ile_x, string &file_in, int &start_ind, int &start_linia);
 void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x, string file_in, int start_ind, int start_linia);
@@ -205,6 +207,8 @@ int main()
     cout << "DBSCAN_VP_TREE Time: " << (double)duration1.count() / 1000000.0 << " s" << endl;      // Time - show Function duration
     cout << "DBSCAN_VP_TREE Time (SUMA): " << (double)(duration1.count()+duration2.count()) / 1000000.0 << " s" << endl;
     
+    cout << endl << "TC Time (mean) = " << TC_Time_mean/(double)ile_linii << " ms" << endl;
+    cout << endl << "kNN Time (mean) = " << kNN_Time_mean/(double)ile_linii << " ms" << endl;
 // Show VP_Tree Structure
     // Show_VP_Tree(VP_tree, Tree_Counter);
 
@@ -899,11 +903,12 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
     int TC = 0;                     // Tree Counter
     int TC1 = 0;
     int TC2 = 0;
+
+    double dist = 0;
     // int TC3 = 0;
     // int flag_end = 0;
 
     // cout << endl << "Start Searching Tree for: " << Qindex << endl;
-
     
     // while(flag_end != 2)
     while(1)
@@ -934,7 +939,7 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
         {
                 
                 // TC2 = TC1;
-                // TC1 = TC;
+                TC1 = TC;
                 TC = VP_tree[TC].L_kid;
                 // if(TC != 0){
                     // TC2 = VP_tree[TC].index_parent_node;
@@ -944,7 +949,7 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
                 }
                 else
                 { 
-                    TC2 = VP_tree[TC].index_parent_node;
+                    // TC2 = VP_tree[TC].index_parent_node;
                     break;
                 }
         }
@@ -965,7 +970,9 @@ int RangeQuery_Tree(VP *VP_tree,Punkt *pkt, int *N_tab, int ile_linii, int Qinde
     // if (kNN < minN)
     // {
         // kNN = 0;
-        kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC2, &kNN);
+        cout << endl << "kNN Search: " ;
+        kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, TC1, &kNN);
+        
         // cout << "Update TC1 --> " << Qindex << " = " << VP_tree[TC1].index << " = " << kNN << endl;
 
         // if (kNN < minN && TC1 != 0)
@@ -993,6 +1000,8 @@ void kNN_TreeDist(VP *VP_tree, Punkt *pkt, int *N_tab, int ile_linii, int Qindex
 {
     // if (VP_tree[TC].index != Qindex)
     // {
+        cout << "TC-" << TC << "-" << DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x);
+
         if(DistFunc(&pkt[Qindex], &pkt[VP_tree[TC].index], ile_x) <= Eps)
         {
             N_tab[(*kNN)] = VP_tree[TC].index;
@@ -1001,10 +1010,12 @@ void kNN_TreeDist(VP *VP_tree, Punkt *pkt, int *N_tab, int ile_linii, int Qindex
     // }
 
     if(VP_tree[TC].L_kid > -1){
+        cout << "--> L: " ;
         kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].L_kid, kNN);
     }
     
     if(VP_tree[TC].R_kid > -1){
+        cout << "--> R: " ;
         kNN_TreeDist(VP_tree, pkt, N_tab, ile_linii, Qindex, Eps, minN, ile_x, VP_tree[TC].R_kid, kNN);
     }
 }
