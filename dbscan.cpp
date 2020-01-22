@@ -54,7 +54,7 @@ void Show_Imported_First3(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Imported_All(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Clustered(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Clustered_All(Punkt *pkt, int ile_linii, int ile_x);
-void Show_C_All(Punkt *pkt, int ile_linii, int ile_x);
+void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_yes, int VP2_yes);
 void Save_File(Punkt *pkt, int ile_linii, int ile_x);
 
 void Clear_N_S(int *N_tab, int *S_tab, int ile_linii);
@@ -363,7 +363,7 @@ int main()
     if(DBSCAN_yes == 1 || VP1_yes == 1 || VP2_yes == 1)
     {
         // Show_Clustered_All(pkt, ile_linii, ile_x);
-        Show_C_All(pkt, ile_linii, ile_x);
+        Show_C_All(pkt, ile_linii, ile_x, DBSCAN_yes, VP1_yes, VP2_yes);
         Save_File(pkt, ile_linii, ile_x);                       // Saving CSV - with Cluster data
     }
 
@@ -620,7 +620,7 @@ void Show_Clustered_All(Punkt *pkt, int ile_linii, int ile_x)
     }
 }
 
-void Show_C_All(Punkt *pkt, int ile_linii, int ile_x)
+void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_yes, int VP2_yes)
 {
     cout << endl;
     int Tab_C[1000];
@@ -640,33 +640,41 @@ void Show_C_All(Punkt *pkt, int ile_linii, int ile_x)
         Tab_C2[pkt[i].cluster3 + 1]++;
     }
 
-    cout << "DBSCAN Original - Class:" << endl;
-    for (int i = 0; i < 1000; i++)
+    if(DBSCAN_yes == 1)
     {
-        if (Tab_C[i] > 0)
+        cout << "DBSCAN Original - Class:" << endl;
+        for (int i = 0; i < 1000; i++)
         {
-            cout << "Class: " << i << " = " << Tab_C[i] << endl;
+            if (Tab_C[i] > 0)
+            {
+                cout << "Class: " << i-1 << " = " << Tab_C[i] << endl;
+            }
         }
     }
 
-    cout << endl << "DBSCAN VP_Tree v1 - Class:" << endl;
-    for (int i = 0; i < 1000; i++)
+    if(VP1_yes == 1)
     {
-        if (Tab_C1[i] > 0)
+        cout << endl << "DBSCAN VP_Tree v1 - Class:" << endl;
+        for (int i = 0; i < 1000; i++)
         {
-            cout << "Class: " << i << " = " << Tab_C1[i] << endl;
+            if (Tab_C1[i] > 0)
+            {
+                cout << "Class: " << i-1 << " = " << Tab_C1[i] << endl;
+            }
         }
     }
 
-    cout << endl << "DBSCAN VP_Tree v2 - Class:" << endl;
-    for (int i = 0; i < 1000; i++)
+    if(VP2_yes == 1)
     {
-        if (Tab_C2[i] > 0)
+        cout << endl << "DBSCAN VP_Tree v2 - Class:" << endl;
+        for (int i = 0; i < 1000; i++)
         {
-            cout << "Class: " << i << " = " << Tab_C2[i] << endl;
+            if (Tab_C2[i] > 0)
+            {
+                cout << "Class: " << i-1 << " = " << Tab_C2[i] << endl;
+            }
         }
     }
-    
 }
 
 
