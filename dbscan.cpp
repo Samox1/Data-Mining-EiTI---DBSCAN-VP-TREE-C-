@@ -626,6 +626,7 @@ void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_ye
     int Tab_C[1000];
     int Tab_C1[1000];
     int Tab_C2[1000];
+
     for (int i = 0; i < 1000; i++)
     {
         Tab_C[i] = 0;
@@ -633,15 +634,20 @@ void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_ye
         Tab_C2[i] = 0;
     }
     
-    for(int i=0; i<ile_linii; i++)
-    {
-        Tab_C[pkt[i].cluster + 1]++;
-        Tab_C1[pkt[i].cluster2 + 1]++;
-        Tab_C2[pkt[i].cluster3 + 1]++;
-    }
+    // for(int i=0; i<ile_linii; i++)
+    // {
+    //     Tab_C[pkt[i].cluster + 1]++;
+    //     Tab_C1[pkt[i].cluster2 + 1]++;
+    //     Tab_C2[pkt[i].cluster3 + 1]++;
+    // }
 
     if(DBSCAN_yes == 1)
     {
+        for(int i=0; i<ile_linii; i++)
+        {
+            Tab_C[pkt[i].cluster + 1]++;
+        }
+
         cout << "DBSCAN Original - Class:" << endl;
         for (int i = 0; i < 1000; i++)
         {
@@ -654,6 +660,11 @@ void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_ye
 
     if(VP1_yes == 1)
     {
+        for(int i=0; i<ile_linii; i++)
+        {
+            Tab_C1[pkt[i].cluster + 1]++;
+        }
+
         cout << endl << "DBSCAN VP_Tree v1 - Class:" << endl;
         for (int i = 0; i < 1000; i++)
         {
@@ -666,6 +677,11 @@ void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_ye
 
     if(VP2_yes == 1)
     {
+        for(int i=0; i<ile_linii; i++)
+        {
+            Tab_C2[pkt[i].cluster + 1]++;
+        }
+
         cout << endl << "DBSCAN VP_Tree v2 - Class:" << endl;
         for (int i = 0; i < 1000; i++)
         {
