@@ -9,7 +9,7 @@ library(dbscan)
 
 library(MASS)
 
-S <- matrix(c(1,0,0,1),2,2)
+S <- matrix(c(1,1,1,1),2,2)
 mt0 <- c(3,3)
 mt1 <- c(0,0)
 mt2 <- c(10,10)
@@ -28,7 +28,7 @@ n6 <- 1000
 n <- n1 + n2 + n3 + n4 + n5 + n6
 
 X0 <- mvrnorm(n0, mt0, S)
-X1 <- mvrnorm(n1, mt1, S)
+X1 <- mvrnorm(n0, mt1, S)
 X2 <- mvrnorm(n2, mt2, S)
 X3 <- mvrnorm(n3, mt3, S)
 X4 <- mvrnorm(n4, mt4, S)
@@ -435,7 +435,7 @@ plot(g, layout=lay)
 ######################################################################################################################################################
 
 
-Data120 <- as.data.frame(read.table("Data_C3_2000.csv", header=FALSE ,sep=","))
+Data120 <- as.data.frame(read.table("DataCpp30.csv", header=FALSE ,sep=","))
 
 Data120 <- as.data.frame(read.table("Data_Clustered_120_0-5_4_0-1_0-9_Test.csv", header=FALSE,sep=","))
 Tree1 <- as.data.frame(read.table("Tree1_120_0-5_4_0-1_0-9_Test.csv", header=TRUE ,sep=","))
