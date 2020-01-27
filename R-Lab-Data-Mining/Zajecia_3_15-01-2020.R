@@ -285,7 +285,6 @@ car_Frestores_mtry <- train(category~.,  data = carTrain,
 print(car_Frestores_mtry)
 
 
-
 treesModels <- list()
 for (nbTree in c(5,10,25, 50, 100, 250, 500)) {
   car_F_maxtrees <- train(category~.,  data = carTrain,
