@@ -7,6 +7,8 @@
             "command": "g++",
             "args": [
                 "-g",
+                "-static-libgcc",
+                "-std=c++11",
                 "-fopenmp",
                 "-o",
                 "dbscan",
