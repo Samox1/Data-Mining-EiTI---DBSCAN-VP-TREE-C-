@@ -211,6 +211,9 @@ int main(int argc, char *argv[])
             Negative_Global[i] = -1;                                                                    // Czyszczenie listy indeksow sasiadow
         }
 
+        double Time_Build = 0.0;
+        double Time_Search = 0.0;
+        double Time_All = 0.0;
         cout << endl << "* Start * currentDateTime() = " << currentDateTime() << endl;
 
     // --- Original DBSCAN ------------------------------------------------------------------------------------------------------------------------------- //
@@ -226,6 +229,9 @@ int main(int argc, char *argv[])
             auto duration = duration_cast<microseconds>(stop - start);                                      // Time - Caltulation
             // cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;                           // Time - show Function duration
             cout << endl << "DBSCAN Time: " << (double) duration.count() / 1000000.0 << " s" << endl;
+
+            Time_Search = (double) duration.count() / 1000000.0;
+            Time_All = Time_Search;
         }
 
     // Show every point and his Cluster number
@@ -280,6 +286,10 @@ int main(int argc, char *argv[])
             // Show_VP_Tree(VP_tree, Tree_Counter);
             // Save_VP_Tree(VP_tree, Tree_Counter);
 
+            Time_Build = (double) duration2.count() / 1000000.0;
+            Time_Search = (double) duration1.count() / 1000000.0;
+            Time_All = (double) (duration1.count()+duration2.count()) / 1000000.0;
+
             delete [] VP_tree;
         }
 
@@ -327,6 +337,10 @@ int main(int argc, char *argv[])
             // Show_VP_Tree(VP_tree2, Tree_Counter);
             // Save_VP_Tree(VP_tree2, Tree_Counter);
 
+            Time_Build = (double) duration4.count() / 1000000.0;
+            Time_Search = (double) duration3.count() / 1000000.0;
+            Time_All = (double) (duration3.count()+duration4.count()) / 1000000.0;
+
             delete [] VP_tree2;
         }
 
@@ -338,16 +352,17 @@ int main(int argc, char *argv[])
     int cc = 0;
 
     if(DBSCAN_yes == 1 || VP1_yes == 1 || VP2_yes == 1)
-    {
-        
+    {   
         // Show_Clustered_All(pkt, ile_linii, ile_x);
         Show_C_All_SKRYPT(pkt, ile_linii, ile_x, DBSCAN_yes, VP1_yes, VP2_yes, &noise, &cc);
         Save_File_SKRYPT(pkt, ile_linii, ile_x, argv[9], atoi(argv[4]));                       // Saving CSV - with Cluster data
     }
 
     logsfile.open("logs.txt", std::ios_base::app); // append instead of overwrite
-    logsfile << currentDateTime() << "," << noise << "," << cc-1 << endl;
+    logsfile << currentDateTime() << "," << Time_Build << "," << Time_Search << "," << Time_All << "," << noise << "," << cc-1 << endl;
     logsfile.close();
+
+    cout << currentDateTime() << "," << Time_Build << "," << Time_Search << "," << Time_All << "," << noise << "," << cc-1 << endl << endl;
 
     // delete - Destroy array/pointers
         delete [] S_VP_tab;
