@@ -20,7 +20,7 @@ library(stringr)
 library(caret)
 library(plotly)
 
-# Import danych:
+# --- *** Import danych:
 rm(list = ls())            # Czyszczenie Globalnego Srodowiska 
 
 HU_Data_ALL <- as.data.frame(read.table("HU_TS_15_min.csv",header=TRUE,sep=","))
@@ -38,13 +38,15 @@ HU_Data <- HU_Data_ALL %>% filter(utc_timestamp[[1]] > rok_start1-days(2) & utc_
 colnames(HU_Data[,1]) <- ""
 HU_Data <- HU_Data[, c("utc_timestamp" , "HU_load_actual_entsoe_transparency")]
 
-NA_sum <- sum(is.na(HU_Data$HU_load_actual_entsoe_transparency))
-levele <- as.integer(max(HU_Data$HU_load_actual_entsoe_transparency) - min(HU_Data$HU_load_actual_entsoe_transparency))
-minMW <- min(HU_Data$HU_load_actual_entsoe_transparency)
-maxMW <- max(HU_Data$HU_load_actual_entsoe_transparency)
+# NA_sum <- sum(is.na(HU_Data$HU_load_actual_entsoe_transparency))
+# levele <- as.integer(max(HU_Data$HU_load_actual_entsoe_transparency) - min(HU_Data$HU_load_actual_entsoe_transparency))
+# minMW <- min(HU_Data$HU_load_actual_entsoe_transparency)
+# maxMW <- max(HU_Data$HU_load_actual_entsoe_transparency)
 names(HU_Data)[2] <- "Load_Now"
 
-# Wstepna obrobka danych:
+
+# --- *** Wstepna obrobka danych:
+
 # --- Utworzenie nowej tablicy pod drzewo --- #
 Temp <- HU_Data %>% filter(utc_timestamp > (rok_start1) & utc_timestamp < end1)
 
@@ -107,7 +109,9 @@ rm(Day1BeforeP15Min)
 
 
 
-# Przygotowanie modelu:
+# --- *** Przygotowanie modelu:
+
+# Drzewa Decyzyjne (ANOVA)
 
 Tree_Anova_Tune <- tune(rpart, Load_Now ~ Load_Min15 + Load_Day1B, data = Temp, validation.x = newdata, validation.y = newdata$Load_Now,ranges = list(minsplit=c(1:5), minbucket=c(1:5), cp=10^(c(-4):(-10))))
 newdata$ClassPredictAnova <- predict(Tree_Anova_Tune$best.model, newdata)
@@ -132,5 +136,36 @@ newdata$ClassPredictAnova <- predict(Tree_Anova_Tune$best.model, newdata)
 newdata$ClassPreAnova_Shift <- c(as.numeric(as.character(newdata$ClassPredictAnova[2:length(newdata$ClassPredictAnova)])), as.numeric(as.character(newdata$ClassPredictAnova[length(newdata$ClassPredictAnova)])))
 MAE_Anova_1Day <- sum(abs(newdata$Load_Now - newdata$ClassPreAnova_Shift)) / length(newdata$Load_Now)
 MAPE_Anova_1Day <- sum(abs(newdata$Load_Now - newdata$ClassPreAnova_Shift) / newdata$Load_Now) / length(newdata$Load_Now) * 100
+
+
+# Random Forest
+
+RF_Tune <- tune(randomForest, Load_Now ~ Load_Min15 + Load_Day1B, data = Temp, validation.x = newdata, validation.y = newdata$Load_Now,ranges = list(ntree=c(10,20,30,40,50,60,70,80,90,100)))
+newdata$ClassPredictRF <- predict(RF_Tune$best.model, newdata)
+newdata$ClassPreRF_Shift <- c(as.numeric(as.character(newdata$ClassPredictRF[2:length(newdata$ClassPredictRF)])), as.numeric(as.character(newdata$ClassPredictRF[length(newdata$ClassPredictRF)])))
+MAE_RF <- sum(abs(newdata$Load_Now - newdata$ClassPreRF_Shift)) / length(newdata$Load_Now)
+MAPE_RF <- sum(abs(newdata$Load_Now - newdata$ClassPreRF_Shift) / newdata$Load_Now) / length(newdata$Load_Now) * 100
+
+RF_Tune <- tune(randomForest, Load_Now ~ Load_Min15 + Load_Min30 + Load_Day1B, data = Temp, validation.x = newdata, validation.y = newdata$Load_Now,ranges = list(ntree=c(10,20,30,40,50,60,70,80,90,100)))
+newdata$ClassPredictRF <- predict(RF_Tune$best.model, newdata)
+newdata$ClassPreRF_Shift <- c(as.numeric(as.character(newdata$ClassPredictRF[2:length(newdata$ClassPredictRF)])), as.numeric(as.character(newdata$ClassPredictRF[length(newdata$ClassPredictRF)])))
+MAE_RF30 <- sum(abs(newdata$Load_Now - newdata$ClassPreRF_Shift)) / length(newdata$Load_Now)
+MAPE_RF30 <- sum(abs(newdata$Load_Now - newdata$ClassPreRF_Shift) / newdata$Load_Now) / length(newdata$Load_Now) * 100
+
+RF_Tune <- tune(randomForest, Load_Now ~ Load_Min15 + Load_Min30 + Load_Min45 + Load_Day1B, data = Temp, validation.x = newdata, validation.y = newdata$Load_Now,ranges = list(ntree=c(10,20,30,40,50,60,70,80,90,100)))
+newdata$ClassPredictRF <- predict(RF_Tune$best.model, newdata)
+newdata$ClassPreRF_Shift <- c(as.numeric(as.character(newdata$ClassPredictRF[2:length(newdata$ClassPredictRF)])), as.numeric(as.character(newdata$ClassPredictRF[length(newdata$ClassPredictRF)])))
+MAE_RF3045 <- sum(abs(newdata$Load_Now - newdata$ClassPreRF_Shift)) / length(newdata$Load_Now)
+MAPE_RF3045 <- sum(abs(newdata$Load_Now - newdata$ClassPreRF_Shift) / newdata$Load_Now) / length(newdata$Load_Now) * 100
+
+RF_Tune <- tune(randomForest, Load_Now ~ Load_Min15 + Load_Day1B + Load_Day1B15min + Load_Day1Bp15min, data = Temp, validation.x = newdata, validation.y = newdata$Load_Now,ranges = list(ntree=c(10,20,30,40,50,60,70,80,90,100)))
+newdata$ClassPredictRF <- predict(RF_Tune$best.model, newdata)
+newdata$ClassPreRF_Shift <- c(as.numeric(as.character(newdata$ClassPredictRF[2:length(newdata$ClassPredictRF)])), as.numeric(as.character(newdata$ClassPredictRF[length(newdata$ClassPredictRF)])))
+MAE_RF1Day <- sum(abs(newdata$Load_Now - newdata$ClassPreRF_Shift)) / length(newdata$Load_Now)
+MAPE_RF1Day <- sum(abs(newdata$Load_Now - newdata$ClassPreRF_Shift) / newdata$Load_Now) / length(newdata$Load_Now) * 100
+
+
+
+
 
 

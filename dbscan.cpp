@@ -5,7 +5,9 @@
 #include <chrono> 
 #include <omp.h>
 #include <atomic>
-
+#include <string>
+#include <stdio.h>
+#include <time.h>
 
 #define UNDEFINED   -2
 #define NOISE       -1
@@ -46,8 +48,19 @@ struct VP{
         double right_bound = 0.0;
 };
 
+// Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+const std::string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%dT%X", &tstruct);
+    return buf;
+}
+
 int *Negative_Global;
 
+void Import_CSV_Metadata_SKRYPT(Punkt *pkt, int &ile_linii, int &ile_x, string &file_in, int &start_ind, int &start_linia, char *plik_in, char FirstRowYN, char FirstColYN);
 void Import_CSV_Metadata(Punkt *pkt, int &ile_linii, int &ile_x, string &file_in, int &start_ind, int &start_linia);
 void Import_CSV_File(Punkt *pkt, int ile_linii, int ile_x, string file_in, int start_ind, int start_linia);
 void Show_Imported_First3(Punkt *pkt, int ile_linii, int ile_x);
@@ -55,6 +68,8 @@ void Show_Imported_All(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Clustered(Punkt *pkt, int ile_linii, int ile_x);
 void Show_Clustered_All(Punkt *pkt, int ile_linii, int ile_x);
 void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_yes, int VP2_yes);
+void Show_C_All_SKRYPT(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_yes, int VP2_yes, int *noise, int *cc);
+void Save_File_SKRYPT(Punkt *pkt, int ile_linii, int ile_x, char *plik_out, int algoyrtm);
 void Save_File(Punkt *pkt, int ile_linii, int ile_x);
 
 void Clear_N_S(int *N_tab, int *S_tab, int ile_linii);
@@ -87,9 +102,14 @@ void DBSCAN_VP_TREE_2(VP *VP_tree, Punkt *pkt, int *S_tab, int *N_tab, double Ep
 
 // --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN --- MAIN ---//
 
-int main()
+int main(int argc, char *argv[])
 {
-    cout << endl << "Hello, This is (VP-TREE) DBSCAN program" << endl;
+    ofstream logsfile;
+    logsfile.open("logs.txt", std::ios_base::app); // append instead of overwrite
+    logsfile << currentDateTime() << ",";
+    logsfile.close();
+
+    cout << endl << "Hello, This is DBSCAN (VP-TREE) program" << endl;
 
     Punkt *pkt;                         // Wskaznik na "Punkt" --> potem przypisana tablica pod wskaznik
     int *N_tab;                         // Tablica z indeksami sasiadow przy RangeQuery
@@ -102,262 +122,502 @@ int main()
     int start_ind = 0;                  // Flag for import - take first COLUMN - Variable to carry information between functions
     int start_linia = 0;                // Flag for import - take first ROW - Variable to carry information between functions
 
-
-// Import Metadata from CSV File    
-    Import_CSV_Metadata(pkt, ile_linii, ile_x, file_in, start_ind, start_linia);
-
-// Allocation Memory
-    pkt = new Punkt[ile_linii];                                         // Memory Initialization
-
-    for(int i=0; i<ile_linii; i++)
+    for (int i = 0; i < argc; i++)
     {
-        pkt[i].Przydziel(ile_x);                                        // Memory Initialization
+        cout << i << ": " << argv[i] << endl;
     }
 
-// Import Data from CSV File
-    Import_CSV_File(pkt, ile_linii, ile_x, file_in, start_ind, start_linia);
-
-
-// Show first 3 rows from memory - Imported Structure
-    Show_Imported_First3(pkt, ile_linii, ile_x);
-
-// Show ALL Imported Data
-    // Show_Imported_All(pkt, ile_linii, ile_x);
-
-    int DBSCAN_yes = 0;
-    int VP1_yes = 0;
-    int VP2_yes = 0;
-    int flaga_wybor = 1;
-    char DBSCAN_if = 0;
-
-    while(flaga_wybor)                                                  // While - for: Original DBSCAN - y / n 
-    {   
-        cout << "Calculate: Original DBSCAN ? [y/n] : ";
-        cin >> DBSCAN_if;
-        switch (DBSCAN_if)
-        {
-        case 'y':
-            DBSCAN_yes = 1;
-            flaga_wybor = 0;
-            break;
-        case 'n':
-            DBSCAN_yes = 0;
-            flaga_wybor = 0;
-            break;
-        default:
-            cout << "Wrong character" << endl;
-            break;
-        } 
-    }
-
-    flaga_wybor = 1;
-
-    while(flaga_wybor)                                                  // While - for: DBSCAN with VP_Tree (ver 1) - y / n 
-    {   
-        cout << "Calculate: DBSCAN + VP_Tree (ver 1) ? [y/n] : ";
-        cin >> DBSCAN_if;
-        switch (DBSCAN_if)
-        {
-        case 'y':
-            VP1_yes = 1;
-            flaga_wybor = 0;
-            break;
-        case 'n':
-            VP1_yes = 0;
-            flaga_wybor = 0;
-            break;
-        default:
-            cout << "Wrong character" << endl;
-            break;
-        } 
-    }
-
-    flaga_wybor = 1;
-
-    while(flaga_wybor)                                                  // While - for: DBSCAN with VP_Tree (ver 2) - y / n 
-    {   
-        cout << "Calculate: DBSCAN + VP_Tree (ver 2) ? [y/n] : ";
-        cin >> DBSCAN_if;
-        switch (DBSCAN_if)
-        {
-        case 'y':
-            VP2_yes = 1;
-            flaga_wybor = 0;
-            break;
-        case 'n':
-            VP2_yes = 0;
-            flaga_wybor = 0;
-            break;
-        default:
-            cout << "Wrong character" << endl;
-            break;
-        } 
-    }
-
-
-    int C = 0;                                                          // Cluster Counter
-    double Eps = 0.5;                                                   // Max distance between points
-    int minN = 4;                                                       // Minimal number of Neighbors
-    double P_proc_S = 0.0;
-    double D_proc_S = 0.0;
-
-    if(DBSCAN_yes == 1 || VP1_yes == 1 || VP2_yes == 1)
-    {
-        cout << endl << "Epsilon (double): ";
-        cin >> Eps;
-
-        do{
-        cout << "Minimal number of Neighbors = minN (int)): ";
-        cin >> minN;
-        }while(minN < 1);   
-
-    }else{
-        cout << "Oh, you don't want to perform any clustering operation. Bye Bye!" << endl;
-
-        delete [] pkt;
-    }
-
-    if(VP1_yes == 1 || VP2_yes == 1)
-    {
-        do{
-        cout << "P Random Sample of S (0-1): " ;
-        cin >> P_proc_S;
-        }while(P_proc_S < 0.0 || P_proc_S > 1.0);
-
-        do{
-        cout << "D Random Sample of S (0-1): " ;
-        cin >> D_proc_S;
-        }while(D_proc_S < 0.0 || D_proc_S > 1.0);
-    }
-
-    Negative_Global = new int[ile_linii];                   
-    N_tab = new int[ile_linii];                                                                     // Neighbors tab - index for N in pkt tab
-    S_tab = new int[ile_linii];                                                                     // Seed tab - index for S in pkt tab
     
-    for(int i=0; i<ile_linii; i++)
+    if (argc > 1)    // ------------------------------------------------------------------------------- // WERSJA DO SKRYPTU
     {
-        Negative_Global[i] = -1;                                                                    // Czyszczenie listy indeksow sasiadow
-    }
+        // Import Metadata from CSV File    
+        Import_CSV_Metadata_SKRYPT(pkt, ile_linii, ile_x, file_in, start_ind, start_linia, argv[1], argv[2][0], argv[3][0]);
+
+    // Allocation Memory
+        pkt = new Punkt[ile_linii];                                         // Memory Initialization
+
+        for(int i=0; i<ile_linii; i++)
+        {
+            pkt[i].Przydziel(ile_x);                                        // Memory Initialization
+        }
+
+    // Import Data from CSV File
+        Import_CSV_File(pkt, ile_linii, ile_x, file_in, start_ind, start_linia);
 
 
-// --- Original DBSCAN ------------------------------------------------------------------------------------------------------------------------------- //
-    if(DBSCAN_yes == 1)
-    {
-        Clear_N_S(N_tab, S_tab, ile_linii);                                                             // Clear Neighbors Tab && Seed Tab
+    // Show first 3 rows from memory - Imported Structure
+        Show_Imported_First3(pkt, ile_linii, ile_x);
 
-        auto start = high_resolution_clock::now();                                                      // Time - START
-    // DBSCAN --- START //
-        DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);                               // DBSCAN - Origin - Function
-    // DBSCAN --- END //
-        auto stop = high_resolution_clock::now();                                                       // Time - STOP
-        auto duration = duration_cast<microseconds>(stop - start);                                      // Time - Caltulation
-        cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;                           // Time - show Function duration
-        cout << "DBSCAN Time: " << (double) duration.count() / 1000000.0 << " s" << endl;
-    }
-
-// Show every point and his Cluster number
-    // Show_Clustered(pkt, ile_linii, ile_x);
+    // Show ALL Imported Data
+        // Show_Imported_All(pkt, ile_linii, ile_x);
 
 
-// --- VP-TREE - ver 1 - Simple Condition ------------------------------------------------------------------------------------------------------------- //
+        int DBSCAN_yes = 0;
+        int VP1_yes = 0;
+        int VP2_yes = 0;
 
-    int Tree_Counter = -1;                                                                          // 
-    int L_R = 0;                                                                                    // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
-    int index_parentnode = -1;                                                                      // Nie ma wczesniejszego "Rodzica"
-
-    int *S_VP_tab;
-    S_VP_tab = new int[ile_linii];
-    for (int i = 0; i < ile_linii; i++)                                                             // Wpisywanie indeksow do startowej tablicy S do tworzenia drzewa VP-Tree
-    {
-        S_VP_tab[i] = i;
-    }
-
-// DBSCAN VP_Tree - ver 1 ----------
-    if(VP1_yes == 1)
-    {
-        Clear_N_S(N_tab, S_tab, ile_linii);                                                         // Clear Neighbors Tab && Seed Tab
-
-        VP *VP_tree;                                                                                // Memory for VP_Tree
-        VP_tree = new VP[ile_linii];
-
-        Tree_Counter = -1;                                                                          // 
-        L_R = 0;                                                                                    // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
-        index_parentnode = -1;                                                                      // Nie ma wczesniejszego "Rodzica"
-        C = 0;
-
-        auto start2 = high_resolution_clock::now();                                                     // Time - START
-    // VP_TREE - CREATE - START //
-        Make_VP_Tree(VP_tree, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, &Tree_Counter, L_R, index_parentnode);
-    // VP_TREE - CREATE - END //
-        auto stop2 = high_resolution_clock::now();                                                      // Time - STOP
-        auto duration2 = duration_cast<microseconds>(stop2 - start2);                                   // Time - Caltulation
-        cout << endl << "MAKE_VP_TREE Time: " << duration2.count() << " us" << endl;                    // Time - show Function duration
-        cout << "MAKE_VP_TREE Time: " << (double)duration2.count() / 1000000.0 << " s" << endl;         // Time - show Function duration
-
-        auto start1 = high_resolution_clock::now();                                                     // Time - START
-    // DBSCAN_VP-TREE --- START //
-        DBSCAN_VP_TREE(VP_tree,pkt, S_tab, N_tab, Eps, (Tree_Counter+1), minN, C, ile_x);               // DBSCAN - VP-Tree - ver 1 - Function
-    // DBSCAN_VP-TREE --- END //
-        auto stop1 = high_resolution_clock::now();                                                      // Time - STOP
-        auto duration1 = duration_cast<microseconds>(stop1 - start1);                                   // Time - Caltulation
-        cout << "DBSCAN_VP_TREE Time: " << duration1.count() << " us" << endl;                          // Time - show Function duration  
-        cout << "DBSCAN_VP_TREE Time: " << (double)duration1.count() / 1000000.0 << " s" << endl;       // Time - show Function duration
-        cout << "DBSCAN_VP_TREE Time (SUMA): " << (double)(duration1.count()+duration2.count()) / 1000000.0 << " s" << endl;
-
-        // Show_VP_Tree(VP_tree, Tree_Counter);
-        // Save_VP_Tree(VP_tree, Tree_Counter);
-
-        delete [] VP_tree;
-    }
-
-// --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
-
-
-// --- VP-TREE - ver 2 - Improved Condition ------------------------------------------------------------------------------------------------------------- //
-
-    if(VP2_yes == 1)
-    {
-        Clear_N_S(N_tab, S_tab, ile_linii);                                                             // Clear Neighbors Tab && Seed Tab
+        if (atoi(argv[4]) == 1)
+        {
+            DBSCAN_yes = 1;
+        }
         
+        if (atoi(argv[4]) == 2)
+        {
+            VP1_yes = 1;
+        }
+        
+        if (atoi(argv[4]) == 3)
+        {
+            VP2_yes = 1;
+        }
+        
+        cout << "Calculate: Original DBSCAN ? [y/n] : ";
+        cout << DBSCAN_yes << endl;
+  
+        cout << "Calculate: VP_Tree (ver 1) ? [y/n] : ";
+        cout << VP1_yes << endl;
+
+        cout << "Calculate: VP_Tree (ver 2) ? [y/n] : ";
+        cout << VP2_yes << endl;
+
+        int C = 0;                                                          // Cluster Counter
+        double Eps = atof(argv[5]);                                                   // Max distance between points
+        int minN = atoi(argv[6]);                                                       // Minimal number of Neighbors
+        double P_proc_S = atof(argv[7]);
+        double D_proc_S = atof(argv[8]);
+
+        cout << endl << "Epsilon (double): ";
+        cout << Eps << endl;
+        cout << "Minimal number of Neighbors = minN (int)): ";
+        cout << minN << endl;
+   
+        cout << "P Random Sample of S (0-1): " ;
+        cout << P_proc_S << endl;
+        cout << "D Random Sample of S (0-1): " ;
+        cout << D_proc_S << endl;
+
+        logsfile.open("logs.txt", std::ios_base::app); // append instead of overwrite
+        logsfile << currentDateTime() << ",";
+        logsfile.close();
+
+
+        Negative_Global = new int[ile_linii];                   
+        N_tab = new int[ile_linii];                                                                     // Neighbors tab - index for N in pkt tab
+        S_tab = new int[ile_linii];                                                                     // Seed tab - index for S in pkt tab
+
+        for(int i=0; i<ile_linii; i++)
+        {
+            Negative_Global[i] = -1;                                                                    // Czyszczenie listy indeksow sasiadow
+        }
+
+        cout << endl << "* Start * currentDateTime() = " << currentDateTime() << endl;
+
+    // --- Original DBSCAN ------------------------------------------------------------------------------------------------------------------------------- //
+        if(DBSCAN_yes == 1)
+        {
+            Clear_N_S(N_tab, S_tab, ile_linii);                                                             // Clear Neighbors Tab && Seed Tab
+
+            auto start = high_resolution_clock::now();                                                      // Time - START
+        // DBSCAN --- START //
+            DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);                               // DBSCAN - Origin - Function
+        // DBSCAN --- END //
+            auto stop = high_resolution_clock::now();                                                       // Time - STOP
+            auto duration = duration_cast<microseconds>(stop - start);                                      // Time - Caltulation
+            // cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;                           // Time - show Function duration
+            cout << endl << "DBSCAN Time: " << (double) duration.count() / 1000000.0 << " s" << endl;
+        }
+
+    // Show every point and his Cluster number
+        // Show_Clustered(pkt, ile_linii, ile_x);
+
+
+    // --- VP-TREE - ver 1 - Simple Condition ------------------------------------------------------------------------------------------------------------- //
+
+        int Tree_Counter = -1;                                                                          // 
+        int L_R = 0;                                                                                    // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
+        int index_parentnode = -1;                                                                      // Nie ma wczesniejszego "Rodzica"
+
+        int *S_VP_tab;
+        S_VP_tab = new int[ile_linii];
         for (int i = 0; i < ile_linii; i++)                                                             // Wpisywanie indeksow do startowej tablicy S do tworzenia drzewa VP-Tree
         {
             S_VP_tab[i] = i;
         }
 
-        VP *VP_tree2;                                                                                   // Memory for VP_Tree
-        VP_tree2 = new VP[ile_linii];
+    // DBSCAN VP_Tree - ver 1 ----------
+        if(VP1_yes == 1)
+        {
+            Clear_N_S(N_tab, S_tab, ile_linii);                                                         // Clear Neighbors Tab && Seed Tab
 
-        Tree_Counter = -1;                                                                              // 
-        L_R = 0;                                                                                        // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
-        index_parentnode = -1;                                                                          // Nie ma wczesniejszego "Rodzica"
-        C = 0;
+            VP *VP_tree;                                                                                // Memory for VP_Tree
+            VP_tree = new VP[ile_linii];
 
-        auto start4 = high_resolution_clock::now();                                                     // Time - START
-    // VP_TREE - CREATE - START //
-        Make_VP_Tree_2(VP_tree2, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, &Tree_Counter, L_R, index_parentnode);
-    // VP_TREE - CREATE - END //
-        auto stop4 = high_resolution_clock::now();                                                      // Time - STOP
-        auto duration4 = duration_cast<microseconds>(stop4 - start4);                                   // Time - Caltulation
-        cout << endl << "MAKE_VP_TREE_2 Time: " << duration4.count() << " us" << endl;                  // Time - show Function duration
-        cout << "MAKE_VP_TREE_2 Time: " << (double)duration4.count() / 1000000.0 << " s" << endl;       // Time - show Function duration
+            Tree_Counter = -1;                                                                          // 
+            L_R = 0;                                                                                    // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
+            index_parentnode = -1;                                                                      // Nie ma wczesniejszego "Rodzica"
+            C = 0;
 
-        auto start3 = high_resolution_clock::now();                                                     // Time - START
-    // DBSCAN_VP-TREE --- START //
-        DBSCAN_VP_TREE_2(VP_tree2,pkt, S_tab, N_tab, Eps, (Tree_Counter+1), minN, C, ile_x);            // DBSCAN - VP-Tree - ver 2 - Function
-    // DBSCAN_VP-TREE --- END //
-        auto stop3 = high_resolution_clock::now();                                                      // Time - STOP
-        auto duration3 = duration_cast<microseconds>(stop3 - start3);                                   // Time - Caltulation
-        cout << "DBSCAN_VP_TREE_2 Time: " << duration3.count() << " us" << endl;                        // Time - show Function duration
-        cout << "DBSCAN_VP_TREE_2 Time: " << (double)duration3.count() / 1000000.0 << " s" << endl;     // Time - show Function duration
-        cout << "DBSCAN_VP_TREE_2 Time (SUMA): " << (double)(duration3.count()+duration4.count()) / 1000000.0 << " s" << endl;    // Time - show Function duration
+            auto start2 = high_resolution_clock::now();                                                     // Time - START
+        // VP_TREE - CREATE - START //
+            Make_VP_Tree(VP_tree, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, &Tree_Counter, L_R, index_parentnode);
+        // VP_TREE - CREATE - END //
+            auto stop2 = high_resolution_clock::now();                                                      // Time - STOP
+            auto duration2 = duration_cast<microseconds>(stop2 - start2);                                   // Time - Caltulation
+            // cout << endl << "MAKE_VP_TREE Time: " << duration2.count() << " us" << endl;                    // Time - show Function duration
+            cout << endl << "MAKE_VP_TREE Time: " << (double)duration2.count() / 1000000.0 << " s" << endl;         // Time - show Function duration
 
-        // Show_VP_Tree(VP_tree2, Tree_Counter);
-        // Save_VP_Tree(VP_tree2, Tree_Counter);
+            auto start1 = high_resolution_clock::now();                                                     // Time - START
+        // DBSCAN_VP-TREE --- START //
+            DBSCAN_VP_TREE(VP_tree,pkt, S_tab, N_tab, Eps, (Tree_Counter+1), minN, C, ile_x);               // DBSCAN - VP-Tree - ver 1 - Function
+        // DBSCAN_VP-TREE --- END //
+            auto stop1 = high_resolution_clock::now();                                                      // Time - STOP
+            auto duration1 = duration_cast<microseconds>(stop1 - start1);                                   // Time - Caltulation
+            //cout << "DBSCAN_VP_TREE Time: " << duration1.count() << " us" << endl;                          // Time - show Function duration  
+            cout << "DBSCAN_VP_TREE Time: " << (double)duration1.count() / 1000000.0 << " s" << endl;       // Time - show Function duration
+            cout << "-> DBSCAN_VP_TREE Time (SUM): " << (double)(duration1.count()+duration2.count()) / 1000000.0 << " s" << endl;
 
-        delete [] VP_tree2;
+            // Show_VP_Tree(VP_tree, Tree_Counter);
+            // Save_VP_Tree(VP_tree, Tree_Counter);
+
+            delete [] VP_tree;
+        }
+
+    // --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
+
+
+    // --- VP-TREE - ver 2 - Improved Condition ------------------------------------------------------------------------------------------------------------- //
+
+        if(VP2_yes == 1)
+        {
+            Clear_N_S(N_tab, S_tab, ile_linii);                                                             // Clear Neighbors Tab && Seed Tab
+
+            for (int i = 0; i < ile_linii; i++)                                                             // Wpisywanie indeksow do startowej tablicy S do tworzenia drzewa VP-Tree
+            {
+                S_VP_tab[i] = i;
+            }
+
+            VP *VP_tree2;                                                                                   // Memory for VP_Tree
+            VP_tree2 = new VP[ile_linii];
+
+            Tree_Counter = -1;                                                                              // 
+            L_R = 0;                                                                                        // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
+            index_parentnode = -1;                                                                          // Nie ma wczesniejszego "Rodzica"
+            C = 0;
+
+            auto start4 = high_resolution_clock::now();                                                     // Time - START
+        // VP_TREE - CREATE - START //
+            Make_VP_Tree_2(VP_tree2, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, &Tree_Counter, L_R, index_parentnode);
+        // VP_TREE - CREATE - END //
+            auto stop4 = high_resolution_clock::now();                                                      // Time - STOP
+            auto duration4 = duration_cast<microseconds>(stop4 - start4);                                   // Time - Caltulation
+            //cout << endl << "MAKE_VP_TREE_2 Time: " << duration4.count() << " us" << endl;                  // Time - show Function duration
+            cout << endl << "MAKE_VP_TREE_2 Time: " << (double)duration4.count() / 1000000.0 << " s" << endl;       // Time - show Function duration
+
+            auto start3 = high_resolution_clock::now();                                                     // Time - START
+        // DBSCAN_VP-TREE --- START //
+            DBSCAN_VP_TREE_2(VP_tree2,pkt, S_tab, N_tab, Eps, (Tree_Counter+1), minN, C, ile_x);            // DBSCAN - VP-Tree - ver 2 - Function
+        // DBSCAN_VP-TREE --- END //
+            auto stop3 = high_resolution_clock::now();                                                      // Time - STOP
+            auto duration3 = duration_cast<microseconds>(stop3 - start3);                                   // Time - Caltulation
+            //cout << "DBSCAN_VP_TREE_2 Time: " << duration3.count() << " us" << endl;                        // Time - show Function duration
+            cout << "DBSCAN_VP_TREE_2 Time: " << (double)duration3.count() / 1000000.0 << " s" << endl;     // Time - show Function duration
+            cout << "-> DBSCAN_VP_TREE_2 Time (SUMA): " << (double)(duration3.count()+duration4.count()) / 1000000.0 << " s" << endl;    // Time - show Function duration
+
+            // Show_VP_Tree(VP_tree2, Tree_Counter);
+            // Save_VP_Tree(VP_tree2, Tree_Counter);
+
+            delete [] VP_tree2;
+        }
+
+    // --- VP-TREE ver 2 --------------------------------------------------------------------------------------------------------------- //
+
+    cout << endl << "* End * currentDateTime() = " << currentDateTime() << endl;
+    
+    int noise = 0;
+    int cc = 0;
+
+    if(DBSCAN_yes == 1 || VP1_yes == 1 || VP2_yes == 1)
+    {
+        
+        // Show_Clustered_All(pkt, ile_linii, ile_x);
+        Show_C_All_SKRYPT(pkt, ile_linii, ile_x, DBSCAN_yes, VP1_yes, VP2_yes, &noise, &cc);
+        Save_File_SKRYPT(pkt, ile_linii, ile_x, argv[9], atoi(argv[4]));                       // Saving CSV - with Cluster data
     }
 
-// --- VP-TREE ver 2 --------------------------------------------------------------------------------------------------------------- //
+    logsfile.open("logs.txt", std::ios_base::app); // append instead of overwrite
+    logsfile << currentDateTime() << "," << noise << "," << cc-1 << endl;
+    logsfile.close();
+
+    // delete - Destroy array/pointers
+        delete [] S_VP_tab;
+        delete [] Negative_Global;
+        delete [] S_tab;
+        delete [] N_tab;
+        delete [] pkt;
+
+
+
+
+    }else{  // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- // WERSJA DLA UZYTKOWNIKA // ------------------------------------------------------------------------------- //
+            // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- // WERSJA DLA UZYTKOWNIKA // ------------------------------------------------------------------------------- //
+            // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- // WERSJA DLA UZYTKOWNIKA // ------------------------------------------------------------------------------- //
+
+    // Import Metadata from CSV File    
+        Import_CSV_Metadata(pkt, ile_linii, ile_x, file_in, start_ind, start_linia);
+
+    // Allocation Memory
+        pkt = new Punkt[ile_linii];                                         // Memory Initialization
+
+        for(int i=0; i<ile_linii; i++)
+        {
+            pkt[i].Przydziel(ile_x);                                        // Memory Initialization
+        }
+
+    // Import Data from CSV File
+        Import_CSV_File(pkt, ile_linii, ile_x, file_in, start_ind, start_linia);
+
+
+    // Show first 3 rows from memory - Imported Structure
+        Show_Imported_First3(pkt, ile_linii, ile_x);
+
+    // Show ALL Imported Data
+        // Show_Imported_All(pkt, ile_linii, ile_x);
+
+        int DBSCAN_yes = 0;
+        int VP1_yes = 0;
+        int VP2_yes = 0;
+        int flaga_wybor = 1;
+        char DBSCAN_if = 0;
+
+        while(flaga_wybor)                                                  // While - for: Original DBSCAN - y / n 
+        {   
+            cout << "Calculate: Original DBSCAN ? [y/n] : ";
+            cin >> DBSCAN_if;
+            switch (DBSCAN_if)
+            {
+            case 'y':
+                DBSCAN_yes = 1;
+                flaga_wybor = 0;
+                break;
+            case 'n':
+                DBSCAN_yes = 0;
+                flaga_wybor = 0;
+                break;
+            default:
+                cout << "Wrong character" << endl;
+                break;
+            } 
+        }
+
+        flaga_wybor = 1;
+
+        while(flaga_wybor)                                                  // While - for: DBSCAN with VP_Tree (ver 1) - y / n 
+        {   
+            cout << "Calculate: DBSCAN + VP_Tree (ver 1) ? [y/n] : ";
+            cin >> DBSCAN_if;
+            switch (DBSCAN_if)
+            {
+            case 'y':
+                VP1_yes = 1;
+                flaga_wybor = 0;
+                break;
+            case 'n':
+                VP1_yes = 0;
+                flaga_wybor = 0;
+                break;
+            default:
+                cout << "Wrong character" << endl;
+                break;
+            } 
+        }
+
+        flaga_wybor = 1;
+
+        while(flaga_wybor)                                                  // While - for: DBSCAN with VP_Tree (ver 2) - y / n 
+        {   
+            cout << "Calculate: DBSCAN + VP_Tree (ver 2) ? [y/n] : ";
+            cin >> DBSCAN_if;
+            switch (DBSCAN_if)
+            {
+            case 'y':
+                VP2_yes = 1;
+                flaga_wybor = 0;
+                break;
+            case 'n':
+                VP2_yes = 0;
+                flaga_wybor = 0;
+                break;
+            default:
+                cout << "Wrong character" << endl;
+                break;
+            } 
+        }
+
+
+        int C = 0;                                                          // Cluster Counter
+        double Eps = 0.5;                                                   // Max distance between points
+        int minN = 4;                                                       // Minimal number of Neighbors
+        double P_proc_S = 0.0;
+        double D_proc_S = 0.0;
+
+        if(DBSCAN_yes == 1 || VP1_yes == 1 || VP2_yes == 1)
+        {
+            cout << endl << "Epsilon (double): ";
+            cin >> Eps;
+
+            do{
+            cout << "Minimal number of Neighbors = minN (int)): ";
+            cin >> minN;
+            }while(minN < 1);   
+
+        }else{
+            cout << "Oh, you don't want to perform any clustering operation. Bye Bye!" << endl;
+
+            delete [] pkt;
+        }
+
+        if(VP1_yes == 1 || VP2_yes == 1)
+        {
+            do{
+            cout << "P Random Sample of S (0-1): " ;
+            cin >> P_proc_S;
+            }while(P_proc_S < 0.0 || P_proc_S > 1.0);
+
+            do{
+            cout << "D Random Sample of S (0-1): " ;
+            cin >> D_proc_S;
+            }while(D_proc_S < 0.0 || D_proc_S > 1.0);
+        }
+
+        Negative_Global = new int[ile_linii];                   
+        N_tab = new int[ile_linii];                                                                     // Neighbors tab - index for N in pkt tab
+        S_tab = new int[ile_linii];                                                                     // Seed tab - index for S in pkt tab
+
+        for(int i=0; i<ile_linii; i++)
+        {
+            Negative_Global[i] = -1;                                                                    // Czyszczenie listy indeksow sasiadow
+        }
+
+
+    // --- Original DBSCAN ------------------------------------------------------------------------------------------------------------------------------- //
+        if(DBSCAN_yes == 1)
+        {
+            Clear_N_S(N_tab, S_tab, ile_linii);                                                             // Clear Neighbors Tab && Seed Tab
+
+            auto start = high_resolution_clock::now();                                                      // Time - START
+        // DBSCAN --- START //
+            DBSCAN_Origin(pkt, S_tab, N_tab, Eps, ile_linii, minN, C, ile_x);                               // DBSCAN - Origin - Function
+        // DBSCAN --- END //
+            auto stop = high_resolution_clock::now();                                                       // Time - STOP
+            auto duration = duration_cast<microseconds>(stop - start);                                      // Time - Caltulation
+            cout << endl << "DBSCAN Time: " << duration.count() << " us" << endl;                           // Time - show Function duration
+            cout << "DBSCAN Time: " << (double) duration.count() / 1000000.0 << " s" << endl;
+        }
+
+    // Show every point and his Cluster number
+        // Show_Clustered(pkt, ile_linii, ile_x);
+
+
+    // --- VP-TREE - ver 1 - Simple Condition ------------------------------------------------------------------------------------------------------------- //
+
+        int Tree_Counter = -1;                                                                          // 
+        int L_R = 0;                                                                                    // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
+        int index_parentnode = -1;                                                                      // Nie ma wczesniejszego "Rodzica"
+
+        int *S_VP_tab;
+        S_VP_tab = new int[ile_linii];
+        for (int i = 0; i < ile_linii; i++)                                                             // Wpisywanie indeksow do startowej tablicy S do tworzenia drzewa VP-Tree
+        {
+            S_VP_tab[i] = i;
+        }
+
+    // DBSCAN VP_Tree - ver 1 ----------
+        if(VP1_yes == 1)
+        {
+            Clear_N_S(N_tab, S_tab, ile_linii);                                                         // Clear Neighbors Tab && Seed Tab
+
+            VP *VP_tree;                                                                                // Memory for VP_Tree
+            VP_tree = new VP[ile_linii];
+
+            Tree_Counter = -1;                                                                          // 
+            L_R = 0;                                                                                    // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
+            index_parentnode = -1;                                                                      // Nie ma wczesniejszego "Rodzica"
+            C = 0;
+
+            auto start2 = high_resolution_clock::now();                                                     // Time - START
+        // VP_TREE - CREATE - START //
+            Make_VP_Tree(VP_tree, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, &Tree_Counter, L_R, index_parentnode);
+        // VP_TREE - CREATE - END //
+            auto stop2 = high_resolution_clock::now();                                                      // Time - STOP
+            auto duration2 = duration_cast<microseconds>(stop2 - start2);                                   // Time - Caltulation
+            cout << endl << "MAKE_VP_TREE Time: " << duration2.count() << " us" << endl;                    // Time - show Function duration
+            cout << "MAKE_VP_TREE Time: " << (double)duration2.count() / 1000000.0 << " s" << endl;         // Time - show Function duration
+
+            auto start1 = high_resolution_clock::now();                                                     // Time - START
+        // DBSCAN_VP-TREE --- START //
+            DBSCAN_VP_TREE(VP_tree,pkt, S_tab, N_tab, Eps, (Tree_Counter+1), minN, C, ile_x);               // DBSCAN - VP-Tree - ver 1 - Function
+        // DBSCAN_VP-TREE --- END //
+            auto stop1 = high_resolution_clock::now();                                                      // Time - STOP
+            auto duration1 = duration_cast<microseconds>(stop1 - start1);                                   // Time - Caltulation
+            cout << "DBSCAN_VP_TREE Time: " << duration1.count() << " us" << endl;                          // Time - show Function duration  
+            cout << "DBSCAN_VP_TREE Time: " << (double)duration1.count() / 1000000.0 << " s" << endl;       // Time - show Function duration
+            cout << "DBSCAN_VP_TREE Time (SUMA): " << (double)(duration1.count()+duration2.count()) / 1000000.0 << " s" << endl;
+
+            // Show_VP_Tree(VP_tree, Tree_Counter);
+            // Save_VP_Tree(VP_tree, Tree_Counter);
+
+            delete [] VP_tree;
+        }
+
+    // --- VP-TREE --------------------------------------------------------------------------------------------------------------- //
+
+
+    // --- VP-TREE - ver 2 - Improved Condition ------------------------------------------------------------------------------------------------------------- //
+
+        if(VP2_yes == 1)
+        {
+            Clear_N_S(N_tab, S_tab, ile_linii);                                                             // Clear Neighbors Tab && Seed Tab
+
+            for (int i = 0; i < ile_linii; i++)                                                             // Wpisywanie indeksow do startowej tablicy S do tworzenia drzewa VP-Tree
+            {
+                S_VP_tab[i] = i;
+            }
+
+            VP *VP_tree2;                                                                                   // Memory for VP_Tree
+            VP_tree2 = new VP[ile_linii];
+
+            Tree_Counter = -1;                                                                              // 
+            L_R = 0;                                                                                        // Nie wiadomo czy lewe/prawe bo jestesmy na poczatku drzewa
+            index_parentnode = -1;                                                                          // Nie ma wczesniejszego "Rodzica"
+            C = 0;
+
+            auto start4 = high_resolution_clock::now();                                                     // Time - START
+        // VP_TREE - CREATE - START //
+            Make_VP_Tree_2(VP_tree2, pkt, S_VP_tab, ile_linii, P_proc_S, D_proc_S, ile_x, &Tree_Counter, L_R, index_parentnode);
+        // VP_TREE - CREATE - END //
+            auto stop4 = high_resolution_clock::now();                                                      // Time - STOP
+            auto duration4 = duration_cast<microseconds>(stop4 - start4);                                   // Time - Caltulation
+            cout << endl << "MAKE_VP_TREE_2 Time: " << duration4.count() << " us" << endl;                  // Time - show Function duration
+            cout << "MAKE_VP_TREE_2 Time: " << (double)duration4.count() / 1000000.0 << " s" << endl;       // Time - show Function duration
+
+            auto start3 = high_resolution_clock::now();                                                     // Time - START
+        // DBSCAN_VP-TREE --- START //
+            DBSCAN_VP_TREE_2(VP_tree2,pkt, S_tab, N_tab, Eps, (Tree_Counter+1), minN, C, ile_x);            // DBSCAN - VP-Tree - ver 2 - Function
+        // DBSCAN_VP-TREE --- END //
+            auto stop3 = high_resolution_clock::now();                                                      // Time - STOP
+            auto duration3 = duration_cast<microseconds>(stop3 - start3);                                   // Time - Caltulation
+            cout << "DBSCAN_VP_TREE_2 Time: " << duration3.count() << " us" << endl;                        // Time - show Function duration
+            cout << "DBSCAN_VP_TREE_2 Time: " << (double)duration3.count() / 1000000.0 << " s" << endl;     // Time - show Function duration
+            cout << "DBSCAN_VP_TREE_2 Time (SUMA): " << (double)(duration3.count()+duration4.count()) / 1000000.0 << " s" << endl;    // Time - show Function duration
+
+            // Show_VP_Tree(VP_tree2, Tree_Counter);
+            // Save_VP_Tree(VP_tree2, Tree_Counter);
+
+            delete [] VP_tree2;
+        }
+
+    // --- VP-TREE ver 2 --------------------------------------------------------------------------------------------------------------- //
+
     
 
     if(DBSCAN_yes == 1 || VP1_yes == 1 || VP2_yes == 1)
@@ -368,13 +628,16 @@ int main()
     }
 
 
-// delete - Destroy array/pointers
-    delete [] S_VP_tab;
-    delete [] Negative_Global;
-    delete [] S_tab;
-    delete [] N_tab;
 
-    delete [] pkt;
+    // delete - Destroy array/pointers
+        delete [] S_VP_tab;
+        delete [] Negative_Global;
+        delete [] S_tab;
+        delete [] N_tab;
+
+        delete [] pkt;
+
+    }
 
 }
 // --- End of Main --- //
@@ -383,7 +646,112 @@ int main()
 
 // --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- FUNCTION --- //
 
+void Import_CSV_Metadata_SKRYPT(Punkt *pkt, int &ile_linii, int &ile_x, string &file_in, int &start_ind, int &start_linia, char *plik_wejscie, char FirstRowYN, char FirstColYN)
+{
+    string file1 = plik_wejscie;                                           // Name of File to Import
+    string line, word, temp, struktura;                                     // Temporary strings for import
+    //char FirstColYN, FirstRowYN;                                            // FirstColYN - char for: Import First Column?   // FirstRowYN - char for: Import First Row?
+    int index = 0;                                                          // Counter for every "word" in imported line
+    int counter_tab = 0;                                                    // Counter for "x" in every point
+    int start_index = 0;                                                    // Start index - if User don't want First Column
+    int ktora_linia = 0;                                                    // Row Counter for importing 
+    int exist = 0;
 
+    do{
+        //cout << "What file you want? : ";
+        //cin >> file1;
+        if (FILE *file = fopen(file1.c_str(), "r")) {
+            fclose(file);
+            exist = 1;
+        }else{
+            cout << "Warning: Can't find this file" << endl;
+        }
+    }while(exist != 1);
+    
+    
+    cout << "--- Open file: " << file1 << " --> ";
+
+    fstream plik;                                                           // FStream for import file
+    plik.open(file1);                                                       // Open import file
+
+    if(plik.good())
+    {
+        //cout << plik.tellg() << endl;
+        while(!plik.eof())
+        {
+            while(getline(plik, line, '\n'))                                // Calculate how many lines are in the file
+            {
+                ile_linii++;
+            }
+        }
+
+        plik.clear();
+        plik.seekg(0, ios::beg);                                            // Clear buffer and go to the beginning of the file
+
+        for(int i = 0; i < 3; i++)                                          // Import first 3 lines from file - to show them later
+        {   
+            ile_x = 0;
+            getline(plik, line, '\n');
+            stringstream sstream_temp(line);
+            while(getline(sstream_temp, word, ','))
+            {
+                // cout << word << " ";
+                struktura = struktura + word + " | ";
+                ile_x++;
+            }
+            struktura = struktura + '\n';
+        }
+        
+        // cout << "Ile kolumn: " << ile_x << endl;
+        // cout << "Wierszy w pliku: " <<  ile_linii << endl;
+        cout << endl << "***" << endl << "File Structure: " << endl << "Columns: " <<  ile_x << endl << "Rows: " << ile_linii << endl << "Structure: " << endl << struktura << "***" << endl;       // Show - File Structure
+         
+        cout << "Import 1st row = Header? [y/n] : ";
+        cout << FirstRowYN << endl;
+        switch (FirstRowYN)
+        {
+        case 'y':
+            ktora_linia = 0;
+            break;
+        case 'n':
+            ktora_linia = 1;
+            ile_linii--;
+            break;
+        default:
+            cout << "Wrong character" << endl;
+            break;
+        } 
+
+
+        cout << "Import 1st column? [y/n] : ";
+        cout << FirstColYN << endl;
+        switch (FirstColYN)
+        {
+        case 'y':
+            start_index = 0;
+            break;
+        case 'n':
+            start_index = 1;
+            ile_x--;
+            break;
+        default:
+            cout << "Wrong character" << endl;
+            break;
+        } 
+
+    }else{
+        cout << "Can't open file" << endl;
+    }
+
+
+    file_in = file1;
+    start_linia = ktora_linia;
+    start_ind = start_index;
+
+}        
+
+
+// --- WERSJA DLA UZYTKOWNIKA ---
 void Import_CSV_Metadata(Punkt *pkt, int &ile_linii, int &ile_x, string &file_in, int &start_ind, int &start_linia)
 {
     string file1 = "DataCpp.csv";                                           // Name of File to Import
@@ -620,6 +988,89 @@ void Show_Clustered_All(Punkt *pkt, int ile_linii, int ile_x)
     }
 }
 
+void Show_C_All_SKRYPT(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_yes, int VP2_yes, int *noise, int *cc)
+{
+    cout << endl;
+    int Tab_C[1000];
+    int Tab_C1[1000];
+    int Tab_C2[1000];
+
+    for (int i = 0; i < 1000; i++)
+    {
+        Tab_C[i] = 0;
+        Tab_C1[i] = 0;
+        Tab_C2[i] = 0;
+    }
+    
+    // for(int i=0; i<ile_linii; i++)
+    // {
+    //     Tab_C[pkt[i].cluster + 1]++;
+    //     Tab_C1[pkt[i].cluster2 + 1]++;
+    //     Tab_C2[pkt[i].cluster3 + 1]++;
+    // }
+    int cc1 = 0;
+
+    if(DBSCAN_yes == 1)
+    {
+        for(int i=0; i<ile_linii; i++)
+        {
+            Tab_C[pkt[i].cluster + 1]++;
+        }
+
+        cout << "DBSCAN Original - Class:" << endl;
+        for (int i = 0; i < 1000; i++)
+        {
+            if (Tab_C[i] > 0)
+            {
+                cout << "Class: " << i-1 << " = " << Tab_C[i] << endl;
+                cc1++;
+            }
+        }
+        *noise = Tab_C[0];
+        *cc = cc1;
+    }
+
+    if(VP1_yes == 1)
+    {
+        for(int i=0; i<ile_linii; i++)
+        {
+            Tab_C1[pkt[i].cluster2 + 1]++;
+        }
+
+        cout << endl << "DBSCAN VP_Tree v1 - Class:" << endl;
+        for (int i = 0; i < 1000; i++)
+        {
+            if (Tab_C1[i] > 0)
+            {
+                cout << "Class: " << i-1 << " = " << Tab_C1[i] << endl;
+                cc1++;
+            }
+        }
+        *noise = Tab_C1[0];
+        *cc = cc1;
+    }
+
+    if(VP2_yes == 1)
+    {
+        for(int i=0; i<ile_linii; i++)
+        {
+            Tab_C2[pkt[i].cluster3 + 1]++;
+        }
+
+        cout << endl << "DBSCAN VP_Tree v2 - Class:" << endl;
+        for (int i = 0; i < 1000; i++)
+        {
+            if (Tab_C2[i] > 0)
+            {
+                cout << "Class: " << i-1 << " = " << Tab_C2[i] << endl;
+                cc1++;
+            }
+        }
+        *noise = Tab_C2[0];
+        *cc = cc1;
+    }
+}
+
 void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_yes, int VP2_yes)
 {
     cout << endl;
@@ -662,7 +1113,7 @@ void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_ye
     {
         for(int i=0; i<ile_linii; i++)
         {
-            Tab_C1[pkt[i].cluster + 1]++;
+            Tab_C1[pkt[i].cluster2 + 1]++;
         }
 
         cout << endl << "DBSCAN VP_Tree v1 - Class:" << endl;
@@ -679,7 +1130,7 @@ void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_ye
     {
         for(int i=0; i<ile_linii; i++)
         {
-            Tab_C2[pkt[i].cluster + 1]++;
+            Tab_C2[pkt[i].cluster3 + 1]++;
         }
 
         cout << endl << "DBSCAN VP_Tree v2 - Class:" << endl;
@@ -691,6 +1142,50 @@ void Show_C_All(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int VP1_ye
             }
         }
     }
+}
+
+void Save_File_SKRYPT(Punkt *pkt, int ile_linii, int ile_x, char *plik_out_name, int algorytm)
+{
+    string file_out = plik_out_name;
+    cout << endl << "File output: ";
+    cout << file_out;
+    int num_file_out = 0;
+    int exist = 1;
+
+    ofstream plik_out;
+
+    cout << "--- Open CSV: " << file_out << " --> ";
+
+    plik_out.open(file_out);
+
+    if(plik_out.good())
+    {   
+        for (int i = 0; i < ile_linii; i++)
+        {
+            //plik_out << pkt[i].x[0] << "," << pkt[i].x[1] << "," << pkt[i].cluster << endl;
+            for (int j = 0; j < ile_x; j++)
+            {
+                plik_out << pkt[i].x[j] << ",";
+            }
+            if (algorytm == 1)
+            {
+                plik_out << pkt[i].cluster << ",";
+            }
+            if (algorytm == 2)
+            {
+                plik_out << pkt[i].cluster2 << ",";
+            }
+            if (algorytm == 3)
+            {
+                plik_out << pkt[i].cluster3 << ",";
+            }
+            plik_out << endl;
+        }
+    }else{
+        cout << "Can't open file" << endl;
+    }
+    plik_out.close();
+    cout << "Out File: Closed" << endl << endl;
 }
 
 
