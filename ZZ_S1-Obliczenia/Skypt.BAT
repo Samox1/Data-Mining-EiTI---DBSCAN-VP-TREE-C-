@@ -1,0 +1,1 @@
+FOR /L %%A IN (1,1,3) DO FOR /L %%E IN (5000,1000,15000) DO FOR /L %%N IN (20,10,50) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.01 0.01 S1e_Out_%%A_%%E_%%N.txt

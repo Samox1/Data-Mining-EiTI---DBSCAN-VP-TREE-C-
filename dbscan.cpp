@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
         logsfile.open("logs.txt", std::ios_base::app); // append instead of overwrite
         logsfile << currentDateTime() << "," << argv[1] << "," << argv[9] << "," << argv[4] << "," << argv[5] << "," << argv[6] << "," << argv[7] << "," << argv[8] << ",";
         logsfile.close();
-        cout << endl << currentDateTime() << "," << argv[1] << "," << argv[4] << "," << argv[5] << "," << argv[6] << "," << argv[7] << "," << argv[8] << "," << endl;
+        cout << endl << currentDateTime() << "," << argv[1] << "," << argv[9] << "," << argv[4] << "," << argv[5] << "," << argv[6] << "," << argv[7] << "," << argv[8] << "," << endl;
 
 
         Negative_Global = new int[ile_linii];                   
