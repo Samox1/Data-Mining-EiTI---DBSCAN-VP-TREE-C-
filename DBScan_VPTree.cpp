@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
         cout << D_proc_S << endl;
 
         logsfile.open("logs.txt", std::ios_base::app); // append instead of overwrite
-        logsfile << currentDateTime() << "," << argv[1] << "," << argv[4] << "," << argv[5] << "," << argv[6] << "," << argv[7] << "," << argv[8] << ",";
+        logsfile << currentDateTime() << "," << argv[1] << "," << argv[9] << "," << argv[4] << "," << argv[5] << "," << argv[6] << "," << argv[7] << "," << argv[8] << ",";
         logsfile.close();
         cout << endl << currentDateTime() << "," << argv[1] << "," << argv[4] << "," << argv[5] << "," << argv[6] << "," << argv[7] << "," << argv[8] << "," << endl;
 
@@ -352,7 +352,8 @@ int main(int argc, char *argv[])
     int cc = 0;
 
     if(DBSCAN_yes == 1 || VP1_yes == 1 || VP2_yes == 1)
-    {   
+    {
+        
         // Show_Clustered_All(pkt, ile_linii, ile_x);
         Show_C_All_SKRYPT(pkt, ile_linii, ile_x, DBSCAN_yes, VP1_yes, VP2_yes, &noise, &cc);
         Save_File_SKRYPT(pkt, ile_linii, ile_x, argv[9], atoi(argv[4]));                       // Saving CSV - with Cluster data
