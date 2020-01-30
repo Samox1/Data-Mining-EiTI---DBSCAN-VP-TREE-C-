@@ -51,3 +51,9 @@ plot(S1)
 kNNdistplot(S1)
 abline(h=10000, col = "red", lty=2)
 write.csv(S1, "S1e.csv")
+
+
+T48K <- as.data.frame(read.table("t4.8k.txt", header=FALSE ,sep=","))
+plot(T48K)
+kNNdistplot(T48K)
+abline(h=4, col = "red", lty=2)
