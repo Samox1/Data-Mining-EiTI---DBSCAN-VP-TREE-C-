@@ -21,7 +21,7 @@ Data120 <- as.data.frame(read.table("T48K_Out_3_10.0_20.txt", header=FALSE ,sep=
 
 Cole <- c("red", "green", "blue", "violet", "gold")
 Radi <- 0.5
-cluster <- as.factor(Data120[,5])
+cluster <- as.factor(Data120[,3])
 square <- ggplot(Data120[,1:2], aes(x=V1, y=V2, colour= cluster)) + geom_point()
 for(x in 1:length(Data120[,1])){
   # square <- square + gg_circle(r=Tree1$Mediana[Tree1$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color=, alpha=0.2)
@@ -59,3 +59,7 @@ T48K <- as.data.frame(read.table("t4.8k.txt", header=FALSE ,sep=","))
 plot(T48K)
 kNNdistplot(T48K)
 abline(h=4, col = "red", lty=2)
+
+
+Worms <- as.data.frame(read.table("worms_2d.txt", header=FALSE ,sep=","))
+plot(Worms, xlim=c(3000,4000), ylim=c(3000,4000), pch=20)
