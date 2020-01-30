@@ -1,0 +1,1 @@
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,10) DO .\DBScan_VPTree.exe DataCpp-2D-2000.csv n n %%A 0.5 %%N 0.01 0.01 Data_C_Out_%%A_0.5_%%N.txt

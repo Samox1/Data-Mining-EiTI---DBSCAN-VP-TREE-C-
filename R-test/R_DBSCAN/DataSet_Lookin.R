@@ -17,6 +17,8 @@ gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
   annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
 }
 
+Data120 <- as.data.frame(read.table("T48K_Out_3_10.0_20.txt", header=FALSE ,sep=","))
+
 Cole <- c("red", "green", "blue", "violet", "gold")
 Radi <- 0.5
 cluster <- as.factor(Data120[,5])
