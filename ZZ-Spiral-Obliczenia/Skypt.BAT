@@ -1,0 +1,1 @@
+FOR /L %%A IN (1,1,3) DO FOR /L %%E IN (2,1,4) DO FOR /L %%N IN (2,1,4) DO .\DBScan_VPTree.exe Spiral.csv n n %%A %%E %%N 0.01 0.01 Spiral_Out_%%A_%%E_%%N.txt

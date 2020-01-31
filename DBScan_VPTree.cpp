@@ -360,10 +360,10 @@ int main(int argc, char *argv[])
     }
 
     logsfile.open("logs.txt", std::ios_base::app); // append instead of overwrite
-    logsfile << currentDateTime() << "," << Time_Build << "," << Time_Search << "," << Time_All << "," << noise << "," << cc-1 << endl;
+    logsfile << currentDateTime() << "," << Time_Build << "," << Time_Search << "," << Time_All << "," << noise << "," << cc << endl;
     logsfile.close();
 
-    cout << currentDateTime() << "," << Time_Build << "," << Time_Search << "," << Time_All << "," << noise << "," << cc-1 << endl << endl;
+    cout << currentDateTime() << "," << Time_Build << "," << Time_Search << "," << Time_All << "," << noise << "," << cc << endl << endl;
 
     // delete - Destroy array/pointers
         delete [] S_VP_tab;
@@ -1044,7 +1044,12 @@ void Show_C_All_SKRYPT(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int
             }
         }
         *noise = Tab_C[0];
-        *cc = cc1;
+        if(Tab_C[0]==0){
+        	*cc = cc1;
+		}else{
+			*cc = cc1-1;	
+		}
+       
     }
 
     if(VP1_yes == 1)
@@ -1064,7 +1069,11 @@ void Show_C_All_SKRYPT(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int
             }
         }
         *noise = Tab_C1[0];
-        *cc = cc1;
+        if(Tab_C1[0]==0){
+        	*cc = cc1;
+		}else{
+			*cc = cc1-1;	
+		}
     }
 
     if(VP2_yes == 1)
@@ -1084,7 +1093,11 @@ void Show_C_All_SKRYPT(Punkt *pkt, int ile_linii, int ile_x, int DBSCAN_yes, int
             }
         }
         *noise = Tab_C2[0];
-        *cc = cc1;
+        if(Tab_C2[0]==0){
+        	*cc = cc1;
+		}else{
+			*cc = cc1-1;	
+		}
     }
 }
 
