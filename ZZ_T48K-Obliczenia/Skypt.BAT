@@ -1,0 +1,9 @@
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (5,1,20) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 2.0 %%N 0.01 0.01 T48K_Out_%%A_2.0_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (5,1,20) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 2.5 %%N 0.01 0.01 T48K_Out_%%A_2.5_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (5,1,20) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 3.0 %%N 0.01 0.01 T48K_Out_%%A_3.0_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (5,1,20) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 3.5 %%N 0.01 0.01 T48K_Out_%%A_3.5_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (5,1,20) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 4.0 %%N 0.01 0.01 T48K_Out_%%A_4.0_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (5,1,20) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 4.5 %%N 0.01 0.01 T48K_Out_%%A_4.5_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (5,1,20) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 5.0 %%N 0.01 0.01 T48K_Out_%%A_5.0_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (5,1,20) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 5.5 %%N 0.01 0.01 T48K_Out_%%A_5.5_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (5,1,20) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 6.0 %%N 0.01 0.01 T48K_Out_%%A_6.0_%%N.txt
