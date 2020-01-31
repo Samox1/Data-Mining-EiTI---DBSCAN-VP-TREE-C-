@@ -112,3 +112,7 @@ B1 <- as.data.frame(read.table("birch1.txt", header=FALSE ,sep=","))
 B1 <- B1[,2:3]
 write.csv(B1, "B1Good.csv")
 plot(B1, pch=20, xlim=c(350000, 360000), ylim=c(350000, 360000))
+
+B2 <- as.data.frame(read.table("birch2.txt", header=FALSE ,sep=","))
+B2 <- B2[,2:3]
+write.csv(B2, "B2Good.csv")
