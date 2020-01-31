@@ -1,1 +1,9 @@
-FOR /L %%A IN (1,1,3) DO FOR /L %%E IN (18000,1000,25000) DO FOR /L %%N IN (5,1,15) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.01 0.01 S1_Out_%%A_%%E_%%N.txt
+FOR /L %%A IN (2,1,2) DO FOR /L %%E IN (20000,1000,20000) DO FOR /L %%N IN (11,1,11) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.1 0.1 S1_Out1_%%A_%%E_%%N.txt
+FOR /L %%A IN (2,1,2) DO FOR /L %%E IN (20000,1000,20000) DO FOR /L %%N IN (11,1,11) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.2 0.2 S1_Out2_%%A_%%E_%%N.txt
+FOR /L %%A IN (2,1,2) DO FOR /L %%E IN (20000,1000,20000) DO FOR /L %%N IN (11,1,11) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.3 0.3 S1_Out3_%%A_%%E_%%N.txt
+FOR /L %%A IN (2,1,2) DO FOR /L %%E IN (20000,1000,20000) DO FOR /L %%N IN (11,1,11) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.4 0.4 S1_Out4_%%A_%%E_%%N.txt
+FOR /L %%A IN (2,1,2) DO FOR /L %%E IN (20000,1000,20000) DO FOR /L %%N IN (11,1,11) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.5 0.5 S1_Out5_%%A_%%E_%%N.txt
+FOR /L %%A IN (2,1,2) DO FOR /L %%E IN (20000,1000,20000) DO FOR /L %%N IN (11,1,11) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.6 0.6 S1_Out6_%%A_%%E_%%N.txt
+FOR /L %%A IN (2,1,2) DO FOR /L %%E IN (20000,1000,20000) DO FOR /L %%N IN (11,1,11) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.7 0.7 S1_Out7_%%A_%%E_%%N.txt
+FOR /L %%A IN (2,1,2) DO FOR /L %%E IN (20000,1000,20000) DO FOR /L %%N IN (11,1,11) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.8 0.8 S1_Out8_%%A_%%E_%%N.txt
+FOR /L %%A IN (2,1,2) DO FOR /L %%E IN (20000,1000,20000) DO FOR /L %%N IN (11,1,11) DO .\DBScan_VPTree.exe S1e.txt n n %%A %%E %%N 0.9 0.9 S1_Out9_%%A_%%E_%%N.txt

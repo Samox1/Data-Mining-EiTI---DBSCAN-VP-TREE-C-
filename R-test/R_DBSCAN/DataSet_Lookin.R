@@ -27,7 +27,7 @@ Tree2 <- as.data.frame(read.table("Treee2_30.csv", header=TRUE ,sep=","))
 Cole <- c("red", "green", "blue", "violet", "gold")
 Radi <- 3
 cluster <- as.factor(Data120[,3])
-square <- ggplot(Data120[,1:2], aes(x=V1, y=V2, colour= cluster)) + geom_point() + coord_fixed(ratio = 1)
+square <- ggplot(Data120[,1:2], aes(x=V1, y=V2, colour= cluster)) + scale_x_continuous(name = "X") + scale_y_continuous(name = "Y") + geom_point() + coord_fixed(ratio = 1)
 square <- square + scale_x_continuous(name="X") + scale_y_continuous(name="Y")
 for(x in 1:length(Data120[,1])){
   # square <- square + gg_circle(r=Tree1$Mediana[Tree1$VP.Index==x], xc=Data120[x,1], yc=Data120[x,2], color="black", alpha=0.2)      # Mediana
@@ -122,23 +122,31 @@ B1 <- B1[,2:3]
 write.csv(B1, "B1Good.csv")
 plot(B1, pch=20, xlim=c(350000, 360000), ylim=c(350000, 360000))
 
+
 B2 <- as.data.frame(read.table("birch2.txt", header=FALSE ,sep=","))
 B2 <- B2[,2:3]
 write.csv(B2, "B2Good.csv")
 plot(B2, pch=20,xlim=c(400000, 410000))
 
-road <- dbscan(B2, eps = 500, minPts = 5)
-square <- ggplot(B2, aes(x=V2, y=V3, colour= road$cluster)) + scale_x_continuous(name = "X") + scale_y_continuous(name = "Y") + geom_point()
+road <- dbscan(B2, eps = 750, minPts = 10)
+square <- ggplot(B2, aes(x=V2, y=V3, colour= as.factor(road$cluster))) + scale_x_continuous(name = "X") + scale_y_continuous(name = "Y") + geom_point()
 show(square)
 
-
-Spiral <- as.data.frame(read.table("spiral.txt", header=FALSE ,sep="\t"))
-Spiral <- Spiral[,1:2]
-write.csv(Spiral[,1:2], "Spiral.csv")
-plot(Spiral[,1:2], pch=20)
-road <- dbscan(Spiral[,1:2], eps = 3, minPts = 3)
-square <- ggplot(Spiral[,1:2], aes(x=V1, y=V2, colour= road$cluster)) + scale_x_continuous(name = "X") + scale_y_continuous(name = "Y") + geom_point() + coord_fixed(ratio = 1)
+B2OUT <- as.data.frame(read.table("B2_Out_1_750_10.txt", header=FALSE ,sep=","))
+Cluster <- as.factor(B2OUT$V3)
+square <- ggplot(B2OUT, aes(x=V1, y=V2, colour=Cluster)) + scale_x_continuous(name = "X") + scale_y_continuous(name = "Y") + geom_point() + theme(legend.position = "none") 
 show(square)
 
-
+# Spiral <- as.data.frame(read.table("spiral.txt", header=FALSE ,sep="\t"))
+# Spiral <- Spiral[,1:2]
+# write.csv(Spiral[,1:2], "Spiral.csv")
+# plot(Spiral[,1:2], pch=20)
+# road <- dbscan(Spiral[,1:2], eps = 3, minPts = 3)
+# square <- ggplot(Spiral[,1:2], aes(x=V1, y=V2, colour= road$cluster)) + scale_x_continuous(name = "X") + scale_y_continuous(name = "Y") + geom_point() + coord_fixed(ratio = 1)
+# show(square)
+# 
+# SpiralOUT <- Data120
+# Cluster <- as.factor(SpiralOUT$V3)
+# square <- ggplot(SpiralOUT, aes(x=V1, y=V2)) + scale_x_continuous(name = "X") + scale_y_continuous(name = "Y") + geom_point() + coord_fixed(ratio = 1)
+# show(square)
 
