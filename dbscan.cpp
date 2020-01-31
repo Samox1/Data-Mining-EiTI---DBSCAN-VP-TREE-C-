@@ -581,7 +581,7 @@ int main(int argc, char *argv[])
             cout << "DBSCAN_VP_TREE Time (SUMA): " << (double)(duration1.count()+duration2.count()) / 1000000.0 << " s" << endl;
 
             // Show_VP_Tree(VP_tree, Tree_Counter);
-            // Save_VP_Tree(VP_tree, Tree_Counter);
+            Save_VP_Tree(VP_tree, Tree_Counter);
 
             delete [] VP_tree;
         }
@@ -628,7 +628,7 @@ int main(int argc, char *argv[])
             cout << "DBSCAN_VP_TREE_2 Time (SUMA): " << (double)(duration3.count()+duration4.count()) / 1000000.0 << " s" << endl;    // Time - show Function duration
 
             // Show_VP_Tree(VP_tree2, Tree_Counter);
-            // Save_VP_Tree(VP_tree2, Tree_Counter);
+            Save_VP_Tree(VP_tree2, Tree_Counter);
 
             delete [] VP_tree2;
         }

@@ -1,1 +1,9 @@
-FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,10) DO .\DBScan_VPTree.exe DataCpp-2D-2000.csv n n %%A 0.5 %%N 0.01 0.01 Data_C_Out_%%A_0.5_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,15) DO .\DBScan_VPTree.exe DataCpp-2D-6000.csv n n %%A 0.2 %%N 0.01 0.01 Data_C6_Out_%%A_0.2_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,15) DO .\DBScan_VPTree.exe DataCpp-2D-6000.csv n n %%A 0.3 %%N 0.01 0.01 Data_C6_Out_%%A_0.3_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,15) DO .\DBScan_VPTree.exe DataCpp-2D-6000.csv n n %%A 0.4 %%N 0.01 0.01 Data_C6_Out_%%A_0.4_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,15) DO .\DBScan_VPTree.exe DataCpp-2D-6000.csv n n %%A 0.5 %%N 0.01 0.01 Data_C6_Out_%%A_0.5_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,15) DO .\DBScan_VPTree.exe DataCpp-2D-6000.csv n n %%A 0.6 %%N 0.01 0.01 Data_C6_Out_%%A_0.6_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,15) DO .\DBScan_VPTree.exe DataCpp-2D-6000.csv n n %%A 0.7 %%N 0.01 0.01 Data_C6_Out_%%A_0.7_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,15) DO .\DBScan_VPTree.exe DataCpp-2D-6000.csv n n %%A 0.8 %%N 0.01 0.01 Data_C6_Out_%%A_0.8_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,15) DO .\DBScan_VPTree.exe DataCpp-2D-6000.csv n n %%A 0.9 %%N 0.01 0.01 Data_C6_Out_%%A_0.9_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (3,1,15) DO .\DBScan_VPTree.exe DataCpp-2D-6000.csv n n %%A 1.0 %%N 0.01 0.01 Data_C6_Out_%%A_1.0_%%N.txt

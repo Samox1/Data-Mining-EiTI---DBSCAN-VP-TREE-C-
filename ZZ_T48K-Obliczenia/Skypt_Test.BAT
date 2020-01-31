@@ -1,1 +1,1 @@
-FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (10,1,20) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 10.0 %%N 0.01 0.01 T48K_Out_%%A_10.0_%%N.txt
+FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (18,1,25) DO .\DBScan_VPTree.exe t4.8k.txt y y %%A 10.0 %%N 0.01 0.01 T48K_Out_%%A_10.0_%%N.txt

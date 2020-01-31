@@ -1,1 +1,1 @@
-FOR /L %%A IN (1,1,3) DO FOR /L %%N IN (10,10,20) DO .\DBScan_VPTree.exe worms_2d.txt y y %%A 30.0 %%N 0.01 0.01 Worms2D_Out_%%A_30.0_%%N.txt
+FOR /L %%A IN (3,1,3) DO FOR /L %%N IN (5,5,50) DO FOR /L %%E IN (15,5,50) DO .\DBScan_VPTree.exe worms_2d.txt y y %%A %%E %%N 0.01 0.01 Worms2D_Out_%%A_%%E_%%N.txt

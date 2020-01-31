@@ -9,7 +9,7 @@ library(dbscan)
 
 library(MASS)
 
-S <- matrix(c(1,1,1,1),2,2)
+S <- matrix(c(1,0,0,1),2,2)
 mt0 <- c(3,3)
 mt1 <- c(0,0)
 mt2 <- c(10,10)
@@ -46,10 +46,10 @@ abline(h=.4, col = "red", lty=2)
 abline(h=.5, col = "red", lty=2)
 
 # Write to CSV
-write.csv(DATA_Cpp, "DataCpp30.csv")
+write.csv(DATA_Cpp, "DataCpp-2D-30.csv")
 
 
-plot(X1, pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
+plot(DATA_Cpp, pch = 19, col = "blue", xlab = "X", ylab = "Y", font = 2, asp = 1)
 abline(v = 0, h = 0, col = "gray")
 points(X2, pch = 19, col = "orange")
 points(X3, pch = 19, col = "orange")

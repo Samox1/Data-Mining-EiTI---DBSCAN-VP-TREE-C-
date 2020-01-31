@@ -1,0 +1,1 @@
+FOR /L %%A IN (3,1,3) DO FOR /L %%N IN (4,2,12) DO .\DBScan_VPTree.exe B1Good.csv n n %%A 20000 %%N 0.01 0.01 B1_Out_%%A_20000_%%N.txt
