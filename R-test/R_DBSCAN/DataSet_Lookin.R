@@ -39,6 +39,15 @@ show(square)
 
 
 ### --- Grafy Drzewa
+Tree2$ID_Parent[1] = NA
+p <- collapsibleTree(Tree1, c("ID_Parent", "ID", c("L_kid", "R_kid")))
+p <- collapsibleTreeNetwork(Tree2[,c(5,1)], c("ID_Parent", "ID"))
+p
+# save the widget
+library(htmlwidgets)
+saveWidget(p, file=paste0(getwd(),"dendrogram_interactive.html"))
+
+wat <- warpbreaks
 
 dat <- data.frame(parent=Tree1$ID_Parent, 
                   node=Tree1$ID, 
